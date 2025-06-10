@@ -1,15 +1,17 @@
-import './App.css'
-import { Button } from "flowbite-react";
-import PaginationComponant from './components/common/Pagination'
-import Index from './components/dashboard/index'
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Layout from "./layout/Layout";
+import Dashboard from "./components/dashboard/Dashboard";
 
 function App() {
-
   return (
-    <>
-       <Index />
-    </>
-  )
+    <Router>
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Dashboard />} />
+        </Route>
+      </Routes>
+    </Router>
+  );
 }
 
-export default App
+export default App;

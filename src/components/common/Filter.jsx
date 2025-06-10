@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { FaFilter } from "react-icons/fa6";
 
 const FilterPopover = () => {
   const [showFilter, setShowFilter] = useState(false);
@@ -19,24 +20,37 @@ const FilterPopover = () => {
     <div className="relative inline-block text-left" ref={filterRef}>
       <button
         onClick={() => setShowFilter((prev) => !prev)}
-        className="text-sm border border-gray-300 px-3 py-1.5 rounded-md hover:bg-gray-100 cursor-pointer"
+        className="text-sm border border-gray-300 px-3 py-1.5 rounded-md hover:bg-gray-100 cursor-pointer flex items-center gap-2"
       >
-        Filters
+        <FaFilter className="text-base" />
+        <span>Filters</span>
       </button>
 
       {showFilter && (
         <div className="absolute z-10 right-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg p-4">
-          <h4 className="text-sm font-semibold text-gray-700 mb-2">Filter Options</h4>
+          <h4 className="text-sm font-semibold text-gray-700 mb-2">
+            Filter Options
+          </h4>
 
           <div className="space-y-2">
             <div>
-              <label className="block text-xs font-medium text-gray-600">Start Date</label>
-              <input type="date" className="w-full border rounded px-2 py-1 text-sm" />
+              <label className="block text-xs font-medium text-gray-600">
+                Start Date
+              </label>
+              <input
+                type="date"
+                className="w-full border rounded px-2 py-1 text-sm"
+              />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-gray-600">End Date</label>
-              <input type="date" className="w-full border rounded px-2 py-1 text-sm" />
+              <label className="block text-xs font-medium text-gray-600">
+                End Date
+              </label>
+              <input
+                type="date"
+                className="w-full border rounded px-2 py-1 text-sm"
+              />
             </div>
           </div>
 
