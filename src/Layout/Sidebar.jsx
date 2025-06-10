@@ -19,7 +19,7 @@ const Sidebar = () => {
         <ul className="space-y-1 font-medium pt-5 font-serif">
           <li>
             <Link
-              to="/"
+              to="/stock"
               className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
             >
               <svg
@@ -71,7 +71,7 @@ const Sidebar = () => {
               </span>
             </Link>
           </li>
-          <li>
+          {/* <li>
             <Link
               to="/"
               className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
@@ -89,7 +89,7 @@ const Sidebar = () => {
                 Add Medicine
               </span>
             </Link>
-          </li>
+          </li> */}
           <li>
             <Link
               to="/"
