@@ -128,7 +128,7 @@ const MedicineStock = () => {
             <Button
               color="blue"
               size="sm"
-              className="text-xs px-2 py-1 h-8 cursor-pointer"
+              className="text-xs px-2 py-1 h-8 cursor-pointer bg-sky-800"
             >
               <FaPlus className="mr-2" /> Add Medicine
             </Button>
@@ -141,17 +141,20 @@ const MedicineStock = () => {
         </div>
 
         <div className="overflow-x-auto mt-4">
-          <Table striped>
+          <Table
+            striped
+            className="min-w-[1200px] [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&>tbody>tr:nth-child(odd)]:bg-gray-200"
+          >
             <TableHead>
-              <TableHeadCell>Medicine Name</TableHeadCell>
-              <TableHeadCell>Medicine ID</TableHeadCell>
-              <TableHeadCell>Medicine Type</TableHeadCell>
-              <TableHeadCell>No of Batches</TableHeadCell>
-              <TableHeadCell>Updated By</TableHeadCell>
-              <TableHeadCell>Updated Date</TableHeadCell>
-              <TableHeadCell>Stock Status</TableHeadCell>
-              <TableHeadCell>Expiry Status</TableHeadCell>
-              <TableHeadCell>Actions</TableHeadCell>
+              <TableHeadCell className="bg-sky-900 text-white">Medicine Name</TableHeadCell>
+              <TableHeadCell className="bg-sky-900 text-white">Medicine ID</TableHeadCell>
+              <TableHeadCell className="bg-sky-900 text-white">Medicine Type</TableHeadCell>
+              <TableHeadCell className="bg-sky-900 text-white">No of Batches</TableHeadCell>
+              <TableHeadCell className="bg-sky-900 text-white">Updated By</TableHeadCell>
+              <TableHeadCell className="bg-sky-900 text-white">Updated Date</TableHeadCell>
+              <TableHeadCell className="bg-sky-900 text-white">Stock Status</TableHeadCell>
+              <TableHeadCell className="bg-sky-900 text-white">Expiry Status</TableHeadCell>
+              <TableHeadCell className="bg-sky-900 text-white">Actions</TableHeadCell>
             </TableHead>
             <TableBody className="divide-y">
               {data.map((item, index) => (

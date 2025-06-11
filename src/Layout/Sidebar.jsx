@@ -10,11 +10,13 @@ const Sidebar = () => {
     >
       <div className="h-full px-3 pb-6 overflow-y-auto bg-white dark:bg-gray-800">
         <div className="flex justify-center">
-          <img
-            src={SVYMLogo}
-            alt="SVYM Logo"
-            className="h-16 w-auto object-contain"
-          />
+          <a href="/">
+            <img
+              src={SVYMLogo}
+              alt="SVYM Logo"
+              className="h-16 w-auto object-contain"
+            />
+          </a>
         </div>
         <ul className="space-y-1 font-medium pt-5 font-serif">
           <li>

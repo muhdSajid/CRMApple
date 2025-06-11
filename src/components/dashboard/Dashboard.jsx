@@ -1,4 +1,5 @@
 import FilterPopover from "../common/Filter";
+import CriticalStock from "./CriticalStock";
 
 const Dashboard = () => {
   return (
@@ -74,15 +75,22 @@ const Dashboard = () => {
           <h2 className="text-xl font-semibold">Critical Stock & Shortages</h2>
         </div>
 
-        {/* Filters below underline, right aligned */}
-        <div className="flex justify-end gap-2 mb-4">
-          <FilterPopover />
-          <select className="border border-gray-300 rounded-md px-3 py-1 text-sm cursor-pointer">
-            <option>This Month</option>
-            <option>Last Month</option>
-          </select>
-        </div>
+        <div className="flex justify-between items-center mt-4 ml-2 mr-2">
+          <input
+            type="text"
+            placeholder="Search..."
+            className="border px-3 py-2 border-gray-300 rounded-md w-1/4 text-sm focus:outline-none focus:ring-0 focus:border-gray-300"
+          />
 
+          <div className="flex gap-2">
+            <FilterPopover />
+            <select className="border border-gray-300 rounded-md px-3 py-1.5 text-sm cursor-pointer">
+              <option>This Year</option>
+              <option>Last Year</option>
+            </select>
+          </div>
+        </div>
+        <CriticalStock />
         {/* Table goes here */}
       </div>
     </div>

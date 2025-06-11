@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const PaginationComponant = ({ totalPages = 40 }) => {
+const PaginationComponant = ({ totalPages = 10 }) => {
   const [currentPage, setCurrentPage] = useState(1);
 
   const getPageNumbers = () => {
