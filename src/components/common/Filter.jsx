@@ -57,13 +57,13 @@ const FilterPopover = () => {
           <div className="flex justify-end gap-2 mt-4">
             <button
               onClick={() => setShowFilter(false)}
-              className="text-sm px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded cursor-pointer"
+              className="text-sm px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded"
             >
               Cancel
             </button>
             <button
               onClick={() => setShowFilter(false)}
-              className="text-sm px-3 py-1 bg-blue-600 text-white hover:bg-blue-700 rounded cursor-pointer"
+              className="text-sm px-3 py-1 bg-blue-600 text-white hover:bg-blue-700 rounded"
             >
               Apply
             </button>
