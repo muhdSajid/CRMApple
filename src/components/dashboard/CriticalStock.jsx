@@ -56,12 +56,14 @@ const FlowbiteUrgencyTable = () => {
   return (
     <div className="overflow-x-auto py-4">
       <Table striped className="[&>tbody>tr:nth-child(odd)]:bg-gray-200">
-        <TableHead>
-            <TableHeadCell className="bg-sky-900 text-white">Medicine Name</TableHeadCell>
-            <TableHeadCell className="bg-sky-900 text-white">No of Batch</TableHeadCell>
-            <TableHeadCell className="bg-sky-900 text-white">Minimum Required</TableHeadCell>
-            <TableHeadCell className="bg-sky-900 text-white">Urgency Reason</TableHeadCell>
-            <TableHeadCell className="bg-sky-900 text-white">Action</TableHeadCell>
+        <TableHead className="[&>tr>th]:bg-sky-900 [&>tr>th]:text-white">
+            <TableRow>
+            <TableHeadCell>Medicine Name</TableHeadCell>
+            <TableHeadCell>No of Batch</TableHeadCell>
+            <TableHeadCell>Minimum Required</TableHeadCell>
+            <TableHeadCell>Urgency Reason</TableHeadCell>
+            <TableHeadCell>Action</TableHeadCell>
+            </TableRow>
         </TableHead>
         <TableBody>
           {data.map((item, index) => (
@@ -76,7 +78,7 @@ const FlowbiteUrgencyTable = () => {
                 {item.reason}
               </TableCell>
               <TableCell>
-                <button className="text-blue-600 hover:underline text-sm cursor-pointer">
+                <button className="text-blue-600 hover:underline text-sm">
                   Act Now
                 </button>
               </TableCell>

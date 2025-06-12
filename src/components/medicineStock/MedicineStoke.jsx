@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Tabs,
   TabItem,
@@ -9,10 +9,14 @@ import {
   TableHeadCell,
   TableRow,
   Button,
+  Tooltip,
 } from "flowbite-react";
 import { FaPlus } from "react-icons/fa6";
+import { MdEdit } from "react-icons/md";
+import { IoEyeOutline } from "react-icons/io5";
 import FilterPopover from "../common/Filter";
 import PaginationComponant from "../common/Pagination";
+import ViewStock from "./ViewStock";
 
 const MedicineStock = () => {
   const data = [
@@ -102,7 +106,7 @@ const MedicineStock = () => {
     },
     // Add the remaining entries following the above format
   ];
-
+  const [isOpen, setIsOpen] = useState(false);
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <div className="bg-white rounded-xl p-6 shadow">
@@ -128,7 +132,7 @@ const MedicineStock = () => {
             <Button
               color="blue"
               size="sm"
-              className="text-xs px-2 py-1 h-8 cursor-pointer bg-sky-800"
+              className="text-xs px-2 py-1 h-8 bg-sky-800 hover:bg-sky-900"
             >
               <FaPlus className="mr-2" /> Add Medicine
             </Button>
@@ -145,16 +149,18 @@ const MedicineStock = () => {
             striped
             className="min-w-[1200px] [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&>tbody>tr:nth-child(odd)]:bg-gray-200"
           >
-            <TableHead>
-              <TableHeadCell className="bg-sky-900 text-white">Medicine Name</TableHeadCell>
-              <TableHeadCell className="bg-sky-900 text-white">Medicine ID</TableHeadCell>
-              <TableHeadCell className="bg-sky-900 text-white">Medicine Type</TableHeadCell>
-              <TableHeadCell className="bg-sky-900 text-white">No of Batches</TableHeadCell>
-              <TableHeadCell className="bg-sky-900 text-white">Updated By</TableHeadCell>
-              <TableHeadCell className="bg-sky-900 text-white">Updated Date</TableHeadCell>
-              <TableHeadCell className="bg-sky-900 text-white">Stock Status</TableHeadCell>
-              <TableHeadCell className="bg-sky-900 text-white">Expiry Status</TableHeadCell>
-              <TableHeadCell className="bg-sky-900 text-white">Actions</TableHeadCell>
+            <TableHead className="[&>tr>th]:bg-sky-900 [&>tr>th]:text-white">
+              <TableRow>
+                <TableHeadCell>Medicine Name</TableHeadCell>
+                <TableHeadCell>Medicine ID</TableHeadCell>
+                <TableHeadCell>Medicine Type</TableHeadCell>
+                <TableHeadCell>No of Batches</TableHeadCell>
+                <TableHeadCell>Updated By</TableHeadCell>
+                <TableHeadCell>Updated Date</TableHeadCell>
+                <TableHeadCell>Stock Status</TableHeadCell>
+                <TableHeadCell>Expiry Status</TableHeadCell>
+                <TableHeadCell>Actions</TableHeadCell>
+              </TableRow>
             </TableHead>
             <TableBody className="divide-y">
               {data.map((item, index) => (
@@ -169,7 +175,7 @@ const MedicineStock = () => {
                     <div className="flex items-center gap-2">
                       {item.stockStatus && (
                         <span
-                          className={`${item.stockColor} text-sm font-semibold`}
+                          className={`${item.stockColor} text-sm`}
                         >
                           {item.stockStatus}
                         </span>
@@ -191,8 +197,13 @@ const MedicineStock = () => {
                     )}
                   </TableCell>
                   <TableCell>
-                    <button className="text-blue-500 hover:underline text-sm">
-                      ✏️
+                    <button className="flex text-base font-medium">
+                      <Tooltip content="Edit Stock">
+                        <MdEdit />
+                      </Tooltip>
+                      <Tooltip content="View Stock">
+                        <IoEyeOutline onClick={() => setIsOpen(true)} />
+                      </Tooltip>
                     </button>
                   </TableCell>
                 </TableRow>
@@ -202,6 +213,7 @@ const MedicineStock = () => {
         </div>
         <PaginationComponant />
       </div>
+      {isOpen && <ViewStock isOpen={isOpen} onClose={() => setIsOpen(false)} />}
     </div>
   );
 };

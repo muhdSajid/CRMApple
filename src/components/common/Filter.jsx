@@ -20,7 +20,7 @@ const FilterPopover = () => {
     <div className="relative inline-block text-left" ref={filterRef}>
       <button
         onClick={() => setShowFilter((prev) => !prev)}
-        className="text-sm border border-gray-300 px-3 py-1.5 rounded-md hover:bg-gray-100 cursor-pointer flex items-center gap-2"
+        className="text-sm border border-gray-300 px-3 py-1.5 rounded-md hover:bg-gray-100  flex items-center gap-2"
       >
         <FaFilter className="text-base" />
         <span>Filters</span>
