@@ -1,13 +1,4 @@
 import { Link } from "react-router-dom";
-import {
-  FaRupeeSign,
-  FaMedkit,
-  FaCartPlus,
-  FaBookReader,
-} from "react-icons/fa";
-import { FaClipboardQuestion } from "react-icons/fa6";
-import { HiClipboardDocumentList } from "react-icons/hi2";
-import { IoMdHeadset } from "react-icons/io";
 import SVYMLogo from "../Assets/SVYM-logo.jpg";
 import { LuNotebookPen } from "react-icons/lu";
 import { MdAddShoppingCart } from "react-icons/md";
@@ -39,7 +30,6 @@ const Sidebar = () => {
               to="/stock"
               className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
             >
-              <HiClipboardDocumentList className="text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900" />
               <LuNotebookPen className="text-xl" />
               <span className="ms-3">Medicine Stock</span>
             </Link>
@@ -49,7 +39,6 @@ const Sidebar = () => {
               to="/"
               className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
             >
-              <FaCartPlus className="text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900" />
               <MdAddShoppingCart className="text-xl" />
               <span className="flex-1 ms-3 whitespace-nowrap">Purchase</span>
             </Link>
@@ -59,7 +48,6 @@ const Sidebar = () => {
               to="/distribution"
               className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
             >
-              <FaMedkit className="text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900" />
               <BiSolidCalendarPlus className="text-xl" />
               <span className="flex-1 ms-3 whitespace-nowrap">
                 Distribution
@@ -71,7 +59,6 @@ const Sidebar = () => {
               to="/cost"
               className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
             >
-              <FaRupeeSign className="text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900" />
               <MdCurrencyRupee className="text-xl" />
               <span className="flex-1 ms-3 whitespace-nowrap">Costing</span>
             </Link>
@@ -82,7 +69,6 @@ const Sidebar = () => {
               to="/"
               className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
             >
-              <FaBookReader className="text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900" />
               <TbMessageQuestion className="text-xl text-gray-500" />
               <span className="flex-1 ms-3 whitespace-nowrap text-gray-400 ">
                 User Guide
@@ -94,7 +80,6 @@ const Sidebar = () => {
               to="/"
               className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
             >
-              <FaClipboardQuestion className="text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900" />
               <RiWechatLine className="text-xl text-gray-500" />
               <span className="flex-1 ms-3 whitespace-nowrap text-gray-400">
                 FAQ
@@ -106,7 +91,6 @@ const Sidebar = () => {
               to="/"
               className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
             >
-              <IoMdHeadset className="text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900" />
               <IoHeadsetOutline className="text-xl text-gray-500" />
               <span className="flex-1 ms-3 whitespace-nowrap text-gray-400">
                 Help Center
