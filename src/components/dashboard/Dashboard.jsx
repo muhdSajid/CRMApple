@@ -1,5 +1,7 @@
 import FilterPopover from "../common/Filter";
 import CriticalStock from "./CriticalStock";
+import DonationReport from "./DonationReport";
+import ExpensesReport from "./ExpenseReport";
 
 const Dashboard = () => {
   return (
@@ -40,31 +42,25 @@ const Dashboard = () => {
             <div className="border-b-2 border-gray-200 pb-2 mb-2">
               <h3 className="text-xl font-semibold">Donation Report</h3>
             </div>
-
-            <div className="flex justify-end mb-4">
-              <select className="border border-gray-300 rounded-md px-3 py-1.5 text-sm cursor-pointer">
-                <option>This Month</option>
-                <option>Last Month</option>
-              </select>
-            </div>
-
+            <DonationReport />
             {/* Donation bar chart placeholder */}
           </div>
         </div>
 
-        {/* Right Column: Expense Report (Independent) */}
         <div className="bg-white rounded-2xl shadow p-4">
-          <div className="flex items-center justify-between border-b-2 border-gray-200 pb-2 mb-4">
+          <div className="border-b-2 border-gray-200 pb-2 mb-2">
             <h3 className="text-xl font-semibold">Expense Report</h3>
-            <div className="flex items-center gap-2">
-              <FilterPopover />
-              <select className="border border-gray-300 rounded-md px-3 py-1.5 text-sm cursor-pointer">
-                <option>This Month</option>
-                <option>Last Month</option>
-              </select>
-            </div>
           </div>
-          {/* Donut chart placeholder */}
+
+          <div className="flex items-center justify-end gap-2 mb-4">
+            <FilterPopover />
+            <select className="border border-gray-300 rounded-md px-3 py-1.5 text-sm cursor-pointer">
+              <option>This Month</option>
+              <option>Last Month</option>
+            </select>
+          </div>
+
+          <ExpensesReport />
         </div>
       </div>
 

@@ -14,11 +14,11 @@
   }
 }
 
-@layer base {
+/* @layer base {
   body {
     @apply font-serif;
   }
-}
+} */
 
 @layer base {
   input[type="radio"] {
