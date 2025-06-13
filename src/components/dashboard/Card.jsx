@@ -1,17 +1,19 @@
 import { Card } from "flowbite-react";
+import { HiChartSquareBar } from "react-icons/hi";
 
 export const LocationCard = () => {
   return (
     <Card className="w-max max-w-xs  pl-4 pr-8 bg-[#E8EFF2] rounded-2xl shadow-sm">
       <div className="flex items-center justify-center w-10 h-10 bg-[#2C5B80] rounded-full mb-4">
-        <svg
+        {/* <svg
           className="w-5 h-5 text-white"
           xmlns="http://www.w3.org/2000/svg"
           fill="currentColor"
           viewBox="0 0 24 24"
         >
           <path d="M3 13h4v-2H3v2zm0 4h4v-2H3v2zm0-8h4V7H3v2zm6 4h12v-2H9v2zm0 4h12v-2H9v2zm0-8h12V7H9v2z" />
-        </svg>
+        </svg> */}
+        <HiChartSquareBar className="text-3xl text-white" />
       </div>
 
       <h5 className="text-lg font-semibold text-gray-800 mb-3">Bangalore</h5>
