@@ -42,7 +42,7 @@ const PaginationComponant = ({ totalPages = 10 }) => {
     <div className="flex justify-end space-x-1 pt-5">
       <button
         className={`px-3 py-1 rounded-md text-sm ${
-          currentPage === 1 ? "bg-gray-100 text-gray-400 cursor-not-allowed" : "bg-gray-100 hover:bg-gray-200 cursor-pointer"
+          currentPage === 1 ? "bg-gray-100 text-gray-400 cursor-not-allowed" : "bg-gray-100 hover:bg-gray-200"
         }`}
         onClick={goToPrevious}
         disabled={currentPage === 1}
@@ -53,9 +53,9 @@ const PaginationComponant = ({ totalPages = 10 }) => {
       {getPageNumbers().map((page, index) => (
         <button
           key={index}
-          className={`px-3 py-1 rounded-md text-sm font-medium cursor-pointer ${
+          className={`px-3 py-1 rounded-md text-sm font-medium ${
             page === currentPage
-              ? "bg-blue-800 text-white"
+              ? "bg-sky-900 text-white"
               : page === "..."
               ? "cursor-default"
               : "bg-gray-100 hover:bg-gray-200"
@@ -69,7 +69,7 @@ const PaginationComponant = ({ totalPages = 10 }) => {
 
       <button
         className={`px-3 py-1 rounded-md text-sm ${
-          currentPage === totalPages ? "bg-gray-100 text-gray-400 cursor-not-allowed" : "hover:bg-gray-200 bg-gray-100 cursor-pointer"
+          currentPage === totalPages ? "bg-gray-100 text-gray-400 cursor-not-allowed" : "hover:bg-gray-200 bg-gray-100"
         }`}
         onClick={goToNext}
         disabled={currentPage === totalPages}

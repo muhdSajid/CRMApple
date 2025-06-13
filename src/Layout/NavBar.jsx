@@ -16,7 +16,7 @@ const Navbar = () => {
           <div className="relative ml-auto">
             <button
               onClick={() => setShowMenu(!showMenu)}
-              className="flex items-center space-x-3 bg-white hover:bg-gray-100 px-3 py-2 rounded-md focus:outline-none cursor-pointer"
+              className="flex items-center space-x-3 bg-white hover:bg-gray-100 px-3 py-2 rounded-md focus:outline-none"
             >
               <img
                 src={profilePic}

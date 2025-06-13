@@ -20,7 +20,7 @@ const FilterPopover = () => {
     <div className="relative inline-block text-left" ref={filterRef}>
       <button
         onClick={() => setShowFilter((prev) => !prev)}
-        className="text-sm border border-gray-300 px-3 py-1.5 rounded-md hover:bg-gray-100 cursor-pointer flex items-center gap-2"
+        className="text-sm border border-gray-300 px-3 py-1.5 rounded-md hover:bg-gray-100  flex items-center gap-2"
       >
         <FaFilter className="text-base" />
         <span>Filters</span>
@@ -57,13 +57,13 @@ const FilterPopover = () => {
           <div className="flex justify-end gap-2 mt-4">
             <button
               onClick={() => setShowFilter(false)}
-              className="text-sm px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded cursor-pointer"
+              className="text-sm px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded"
             >
               Cancel
             </button>
             <button
               onClick={() => setShowFilter(false)}
-              className="text-sm px-3 py-1 bg-blue-600 text-white hover:bg-blue-700 rounded cursor-pointer"
+              className="text-sm px-3 py-1 bg-blue-600 text-white hover:bg-blue-700 rounded"
             >
               Apply
             </button>
