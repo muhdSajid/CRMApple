@@ -1,4 +1,4 @@
-import { LocationCard } from "./Card";
+import LocationCard from "./Card";
 import FilterPopover from "../common/Filter";
 import CriticalStock from "./CriticalStock";
 import DonationReport from "./DonationReport";
@@ -7,7 +7,6 @@ import ExpensesReport from "./ExpenseReport";
 const Dashboard = () => {
   return (
     <div className="p-4 space-y-6 bg-[#f9f9f9]">
-      {/* Location Specific-Medicine Status */}
       <div className="bg-white rounded-2xl shadow p-6">
         <div className="flex items-center justify-between border-b-2 border-gray-300 pb-2 mb-4">
           <h3 className="text-xl font-semibold">
@@ -19,15 +18,11 @@ const Dashboard = () => {
           </select>
         </div>
 
-        <div className="flex gap-12 my-10">
-          <LocationCard />
-          <LocationCard />
-          <LocationCard />
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           <LocationCard />
         </div>
       </div>
 
-      {/* Purchase Analytics & Expense Report */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 flex flex-col gap-4">
           <div className="bg-white rounded-2xl shadow p-4">
@@ -41,16 +36,13 @@ const Dashboard = () => {
                 <option>Last Year</option>
               </select>
             </div>
-            {/* Chart placeholder */}
           </div>
 
-          {/* Donation Report */}
           <div className="bg-white rounded-2xl shadow p-4">
             <div className="border-b-2 border-gray-200 pb-2 mb-2">
               <h3 className="text-xl font-semibold">Donation Report</h3>
             </div>
             <DonationReport />
-            {/* Donation bar chart placeholder */}
           </div>
         </div>
 
@@ -71,9 +63,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Critical Stock & Shortages */}
       <div className="bg-white rounded-2xl shadow p-4">
-        {/* Heading with underline */}
         <div className="border-b-2 border-gray-200 pb-2 mb-2">
           <h2 className="text-xl font-semibold">Critical Stock & Shortages</h2>
         </div>
@@ -94,7 +84,6 @@ const Dashboard = () => {
           </div>
         </div>
         <CriticalStock />
-        {/* Table goes here */}
       </div>
     </div>
   );

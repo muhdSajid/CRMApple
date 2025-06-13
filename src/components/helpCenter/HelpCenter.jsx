@@ -25,7 +25,7 @@ const offices = [
     title: "SVYM Bengaluru Regional Office",
     address: [
       "DVG Bhavana, Ghokale Institute of Public Affairs",
-      "No. 2/86/1- A, 5th Main, Bull Temple Road",
+      "No. 2/86/1-A, 5th Main, Bull Temple Road",
       "N. R. Colony, Bengaluru, Karnataka, India - 560004",
     ],
     phone: "+91 968 6666 312",
@@ -70,26 +70,39 @@ const offices = [
 
 export const HelpCenter = () => {
   return (
-    <div className="container mx-auto py-10 px-4">
-      <h1 className="text-3xl font-bold mb-6 text-center">Help Center</h1>
-      <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+    <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      <h1 className="text-3xl font-bold text-center mb-8">Help Center</h1>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {offices.map((office, idx) => (
-          <Card key={idx} className="shadow-md">
-            <h2 className="text-xl font-semibold mb-2">{office.title}</h2>
-            <p className="mb-1 whitespace-pre-line">
-              {office.address.join("\n")}
-            </p>
-            <p className="mb-1 font-medium">📞 {office.phone}</p>
-            {office.maps && (
-              <a
-                href={office.maps}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 underline text-sm"
-              >
-                View on Google Maps
-              </a>
-            )}
+          <Card
+            key={idx}
+            className="h-full shadow-sm border border-gray-200"
+          >
+            <div className="flex flex-col h-full justify-between">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-800 mb-2">
+                  {office.title}
+                </h2>
+                <div className="text-sm text-gray-600 leading-relaxed mb-3">
+                  {office.address.map((line, i) => (
+                    <p key={i}>{line}</p>
+                  ))}
+                </div>
+                <p className="text-sm font-medium text-gray-800 mb-2">
+                  📞 {office.phone}
+                </p>
+              </div>
+              {office.maps && (
+                <a
+                  href={office.maps}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-blue-600 underline hover:text-blue-800"
+                >
+                  View on Google Maps
+                </a>
+              )}
+            </div>
           </Card>
         ))}
       </div>
