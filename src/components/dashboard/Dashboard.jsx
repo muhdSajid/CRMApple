@@ -1,3 +1,4 @@
+import { LocationCard } from "./Card";
 import FilterPopover from "../common/Filter";
 import CriticalStock from "./CriticalStock";
 import DonationReport from "./DonationReport";
@@ -7,7 +8,7 @@ const Dashboard = () => {
   return (
     <div className="p-4 space-y-6 bg-[#f9f9f9]">
       {/* Location Specific-Medicine Status */}
-      <div className="bg-white rounded-2xl shadow p-4">
+      <div className="bg-white rounded-2xl shadow p-6">
         <div className="flex items-center justify-between border-b-2 border-gray-300 pb-2 mb-4">
           <h3 className="text-xl font-semibold">
             Location Specific-Medicine Status
@@ -17,7 +18,13 @@ const Dashboard = () => {
             <option>Last Month</option>
           </select>
         </div>
-        {/* Content goes here */}
+
+        <div className="flex gap-12 my-10">
+          <LocationCard />
+          <LocationCard />
+          <LocationCard />
+          <LocationCard />
+        </div>
       </div>
 
       {/* Purchase Analytics & Expense Report */}

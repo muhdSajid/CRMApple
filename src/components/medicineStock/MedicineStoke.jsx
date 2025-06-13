@@ -17,6 +17,7 @@ import { IoEyeOutline } from "react-icons/io5";
 import FilterPopover from "../common/Filter";
 import PaginationComponant from "../common/Pagination";
 import ViewStock from "./ViewStock";
+import { AddMedicineModal } from "./AddMedicineModal";
 
 const MedicineStock = () => {
   const data = [
@@ -107,6 +108,7 @@ const MedicineStock = () => {
     // Add the remaining entries following the above format
   ];
   const [isOpen, setIsOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <div className="bg-white rounded-xl p-6 shadow">
@@ -133,6 +135,7 @@ const MedicineStock = () => {
               color="blue"
               size="sm"
               className="text-xs px-2 py-1 h-8 bg-sky-800 hover:bg-sky-900"
+              onClick={() => setIsModalOpen(true)}
             >
               <FaPlus className="mr-2" /> Add Medicine
             </Button>
@@ -174,9 +177,7 @@ const MedicineStock = () => {
                   <TableCell>
                     <div className="flex items-center gap-2">
                       {item.stockStatus && (
-                        <span
-                          className={`${item.stockColor} text-sm`}
-                        >
+                        <span className={`${item.stockColor} text-sm`}>
                           {item.stockStatus}
                         </span>
                       )}
@@ -214,6 +215,12 @@ const MedicineStock = () => {
         <PaginationComponant />
       </div>
       {isOpen && <ViewStock isOpen={isOpen} onClose={() => setIsOpen(false)} />}
+      {isModalOpen && (
+        <AddMedicineModal
+          open={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
     </div>
   );
 };
