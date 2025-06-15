@@ -3,6 +3,7 @@ import FilterPopover from "../common/Filter";
 import CriticalStock from "./CriticalStock";
 import DonationReport from "./DonationReport";
 import ExpensesReport from "./ExpenseReport";
+import PurchaseAnalytics from "./PurchaseAnalytics";
 
 const Dashboard = () => {
   return (
@@ -29,13 +30,7 @@ const Dashboard = () => {
             <div className="border-b-2 border-gray-200 pb-2 mb-2">
               <h3 className="text-xl font-semibold">Purchase Analytics</h3>
             </div>
-            <div className="flex justify-end gap-2 mb-4">
-              <FilterPopover />
-              <select className="border border-gray-300 rounded-md px-3 py-1.5 text-sm cursor-pointer">
-                <option>This Year</option>
-                <option>Last Year</option>
-              </select>
-            </div>
+            <PurchaseAnalytics />
           </div>
 
           <div className="bg-white rounded-2xl shadow p-4">
