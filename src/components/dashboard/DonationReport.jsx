@@ -11,7 +11,7 @@ const DonationReport = () => {
   const total = data.reduce((sum, city) => sum + city.amount, 0);
 
   return (
-    <div className="p-2">
+    <div className="p-1">
       <div className="flex justify-between items-start">
         <div className="flex items-baseline gap-2">
           <h2 className="text-3xl font-bold">₹{total.toLocaleString()}</h2>
@@ -45,7 +45,7 @@ const DonationReport = () => {
               <span className={`w-3 h-3 rounded-full ${city.color}`}></span>
               {city.name}
             </div>
-            <div className="font-bold text-lg mt-1">
+            <div className="font-bold text-md mt-1">
               ₹{city.amount.toLocaleString()}
             </div>
           </div>

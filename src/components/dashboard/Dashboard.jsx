@@ -42,7 +42,7 @@ const Dashboard = () => {
         </div>
 
         <div className="bg-white rounded-2xl shadow p-4">
-          <div className="border-b-2 border-gray-200 pb-2 mb-2">
+          <div className="border-b-2 border-gray-200 pb-2 mb-4">
             <h3 className="text-xl font-semibold">Expense Report</h3>
           </div>
 

@@ -47,14 +47,14 @@ const ExpensesReport = () => {
   }, []);
 
   return (
-    <div className="max-w-md mx-auto text-center">
+    <div className="max-w-md mx-auto text-center pt-6">
       <svg ref={svgRef} className="mx-auto"></svg>
       <div className="-mt-12 text-center">
         <p className="text-sm text-gray-500">Total Expenses</p>
         <p className="text-xl font-bold">₹{total.toLocaleString()}</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 mt-6">
+      <div className="grid grid-cols-2 gap-3 mt-12 pt-6">
         {data.map((item, index) => (
           <div
             key={index}

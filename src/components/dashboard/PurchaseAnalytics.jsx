@@ -124,8 +124,8 @@ const PurchaseAnalytics = () => {
   const total = data.reduce((acc, cur) => acc + cur.value, 0);
 
   return (
-    <div ref={wrapperRef} className="relative p-4 w-full">
-      <div className="flex justify-between items-start mb-4">
+    <div ref={wrapperRef} className="relative p-1 w-full">
+      <div className="flex justify-between items-start mb-2">
         <div className="flex items-baseline gap-2">
           <h2 className="text-3xl font-bold">₹{total.toLocaleString()}</h2>
           <p className="text-sm text-gray-500">spent this year</p>
