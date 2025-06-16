@@ -17,7 +17,7 @@ const DonationReport = () => {
           <h2 className="text-3xl font-bold">₹{total.toLocaleString()}</h2>
           <p className="text-sm text-gray-500">received this month</p>
         </div>
-        <select className="border border-gray-300 rounded-md px-3 py-1.5 text-sm cursor-pointer">
+        <select className="border border-gray-300 rounded-md px-3 py-1.5 text-sm">
           <option>This Month</option>
           <option>Last Month</option>
         </select>

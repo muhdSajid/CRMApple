@@ -73,12 +73,12 @@ const ViewStock = ({ isOpen, onClose }) => {
             striped
             className="[&_th]:whitespace-nowrap [&_td]:whitespace-nowrap"
           >
-            <TableHead className="[&>tr>th]:bg-sky-900 [&>tr>th]:text-white items-center">
+            <TableHead className="[&>tr>th]:bg-sky-900 text-white">
               <TableRow>
                 <TableHeadCell>Batch Number</TableHeadCell>
                 <TableHeadCell>Expiry Date</TableHeadCell>
                 <TableHeadCell>No. of Medicines</TableHeadCell>
-                <TableHeadCell>Action</TableHeadCell>
+                <TableHeadCell className="flex justify-center">Action</TableHeadCell>
               </TableRow>
             </TableHead>
             <TableBody className="divide-y">
@@ -93,11 +93,11 @@ const ViewStock = ({ isOpen, onClose }) => {
                   <TableCell>{item.expiry}</TableCell>
                   <TableCell>{item.count}</TableCell>
                   <TableCell className="space-x-2 flex justify-end">
-                    {item.color ? (
+                    {item.color && (
                       <Button size="xs" className="bg-sky-800 hover:bg-sky-900 text-white">
                         Update Stock
                       </Button>
-                    ) : null}
+                    )}
                     <button className="text-gray-600 hover:text-blue-500">
                       <FaEdit size={14} />
                     </button>

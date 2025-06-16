@@ -140,7 +140,7 @@ const MedicineStock = () => {
               <FaPlus className="mr-2" /> Add Medicine
             </Button>
             <FilterPopover />
-            <select className="border border-gray-300 rounded-md px-3 py-1.5 text-sm cursor-pointer">
+            <select className="border border-gray-300 rounded-md px-3 py-1.5 text-sm">
               <option>This Year</option>
               <option>Last Year</option>
             </select>

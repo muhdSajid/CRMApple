@@ -3,7 +3,6 @@ import {
   Select,
   Label,
   TextInput,
-  Radio,
   Datepicker,
   HR,
   Table,
@@ -23,7 +22,7 @@ import { FaCirclePlus } from "react-icons/fa6";
 const Distribution = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   return (
-    <div className="p-6 bg-white rounded-lg shadow-md space-y-6">
+    <div className="m-6 p-6 bg-white rounded-lg shadow-md space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-semibold">Medicine Distribution</h1>
         <Button size="sm" color="light" onClick={() => setIsModalOpen(true)}>
@@ -34,9 +33,13 @@ const Distribution = () => {
 
       <div>
         <div className="flex gap-6">
-          <Label className="">Select</Label>
           <div className="flex items-center gap-2">
-            <Radio id="hospital" name="distributionMode" />
+            <input
+              type="radio"
+              id="hospital"
+              name="distributionMode"
+              className="w-4 h-4 text-primary border-gray-300 focus:ring-primary"
+            />
             <div className="flex gap-2 bg-pink-300 rounded-sm">
               <div className="bg-pink-500 p-1  rounded-sm">
                 <FaBed className="text-xl text-white" />
@@ -50,7 +53,12 @@ const Distribution = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Radio id="camp" name="distributionMode" />
+            <input
+              type="radio"
+              id="camp"
+              name="distributionMode"
+              className="w-4 h-4 text-primary border-gray-300 focus:ring-primary"
+            />
             <div className="flex gap-2 bg-green-300 rounded-sm">
               <div className="bg-green-500 p-1  rounded-sm">
                 <FaCampground className="text-xl text-white" />
@@ -64,7 +72,12 @@ const Distribution = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Radio id="homecare" name="distributionMode" />
+            <input
+              type="radio"
+              id="homecare"
+              name="distributionMode"
+              className="w-4 h-4 text-primary border-gray-300 focus:ring-primary"
+            />
             <div className="flex gap-2 bg-blue-300 rounded-sm">
               <div className="bg-blue-500 p-1  rounded-sm">
                 <FaHome className="text-xl text-white" />
@@ -89,10 +102,11 @@ const Distribution = () => {
           </Select>
         </div>
         <div>
-          <Label htmlFor="distributionDate">Date of Distribution</Label>
+          <Label htmlFor="distributionDate" >Date of Distribution</Label>
           <Datepicker
             id="distributionDate"
-            defaultDate={new Date("2025-02-26")}
+            className="cursor-pointer"
+            defaultDate={new Date()}
           />
         </div>
       </div>

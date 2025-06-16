@@ -11,9 +11,9 @@ import {
   Button,
   Modal,
   ModalBody,
+  ModalHeader
 } from "flowbite-react";
 import PaginationComponant from "../common/Pagination";
-import { IoClose } from "react-icons/io5";
 
 const DistributionListModal = ({ open, onClose }) => {
   const data = [
@@ -100,79 +100,77 @@ const DistributionListModal = ({ open, onClose }) => {
   ];
 
   return (
-    <Modal show={open} onClose={onClose} size="8xl">
+    <Modal show={open} onClose={onClose} size="7xl">
+      <ModalHeader>
+        <div className="flex justify-between items-center w-full">
+          <h2 className="text-lg font-semibold">Medicine Distribution List</h2>
+        </div>
+      </ModalHeader>
       <ModalBody>
-        <div className="p-6 bg-gray-50 min-h-screen">
-          <div className="bg-white rounded-xl p-6 shadow">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold">Medicine Distribution List</h2>
-              <IoClose className="text-xl" onClick={onClose} />
-            </div>
+        <div className="p-4 bg-gray-50 min-h-screen">
+          <Tabs variant="default">
+            <TabItem active title="Bangalore" />
+            <TabItem title="Mangaluru" />
+            <TabItem title="Udupi" />
+            <TabItem title="Hassan" />
+          </Tabs>
 
-            <Tabs variant="default">
-              <TabItem active title="Bangalore" />
-              <TabItem title="Mangaluru" />
-              <TabItem title="Udupi" />
-              <TabItem title="Hassan" />
-            </Tabs>
-
-            <div className="flex justify-end items-center">
-              <input
-                type="text"
-                placeholder="Search..."
-                className="border px-3 py-2 border-gray-300 rounded-md w-1/4 text-sm focus:outline-none focus:ring-0 focus:border-gray-300"
-              />
-            </div>
-
-            <div className="overflow-x-auto mt-4">
-              <Table
-                striped
-                className="min-w-[1200px] [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&>tbody>tr:nth-child(odd)]:bg-gray-200"
-              >
-                <TableHead>
-                  <TableHeadCell className="bg-sky-900 text-white">
-                    Unique Id
-                  </TableHeadCell>
-                  <TableHeadCell className="bg-sky-900 text-white">
-                    Patient Id
-                  </TableHeadCell>
-                  <TableHeadCell className="bg-sky-900 text-white">
-                    Patient Name
-                  </TableHeadCell>
-                  <TableHeadCell className="bg-sky-900 text-white">
-                    Medicine Name
-                  </TableHeadCell>
-                  <TableHeadCell className="bg-sky-900 text-white">
-                    Qty
-                  </TableHeadCell>
-                  <TableHeadCell className="bg-sky-900 text-white">
-                    Date of Distribution
-                  </TableHeadCell>
-                  <TableHeadCell className="bg-sky-900 text-white">
-                    Stock Available
-                  </TableHeadCell>
-                  <TableHeadCell className="bg-sky-900 text-white">
-                    Updated By
-                  </TableHeadCell>
-                </TableHead>
-                <TableBody className="divide-y">
-                  {data.map((item, index) => (
-                    <TableRow key={index}>
-                      <TableCell>{item.UniqueId}</TableCell>
-                      <TableCell>{item.PatientId}</TableCell>
-                      <TableCell>{item.PatientName}</TableCell>
-                      <TableCell>{item.MedicineName}</TableCell>
-                      <TableCell>{item.Qty}</TableCell>
-                      <TableCell>{item.DateOfDistribution}</TableCell>
-                      <TableCell>{item.StockAvailable}</TableCell>
-                      <TableCell>{item.UpdatedBy}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-            <PaginationComponant />
+          <div className="flex justify-end items-center">
+            <input
+              type="text"
+              placeholder="Search..."
+              className="border px-3 py-2 border-gray-300 rounded-md w-1/4 text-sm focus:outline-none focus:ring-0 focus:border-gray-300"
+            />
           </div>
+
+          <div className="overflow-x-auto mt-4">
+            <Table
+              striped
+              className="min-w-[1200px] [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&>tbody>tr:nth-child(odd)]:bg-gray-200"
+            >
+              <TableHead>
+                <TableHeadCell className="bg-sky-900 text-white">
+                  Unique Id
+                </TableHeadCell>
+                <TableHeadCell className="bg-sky-900 text-white">
+                  Patient Id
+                </TableHeadCell>
+                <TableHeadCell className="bg-sky-900 text-white">
+                  Patient Name
+                </TableHeadCell>
+                <TableHeadCell className="bg-sky-900 text-white">
+                  Medicine Name
+                </TableHeadCell>
+                <TableHeadCell className="bg-sky-900 text-white">
+                  Qty
+                </TableHeadCell>
+                <TableHeadCell className="bg-sky-900 text-white">
+                  Date of Distribution
+                </TableHeadCell>
+                <TableHeadCell className="bg-sky-900 text-white">
+                  Stock Available
+                </TableHeadCell>
+                <TableHeadCell className="bg-sky-900 text-white">
+                  Updated By
+                </TableHeadCell>
+              </TableHead>
+              <TableBody className="divide-y">
+                {data.map((item, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{item.UniqueId}</TableCell>
+                    <TableCell>{item.PatientId}</TableCell>
+                    <TableCell>{item.PatientName}</TableCell>
+                    <TableCell>{item.MedicineName}</TableCell>
+                    <TableCell>{item.Qty}</TableCell>
+                    <TableCell>{item.DateOfDistribution}</TableCell>
+                    <TableCell>{item.StockAvailable}</TableCell>
+                    <TableCell>{item.UpdatedBy}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+          <PaginationComponant />
         </div>
       </ModalBody>
     </Modal>

@@ -13,7 +13,7 @@ const Dashboard = () => {
           <h3 className="text-xl font-semibold">
             Location Specific-Medicine Status
           </h3>
-          <select className="border border-gray-300 rounded-md px-3 py-1.5 text-sm cursor-pointer">
+          <select className="border border-gray-300 rounded-md px-3 py-1.5 text-sm">
             <option>This Month</option>
             <option>Last Month</option>
           </select>
@@ -48,7 +48,7 @@ const Dashboard = () => {
 
           <div className="flex items-center justify-end gap-2 mb-4">
             <FilterPopover />
-            <select className="border border-gray-300 rounded-md px-3 py-1.5 text-sm cursor-pointer">
+            <select className="border border-gray-300 rounded-md px-3 py-1.5 text-sm">
               <option>This Month</option>
               <option>Last Month</option>
             </select>
@@ -72,7 +72,7 @@ const Dashboard = () => {
 
           <div className="flex gap-2">
             <FilterPopover />
-            <select className="border border-gray-300 rounded-md px-3 py-1.5 text-sm cursor-pointer">
+            <select className="border border-gray-300 rounded-md px-3 py-1.5 text-sm">
               <option>This Year</option>
               <option>Last Year</option>
             </select>

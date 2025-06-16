@@ -19,6 +19,14 @@
     @apply font-serif;
   }
 } */
+@layer base {
+  select {
+    @apply cursor-pointer;
+  }
+  label {
+    @apply cursor-pointer;
+  }
+}
 
 @layer base {
   input[type="radio"] {
@@ -29,3 +37,4 @@
     @apply cursor-pointer;
   }
 }
+
