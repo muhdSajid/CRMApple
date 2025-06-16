@@ -1,176 +1,163 @@
-import React from "react";
 import {
-  Tabs,
-  TabItem,
+  Button,
+  Select,
+  Label,
+  TextInput,
+  Radio,
+  Datepicker,
+  HR,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeadCell,
   TableRow,
-  Button,
 } from "flowbite-react";
-import { FaPlus } from "react-icons/fa6";
-import FilterPopover from "../common/Filter";
-import PaginationComponant from "../common/Pagination";
+import { FaBed } from "react-icons/fa6";
+import { FaHome } from "react-icons/fa";
+import { FaCampground } from "react-icons/fa";
+import DistributionListModal from "./DistributionListModal";
+import { useState } from "react";
+import { FaCirclePlus } from "react-icons/fa6";
 
 const Distribution = () => {
-  const data = [
-    {
-      UniqueId: "RNS24239",
-      PatientId: "hgfqy65326r4",
-      PatientName: "Annanya Jain",
-      MedicineName: "c69416d4",
-      Qty: 10,
-      DateOfDistribution: "14-02-2026",
-      StockAvailable: 20,
-      UpdatedBy: "Arvind Jain",
-    },
-    {
-      UniqueId: "CC2162202t",
-      PatientId: "hgfqy65326r4",
-      PatientName: "Kunal Garg",
-      MedicineName: "f1e51afb",
-      Qty: 456,
-      DateOfDistribution: "14-02-2026",
-      StockAvailable: 48,
-      UpdatedBy: "Deepak Lohani",
-    },
-    {
-      UniqueId: "11231341",
-      PatientId: "hgfqy65326r4",
-      PatientName: "Vishal Agarwal",
-      MedicineName: "75dc5fb1",
-      Qty: 12,
-      DateOfDistribution: "14-02-2026",
-      StockAvailable: 123,
-      UpdatedBy: "Lorem Ipsum",
-    },
-    {
-      UniqueId: "CBC182201",
-      PatientId: "hgfqy65326r4",
-      PatientName: "Mohit Patel",
-      MedicineName: "39d7a41e",
-      Qty: 4,
-      DateOfDistribution: "14-02-2026",
-      StockAvailable: 8,
-      UpdatedBy: "Arvind Jain",
-    },
-    {
-      UniqueId: "OW B004/24",
-      PatientId: "hgfqy65326r4",
-      PatientName: "Divya Ray",
-      MedicineName: "39d7a41e",
-      Qty: 6,
-      DateOfDistribution: "14-02-2026",
-      StockAvailable: 9,
-      UpdatedBy: "Arvind Jain",
-    },
-    {
-      UniqueId: "CC2162202",
-      PatientId: "hgfqy65326r4",
-      PatientName: "Arpita Panda",
-      MedicineName: "78438a93",
-      Qty: 35,
-      DateOfDistribution: "14-02-2026",
-      StockAvailable: 2,
-      UpdatedBy: "Lorem Ipsum",
-    },
-    {
-      UniqueId: "BM4-01",
-      PatientId: "hgfqy65326r4",
-      PatientName: "Mohit Agarwal",
-      MedicineName: "78438a93",
-      Qty: 9,
-      DateOfDistribution: "14-02-2026",
-      StockAvailable: 1,
-      UpdatedBy: "Deepak Lohani",
-    },
-    {
-      UniqueId: "CC2162202",
-      PatientId: "hgfqy65326r4",
-      PatientName: "Riya Mittal",
-      MedicineName: "5% Dextrose",
-      Qty: 9,
-      DateOfDistribution: "14-02-2026",
-      StockAvailable: 202,
-      UpdatedBy: "Deepak Lohani",
-    },
-  ];
-
+  const [isModalOpen, setIsModalOpen] = useState(false);
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <div className="bg-white rounded-xl p-6 shadow">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold">Medicine Distribution List</h2>
+    <div className="p-6 bg-white rounded-lg shadow-md space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-semibold">Medicine Distribution</h1>
+        <Button size="sm" color="light" onClick={() => setIsModalOpen(true)}>
+          Distribution List
+        </Button>
+      </div>
+      <HR />
+
+      <div>
+        <div className="flex gap-6">
+          <Label className="">Select</Label>
+          <div className="flex items-center gap-2">
+            <Radio id="hospital" name="distributionMode" />
+            <div className="flex gap-2 bg-pink-300 rounded-sm">
+              <div className="bg-pink-500 p-1  rounded-sm">
+                <FaBed className="text-xl text-white" />
+              </div>
+              <div
+                htmlFor="hospital"
+                className="text-pink-600 font-semibold text-center pr-2"
+              >
+                Hospitals
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Radio id="camp" name="distributionMode" />
+            <div className="flex gap-2 bg-green-300 rounded-sm">
+              <div className="bg-green-500 p-1  rounded-sm">
+                <FaCampground className="text-xl text-white" />
+              </div>
+              <div
+                htmlFor="camp"
+                className="text-green-600 font-semibold text-center pr-2"
+              >
+                Medical Camps
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Radio id="homecare" name="distributionMode" />
+            <div className="flex gap-2 bg-blue-300 rounded-sm">
+              <div className="bg-blue-500 p-1  rounded-sm">
+                <FaHome className="text-xl text-white" />
+              </div>
+              <div
+                htmlFor="homecare"
+                className="text-blue-600 font-semibold text-center pr-2"
+              >
+                Home Care
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
 
-        <Tabs variant="default">
-          <TabItem active title="Bangalore" />
-          <TabItem title="Mangaluru" />
-          <TabItem title="Udupi" />
-          <TabItem title="Hassan" />
-        </Tabs>
-
-        <div className="flex justify-end items-center">
-          <input
-            type="text"
-            placeholder="Search..."
-            className="border px-3 py-2 border-gray-300 rounded-md w-1/4 text-sm focus:outline-none focus:ring-0 focus:border-gray-300"
+      <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="hospitalName">Hospital Name</Label>
+          <Select id="hospitalName" required>
+            <option>Motherhood</option>
+            <option>Apollo</option>
+          </Select>
+        </div>
+        <div>
+          <Label htmlFor="distributionDate">Date of Distribution</Label>
+          <Datepicker
+            id="distributionDate"
+            defaultDate={new Date("2025-02-26")}
           />
         </div>
-
-        <div className="overflow-x-auto mt-4">
-          <Table
-            striped
-            className="min-w-[1200px] [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&>tbody>tr:nth-child(odd)]:bg-gray-200"
-          >
-            <TableHead>
-              <TableHeadCell className="bg-sky-900 text-white">
-                Unique Id
-              </TableHeadCell>
-              <TableHeadCell className="bg-sky-900 text-white">
-                Patient Id
-              </TableHeadCell>
-              <TableHeadCell className="bg-sky-900 text-white">
-                Patient Name
-              </TableHeadCell>
-              <TableHeadCell className="bg-sky-900 text-white">
-                Medicine Name
-              </TableHeadCell>
-              <TableHeadCell className="bg-sky-900 text-white">
-                Qty
-              </TableHeadCell>
-              <TableHeadCell className="bg-sky-900 text-white">
-                Date of Distribution
-              </TableHeadCell>
-              <TableHeadCell className="bg-sky-900 text-white">
-                Stock Available
-              </TableHeadCell>
-              <TableHeadCell className="bg-sky-900 text-white">
-                Updated By
-              </TableHeadCell>
-            </TableHead>
-            <TableBody className="divide-y">
-              {data.map((item, index) => (
-                <TableRow key={index}>
-                  <TableCell>{item.UniqueId}</TableCell>
-                  <TableCell>{item.PatientId}</TableCell>
-                  <TableCell>{item.PatientName}</TableCell>
-                  <TableCell>{item.MedicineName}</TableCell>
-                  <TableCell>{item.Qty}</TableCell>
-                  <TableCell>{item.DateOfDistribution}</TableCell>
-                  <TableCell>{item.StockAvailable}</TableCell>
-                  <TableCell>{item.UpdatedBy}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-        <PaginationComponant />
       </div>
+
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHead className="[&>tr>th]:bg-[#E8EFF2] [&>tr>th]:text-black">
+            <TableRow>
+              <TableHeadCell>Patient name</TableHeadCell>
+              <TableHeadCell>Medicine Name</TableHeadCell>
+              <TableHeadCell></TableHeadCell>
+              <TableHeadCell>Quantity</TableHeadCell>
+              <TableHeadCell>Unit Type</TableHeadCell>
+            </TableRow>
+          </TableHead>
+          <TableBody className="divide-y">
+            <TableRow className="bg-white dark:border-gray-700 dark:bg-gray-800">
+              <TableCell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
+                <Select>
+                  <option>Ranjan Dash</option>
+                  <option>Another Patient</option>
+                </Select>
+              </TableCell>
+              <TableCell>
+                <TextInput type="text" value="Paracetamol" />
+              </TableCell>
+              <TableCell>
+                <FaCirclePlus className="text-xl text-[#2D506B]" />
+              </TableCell>
+              <TableCell>
+                <TextInput type="number" min={1} />
+              </TableCell>
+              <TableCell>
+                <Select>
+                  <option>Tablets</option>
+                  <option>Capsules</option>
+                  <option>ml</option>
+                </Select>
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </div>
+
+      <div className="flex justify-end gap-4">
+        <Button
+          type="button"
+          className="bg-white text-[#2D506B] hover:bg-blue-50 border border-[#2D506B]  font-medium rounded-lg text-sm px-5 py-2.5"
+        >
+          Cancel
+        </Button>
+        <Button
+          type="submit"
+          className="text-white bg-[#2D506B] border  hover:bg-sky-900 font-medium rounded-lg text-sm px-5 py-2.5"
+        >
+          Distribute
+        </Button>
+      </div>
+      {isModalOpen && (
+        <DistributionListModal
+          open={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
     </div>
   );
 };
-
 export default Distribution;

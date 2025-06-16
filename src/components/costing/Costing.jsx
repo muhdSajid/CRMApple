@@ -139,7 +139,7 @@ export const Costing = () => {
             </Button>
             <Button
               type="submit"
-              className="text-white bg-[#2D506B] border font-medium rounded-lg text-sm px-5 py-2.5"
+              className="text-white bg-[#2D506B] border  hover:bg-sky-900 font-medium rounded-lg text-sm px-5 py-2.5"
             >
               Generate Report
             </Button>

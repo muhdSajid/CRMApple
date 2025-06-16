@@ -5,6 +5,8 @@ import MedicineStock from "./components/medicineStock/MedicineStoke";
 import { Costing } from "./components/costing/Costing";
 import Distribution from "./components/distribution/Distribution";
 import { HelpCenter } from "./components/helpCenter/HelpCenter";
+import FaqPage from "./components/faq/Faq";
+import UserGuide from "./components/common/userGuide/UserGuide";
 
 function App() {
   return (
@@ -16,6 +18,8 @@ function App() {
           <Route path="/cost" element={<Costing />} />
           <Route path="/distribution" element={<Distribution />} />
           <Route path="/helpcenter" element={<HelpCenter />} />
+          <Route path="/faq" element={<FaqPage />} />
+          <Route path="/userguide" element={<UserGuide />} />
         </Route>
       </Routes>
     </Router>
