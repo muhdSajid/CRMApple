@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  Modal,
-  Button,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
-} from "flowbite-react";
+import { Modal, Button, ModalBody, ModalHeader } from "flowbite-react";
 
 export const AddMedicineModal = ({ open, onClose }) => {
   return (
