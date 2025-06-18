@@ -7,11 +7,13 @@ import Distribution from "./components/distribution/Distribution";
 import { HelpCenter } from "./components/helpCenter/HelpCenter";
 import FaqPage from "./components/faq/Faq";
 import UserGuide from "./components/common/userGuide/UserGuide";
+import LoginPage from "./components/auth/Login";
 
 function App() {
   return (
     <Router>
       <Routes>
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/" element={<Layout />}>
           <Route index element={<Dashboard />} />
           <Route path="/stock" element={<MedicineStock />} />
