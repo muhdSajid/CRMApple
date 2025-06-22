@@ -8,12 +8,14 @@ import { HelpCenter } from "./components/helpCenter/HelpCenter";
 import FaqPage from "./components/faq/Faq";
 import UserGuide from "./components/common/userGuide/UserGuide";
 import LoginPage from "./components/auth/Login";
+import SignupPage from "./components/auth/Signup";
 
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
         <Route path="/" element={<Layout />}>
           <Route index element={<Dashboard />} />
           <Route path="/stock" element={<MedicineStock />} />
