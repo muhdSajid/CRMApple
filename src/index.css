@@ -56,3 +56,7 @@ input[type="password"] {
   -moz-appearance: none;
 }
 
+.custom-datepicker input[type="text"] {
+  @apply bg-white rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none cursor-pointer;
+}
+

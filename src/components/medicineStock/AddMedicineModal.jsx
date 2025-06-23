@@ -1,52 +1,64 @@
 import React from "react";
-import { Modal, Button, ModalBody, ModalHeader } from "flowbite-react";
+import {
+  Modal,
+  Button,
+  ModalBody,
+  ModalHeader,
+  Label,
+  Datepicker,
+} from "flowbite-react";
 
 export const AddMedicineModal = ({ open, onClose }) => {
+  
+  const handleChange = (e) => {
+    console.log(e.target.id)
+  }
   return (
     <Modal show={open} onClose={onClose} size="4xl">
       <ModalHeader>Add Medicine</ModalHeader>
       <ModalBody>
         <form className="grid grid-cols-2 gap-6 mx-5 mt-3">
           <div className="flex gap-4">
-            <label className="block font-medium">
+            <Label>
               Add medicine to existing batch no?
-            </label>
+            </Label>
             <div className="flex items-center gap-3">
-              <label className="flex items-center gap-1">
-                <input type="radio" name="existingBatch" defaultChecked />
+              <input type="radio" name="existingBatch" id="yes" onChange={handleChange} defaultChecked />
+              <Label>
                 Yes
-              </label>
-              <label className="flex items-center gap-1">
-                <input type="radio" name="existingBatch" />
+              </Label>
+              <input type="radio" name="existingBatch" id="no" />
+              <Label>                
                 No
-              </label>
+              </Label>
             </div>
           </div>
 
           <div className="flex gap-4">
-            <label className="block font-medium ">Mode of Medicine?</label>
+            <Label>Mode of Medicine?</Label>
             <div className="flex items-center gap-3">
-              <label className="flex items-center gap-1">
-                <input type="radio" name="mode" defaultChecked />
+              <input type="radio" name="mode" id="purchased" defaultChecked />
+              <Label>
                 Purchased
-              </label>
-              <label className="flex items-center gap-1">
-                <input type="radio" name="mode" />
+              </Label>
+              <input type="radio" name="mode" id="donation" />
+              <Label>
                 Donation
-              </label>
+              </Label>
             </div>
           </div>
 
           <div>
-            <label className="block font-medium mb-1">Date</label>
-            <input
-              type="date"
-              className="w-full border rounded-lg p-2.5 text-sm border-gray-300"
+            <Label>Date</Label>
+            <Datepicker
+              id="distributionDate"
+              className="custom-datepicker"
+              defaultDate={new Date()}
             />
           </div>
 
           <div>
-            <label className="block font-medium mb-1">Medicine Name</label>
+            <Label>Medicine Name</Label>
             <select className="w-full border rounded-lg p-2.5 text-sm border-gray-300">
               <option>Paracetamol</option>
               <option>Ibuprofen</option>
@@ -55,7 +67,7 @@ export const AddMedicineModal = ({ open, onClose }) => {
           </div>
 
           <div>
-            <label className="block font-medium mb-1">Medicine ID</label>
+            <Label>Medicine ID</Label>
             <input
               type="text"
               className="w-full border rounded-lg p-2.5 text-sm border-gray-300"
@@ -63,7 +75,7 @@ export const AddMedicineModal = ({ open, onClose }) => {
           </div>
 
           <div>
-            <label className="block font-medium mb-1">Medicine Type</label>
+            <Label>Medicine Type</Label>
             <select className="w-full border rounded-lg p-2.5 text-sm border-gray-300">
               <option>Tablet</option>
               <option>Syrup</option>
@@ -72,7 +84,7 @@ export const AddMedicineModal = ({ open, onClose }) => {
           </div>
 
           <div>
-            <label className="block font-medium mb-1">Quantity</label>
+            <Label>Quantity</Label>
             <input
               type="number"
               min="0"
@@ -81,7 +93,7 @@ export const AddMedicineModal = ({ open, onClose }) => {
           </div>
 
           <div>
-            <label className="block font-medium mb-1">Low Stock Warning</label>
+            <Label>Low Stock Warning</Label>
             <input
               type="number"
               min="0"
@@ -90,7 +102,7 @@ export const AddMedicineModal = ({ open, onClose }) => {
           </div>
 
           <div>
-            <label className="block font-medium mb-1">Cost</label>
+            <Label>Cost</Label>
             <input
               type="text"
               className="w-full border rounded-lg p-2.5 text-sm border-gray-300"
@@ -98,7 +110,7 @@ export const AddMedicineModal = ({ open, onClose }) => {
           </div>
 
           <div>
-            <label className="block font-medium mb-1">Batch No</label>
+            <Label>Batch No</Label>
             <input
               type="text"
               className="w-full border rounded-lg p-2.5 text-sm border-gray-300"

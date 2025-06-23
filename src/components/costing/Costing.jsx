@@ -1,4 +1,4 @@
-import { Button } from "flowbite-react";
+import { Button, Datepicker, Label } from "flowbite-react";
 import { MultiSelectDropdown } from "./MultiSelectDropdown";
 
 export const Costing = () => {
@@ -78,33 +78,21 @@ export const Costing = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label
-                for="purchase-date"
-                className="block mb-2 text-sm font-medium text-gray-900"
-              >
-                Date of Purchase/ Donation
-              </label>
+              <Label htmlFor="purchase-date">Date of Purchase/ Donation</Label>
               <div className="relative">
-                <input
-                  type="date"
-                  id="purchase-date"
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
-                />
+                <Datepicker id="purchase-date" className="custom-datepicker" defaultDate={new Date()} />
               </div>
             </div>
 
             <MultiSelectDropdown />
 
             <div>
-              <label
-                for="medicine-category"
-                className="block mb-2 text-sm font-medium text-gray-900"
-              >
-                Medicine Category
-              </label>
+              <Label htmlFor="medicine-category">
+                Date of Purchase/ Donation
+              </Label>
               <select
                 id="medicine-category"
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                className="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
               >
                 <option>Antibiotics</option>
                 <option>Analgesics</option>
@@ -113,15 +101,10 @@ export const Costing = () => {
             </div>
 
             <div>
-              <label
-                for="export-as"
-                className="block mb-2 text-sm font-medium text-gray-900"
-              >
-                Export as
-              </label>
+              <Label htmlFor="export-as">Date of Purchase/ Donation</Label>
               <select
                 id="export-as"
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                className="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
               >
                 <option>PDF</option>
                 <option>Excel</option>

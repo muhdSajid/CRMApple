@@ -1,8 +1,6 @@
 import {
   Button,
-  Select,
   Label,
-  TextInput,
   Datepicker,
   HR,
   Table,
@@ -96,16 +94,19 @@ const Distribution = () => {
       <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
         <div>
           <Label htmlFor="hospitalName">Hospital Name</Label>
-          <Select id="hospitalName" required>
+          <select
+            id="hospitalName"
+            className="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-1 focus:ring-blue-500 focus:outline-none block w-full p-2.5"
+          >
             <option>Motherhood</option>
             <option>Apollo</option>
-          </Select>
+          </select>
         </div>
         <div>
-          <Label htmlFor="distributionDate" >Date of Distribution</Label>
+          <Label htmlFor="distributionDate">Date of Distribution</Label>
           <Datepicker
             id="distributionDate"
-            className="cursor-pointer"
+            className="custom-datepicker"
             defaultDate={new Date()}
           />
         </div>
@@ -125,26 +126,42 @@ const Distribution = () => {
           <TableBody className="divide-y">
             <TableRow className="bg-white dark:border-gray-700 dark:bg-gray-800">
               <TableCell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
-                <Select>
+                <select
+                  id="hospitalName"
+                  className="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-1 focus:ring-blue-500 focus:outline-none block w-full p-2.5"
+                >
                   <option>Ranjan Dash</option>
                   <option>Another Patient</option>
-                </Select>
+                </select>
               </TableCell>
               <TableCell>
-                <TextInput type="text" value="Paracetamol" />
+                <input
+                  type="text"
+                  name="medicineName"
+                  className="w-full text-black border rounded-md px-3 py-2 text-sm focus:outline-none border-gray-300 focus:ring-1 focus:ring-blue-500"
+                  value="Paracetamol"
+                />
               </TableCell>
               <TableCell>
                 <FaCirclePlus className="text-xl text-[#2D506B]" />
               </TableCell>
               <TableCell>
-                <TextInput type="number" min={1} />
+                <input
+                  type="number"
+                  name="quanitity"
+                  className={`w-full border rounded-md px-3 py-2 text-sm focus:outline-none border-gray-300 focus:ring-1 focus:ring-blue-500`}
+                  min={1}
+                />
               </TableCell>
               <TableCell>
-                <Select>
+                <select
+                  id="hospitalName"
+                  className="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-1 focus:ring-blue-500 focus:outline-none block w-full p-2.5"
+                >
                   <option>Tablets</option>
                   <option>Capsules</option>
                   <option>ml</option>
-                </Select>
+                </select>
               </TableCell>
             </TableRow>
           </TableBody>

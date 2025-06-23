@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { Label } from "flowbite-react";
 
 export const MultiSelectDropdown = () => {
   const [selectedOptions, setSelectedOptions] = useState([]);
@@ -30,15 +31,10 @@ export const MultiSelectDropdown = () => {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <label
-        htmlFor="warehouse"
-        className="block mb-2 text-sm font-medium text-gray-900"
-      >
-        Select Warehouse
-      </label>
+      <Label htmlFor="warehouse">Select Warehouse</Label>
 
       <div
-        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full cursor-pointer"
+        className="border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full cursor-pointer"
         onClick={() => setIsOpen((prev) => !prev)}
       >
         {selectedOptions.length === 0

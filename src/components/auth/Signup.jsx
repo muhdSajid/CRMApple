@@ -38,8 +38,10 @@ const SignupPage = () => {
     e.preventDefault();
     const validationErrors = validateSignup(formData);
     setErrors(validationErrors);
-    console.log("Form submitted:", formData);
-    // TODO: Validate & submit to backend
+    if (Object.keys(validationErrors).length === 0) {
+      console.log("Form data submitted:", formData);
+      // proceed with API call
+    }
   };
 
   return (
