@@ -154,7 +154,7 @@ const Distribution = () => {
             <TableRow>
               <TableHeadCell>Patient name</TableHeadCell>
               <TableHeadCell>Medicine Name</TableHeadCell>
-              <TableHeadCell>Quantity</TableHeadCell>
+              <TableHeadCell>No Of Medicine</TableHeadCell>
               <TableHeadCell>Unit Type</TableHeadCell>
               <TableHeadCell></TableHeadCell>
             </TableRow>

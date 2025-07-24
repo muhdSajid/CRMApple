@@ -20,6 +20,7 @@ export const Costing = () => {
                 id="this-month"
                 name="report-period"
                 value="this-month"
+                required
                 className="w-4 h-4 text-primary border-gray-300 focus:ring-primary"
               />
               <label for="this-month" className="ml-2 text-sm text-gray-700">
@@ -31,6 +32,7 @@ export const Costing = () => {
                 type="radio"
                 id="last-month"
                 name="report-period"
+                required
                 value="last-month"
                 className="w-4 h-4 text-primary border-gray-300 focus:ring-primary"
               />
@@ -44,6 +46,7 @@ export const Costing = () => {
                 id="last-3-months"
                 name="report-period"
                 value="last-3-months"
+                required
                 className="w-4 h-4 text-primary border-gray-300 focus:ring-primary"
               />
               <label for="last-3-months" className="ml-2 text-sm text-gray-700">
@@ -56,6 +59,7 @@ export const Costing = () => {
                 id="this-year"
                 name="report-period"
                 value="this-year"
+                required
                 className="w-4 h-4 text-primary border-gray-300 focus:ring-primary"
               />
               <label for="this-year" className="ml-2 text-sm text-gray-700">
@@ -68,6 +72,7 @@ export const Costing = () => {
                 id="custom-date"
                 name="report-period"
                 value="custom-date"
+                required
                 className="w-4 h-4 text-primary border-gray-300 focus:ring-primary"
               />
               <label for="custom-date" className="ml-2 text-sm text-gray-700">
@@ -80,7 +85,11 @@ export const Costing = () => {
             <div>
               <Label htmlFor="purchase-date">Date of Purchase/ Donation</Label>
               <div className="relative">
-                <Datepicker id="purchase-date" className="custom-datepicker" defaultDate={new Date()} />
+                <Datepicker
+                  id="purchase-date"
+                  className="custom-datepicker"
+                  defaultDate={new Date()}
+                />
               </div>
             </div>
 
@@ -94,9 +103,12 @@ export const Costing = () => {
                 id="medicine-category"
                 className="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
               >
-                <option>Antibiotics</option>
-                <option>Analgesics</option>
-                <option>Antifungals</option>
+                <option value="" disabled selected>
+                  Select a category
+                </option>
+                <option value="antibiotics">Antibiotics</option>
+                <option value="analgesics">Analgesics</option>
+                <option value="antifungals">Antifungals</option>
               </select>
             </div>
 

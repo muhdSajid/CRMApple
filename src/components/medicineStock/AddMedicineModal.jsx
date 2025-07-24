@@ -9,89 +9,46 @@ import {
 } from "flowbite-react";
 
 export const AddMedicineModal = ({ open, onClose }) => {
-  
   const handleChange = (e) => {
-    console.log(e.target.id)
-  }
+    console.log(e.target.id);
+  };
   return (
     <Modal show={open} onClose={onClose} size="4xl">
       <ModalHeader>Add Medicine</ModalHeader>
       <ModalBody>
         <form className="grid grid-cols-2 gap-6 mx-5 mt-3">
           <div className="flex gap-4">
-            <Label>
-              Add medicine to existing batch no?
-            </Label>
+            <Label>Add medicine to existing batch no?</Label>
             <div className="flex items-center gap-3">
-              <input type="radio" name="existingBatch" id="yes" onChange={handleChange} defaultChecked />
-              <Label>
-                Yes
-              </Label>
+              <input
+                type="radio"
+                name="existingBatch"
+                id="yes"
+                onChange={handleChange}
+                defaultChecked
+              />
+              <Label>Yes</Label>
               <input type="radio" name="existingBatch" id="no" />
-              <Label>                
-                No
-              </Label>
+              <Label>No</Label>
             </div>
           </div>
-
           <div className="flex gap-4">
             <Label>Mode of Medicine?</Label>
             <div className="flex items-center gap-3">
               <input type="radio" name="mode" id="purchased" defaultChecked />
-              <Label>
-                Purchased
-              </Label>
+              <Label>Purchased</Label>
               <input type="radio" name="mode" id="donation" />
-              <Label>
-                Donation
-              </Label>
+              <Label>Donation</Label>
             </div>
           </div>
-
           <div>
-            <Label>Date</Label>
+            <Label>Purchase Date</Label>
             <Datepicker
               id="distributionDate"
               className="custom-datepicker"
               defaultDate={new Date()}
             />
           </div>
-
-          <div>
-            <Label>Medicine Name</Label>
-            <select className="w-full border rounded-lg p-2.5 text-sm border-gray-300">
-              <option>Paracetamol</option>
-              <option>Ibuprofen</option>
-              <option>Amoxicillin</option>
-            </select>
-          </div>
-
-          <div>
-            <Label>Medicine ID</Label>
-            <input
-              type="text"
-              className="w-full border rounded-lg p-2.5 text-sm border-gray-300"
-            />
-          </div>
-
-          <div>
-            <Label>Medicine Type</Label>
-            <select className="w-full border rounded-lg p-2.5 text-sm border-gray-300">
-              <option>Tablet</option>
-              <option>Syrup</option>
-              <option>Other</option>
-            </select>
-          </div>
-
-          <div>
-            <Label>Quantity</Label>
-            <input
-              type="number"
-              min="0"
-              className="w-full border rounded-lg p-2.5 text-sm border-gray-300"
-            />
-          </div>
-
           <div>
             <Label>Low Stock Warning</Label>
             <input
@@ -100,7 +57,45 @@ export const AddMedicineModal = ({ open, onClose }) => {
               className="w-full border rounded-lg p-2.5 text-sm border-gray-300"
             />
           </div>
-
+          <div>
+            <Label>Medicine ID</Label>
+            <input
+              type="text"
+              className="w-full border rounded-lg p-2.5 text-sm border-gray-300"
+            />
+          </div>
+          <div>
+            <Label>Expiry Date</Label>
+            <Datepicker
+              id="distributionDate"
+              className="custom-datepicker"
+              defaultDate={new Date()}
+            />
+          </div>
+          <div>
+            <Label>Medicine Type</Label>
+            <select className="w-full border rounded-lg p-2.5 text-sm border-gray-300">
+              <option>Tablet</option>
+              <option>Syrup</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div>
+            <Label>Quantity</Label>
+            <input
+              type="number"
+              min="0"
+              className="w-full border rounded-lg p-2.5 text-sm border-gray-300"
+            />
+          </div>
+          <div>
+            <Label>Medicine Name</Label>
+            <input
+              type="search"
+              placeholder="search"
+              className="w-full border rounded-lg p-2.5 text-sm border-gray-300"
+            />
+          </div>
           <div>
             <Label>Cost</Label>
             <input
@@ -108,7 +103,6 @@ export const AddMedicineModal = ({ open, onClose }) => {
               className="w-full border rounded-lg p-2.5 text-sm border-gray-300"
             />
           </div>
-
           <div>
             <Label>Batch No</Label>
             <input

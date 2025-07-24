@@ -49,24 +49,6 @@ const ViewStock = ({ isOpen, onClose }) => {
         </div>
       </ModalHeader>
       <ModalBody>
-        <div className="mb-8">
-          <label className="font-medium mr-4">View Stock Status by</label>
-          <div className="inline-flex gap-4">
-            <label className="inline-flex items-center gap-1">
-              <input type="radio" name="status" defaultChecked />
-              All
-            </label>
-            <label className="inline-flex items-center gap-1">
-              <input type="radio" name="status" />
-              Under Stock
-            </label>
-            <label className="inline-flex items-center gap-1">
-              <input type="radio" name="status" />
-              Out of Stock
-            </label>
-          </div>
-        </div>
-
         <div className="overflow-x-auto">
           <Table
             hoverable
@@ -78,7 +60,9 @@ const ViewStock = ({ isOpen, onClose }) => {
                 <TableHeadCell>Batch Number</TableHeadCell>
                 <TableHeadCell>Expiry Date</TableHeadCell>
                 <TableHeadCell>No. of Medicines</TableHeadCell>
-                <TableHeadCell className="flex justify-center">Action</TableHeadCell>
+                <TableHeadCell className="flex justify-center">
+                  Action
+                </TableHeadCell>
               </TableRow>
             </TableHead>
             <TableBody className="divide-y">
@@ -94,7 +78,10 @@ const ViewStock = ({ isOpen, onClose }) => {
                   <TableCell>{item.count}</TableCell>
                   <TableCell className="space-x-2 flex justify-end">
                     {item.color && (
-                      <Button size="xs" className="bg-sky-800 hover:bg-sky-900 text-white">
+                      <Button
+                        size="xs"
+                        className="bg-sky-800 hover:bg-sky-900 text-white"
+                      >
                         Update Stock
                       </Button>
                     )}
