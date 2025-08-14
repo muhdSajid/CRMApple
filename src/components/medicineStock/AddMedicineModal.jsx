@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Modal,
   Button,
@@ -7,10 +7,41 @@ import {
   Label,
   Datepicker,
 } from "flowbite-react";
+import { validateAddMedicine } from "../../utils/validate";
 
 export const AddMedicineModal = ({ open, onClose }) => {
+  const [medicineData, setMedicineData] = useState({
+    existingBatch: "yes",
+    modeOfMedicine: "purchased",
+    date: new Date(),
+    medicineName: "",
+    medicineId: "",
+    medicineType: "Tablet",
+    quantity: 0,
+    lowStockWarning: 0,
+    cost: "",
+    batchNo: "",
+  });
+  const [errors, setErrors] = useState({
+    medicineName: "",
+    medicineId: "",
+    cost: "",
+    batchNo: "",
+  });
   const handleChange = (e) => {
-    console.log(e.target.id);
+    if (e.target.type == "radio") {
+      setMedicineData({ ...medicineData, [e.target.name]: e.target.id });
+    } else {
+      setMedicineData({ ...medicineData, [e.target.id]: e.target.value });
+    }
+  };
+  const handleSubmit = () => {
+    const validationErrors = validateAddMedicine(medicineData);
+    setErrors(validationErrors);
+    if (Object.keys(validationErrors).length === 0) {
+      console.log("medicineData", medicineData);
+      // proceed with API call
+    }
   };
   return (
     <Modal show={open} onClose={onClose} size="4xl">
@@ -25,19 +56,37 @@ export const AddMedicineModal = ({ open, onClose }) => {
                 name="existingBatch"
                 id="yes"
                 onChange={handleChange}
-                defaultChecked
+                checked={medicineData.existingBatch == "yes"}
               />
               <Label>Yes</Label>
-              <input type="radio" name="existingBatch" id="no" />
+              <input
+                type="radio"
+                name="existingBatch"
+                id="no"
+                onChange={handleChange}
+                checked={medicineData.existingBatch == "no"}
+              />
               <Label>No</Label>
             </div>
           </div>
           <div className="flex gap-4">
             <Label>Mode of Medicine?</Label>
             <div className="flex items-center gap-3">
-              <input type="radio" name="mode" id="purchased" defaultChecked />
+              <input
+                type="radio"
+                name="modeOfMedicine"
+                id="purchased"
+                onChange={handleChange}
+                checked={medicineData.modeOfMedicine == "purchased"}
+              />
               <Label>Purchased</Label>
-              <input type="radio" name="mode" id="donation" />
+              <input
+                type="radio"
+                name="modeOfMedicine"
+                id="donation"
+                onChange={handleChange}
+                checked={medicineData.modeOfMedicine == "donation"}
+              />
               <Label>Donation</Label>
             </div>
           </div>
@@ -47,14 +96,77 @@ export const AddMedicineModal = ({ open, onClose }) => {
               id="distributionDate"
               className="custom-datepicker"
               defaultDate={new Date()}
+              onChange={handleChange}
             />
           </div>
+
+          <div>
+            <Label>Medicine Name</Label>
+            <select
+              className="w-full border rounded-lg p-2.5 text-sm border-gray-300"
+              onChange={handleChange}
+              id="medicineName"
+              value={medicineData.medicineName}
+            >
+              <option value="">Select</option>
+              <option value="Paracetamol">Paracetamol</option>
+              <option value="Ibuprofen">Ibuprofen</option>
+              <option value="Amoxicillin">Amoxicillin</option>
+            </select>
+            {errors.medicineName && (
+              <p className="text-red-500 text-xs mt-1">{errors.medicineName}</p>
+            )}
+          </div>
+
+          <div>
+            <Label>Medicine ID</Label>
+            <input
+              type="text"
+              id="medicineId"
+              className="w-full border rounded-lg p-2.5 text-sm border-gray-300"
+              onChange={handleChange}
+              value={medicineData.medicineId}
+            />
+            {errors.medicineId && (
+              <p className="text-red-500 text-xs mt-1">{errors.medicineId}</p>
+            )}
+          </div>
+
+          <div>
+            <Label>Medicine Type</Label>
+            <select
+              className="w-full border rounded-lg p-2.5 text-sm border-gray-300"
+              id="medicineType"
+              onChange={handleChange}
+              value={medicineData.medicineType}
+            >
+              <option>Tablet</option>
+              <option>Syrup</option>
+              <option>Other</option>
+            </select>
+          </div>
+
+          <div>
+            <Label>Quantity</Label>
+            <input
+              type="number"
+              min="0"
+              className="w-full border rounded-lg p-2.5 text-sm border-gray-300"
+              id="quantity"
+              onChange={handleChange}
+              value={medicineData.quantity}
+            />
+          </div>
+
           <div>
             <Label>Low Stock Warning</Label>
             <input
               type="number"
               min="0"
               className="w-full border rounded-lg p-2.5 text-sm border-gray-300"
+              id="lowStockWarning"
+              onChange={handleChange}
+              value={medicineData.lowStockWarning}
             />
           </div>
           <div>
@@ -101,14 +213,26 @@ export const AddMedicineModal = ({ open, onClose }) => {
             <input
               type="text"
               className="w-full border rounded-lg p-2.5 text-sm border-gray-300"
+              id="cost"
+              onChange={handleChange}
+              value={medicineData.cost}
             />
+            {errors.cost && (
+              <p className="text-red-500 text-xs mt-1">{errors.cost}</p>
+            )}
           </div>
           <div>
             <Label>Batch No</Label>
             <input
               type="text"
               className="w-full border rounded-lg p-2.5 text-sm border-gray-300"
+              id="batchNo"
+              onChange={handleChange}
+              value={medicineData.batchNo}
             />
+            {errors.batchNo && (
+              <p className="text-red-500 text-xs mt-1">{errors.batchNo}</p>
+            )}
           </div>
         </form>
       </ModalBody>
@@ -119,7 +243,10 @@ export const AddMedicineModal = ({ open, onClose }) => {
         >
           Cancel
         </Button>
-        <Button className="text-xs px-2 py-1 h-8 bg-sky-800 hover:bg-sky-900">
+        <Button
+          className="text-xs px-2 py-1 h-8 bg-sky-800 hover:bg-sky-900"
+          onClick={handleSubmit}
+        >
           Add Medicine
         </Button>
       </div>

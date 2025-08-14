@@ -1,22 +1,24 @@
+import { requiredVal, emailVal } from "../constants/validation";
+
 export const validateSignup = (values) => {
   const errors = {};
 
   if (!values.firstName.trim()) {
-    errors.firstName = "First name is required.";
+    errors.firstName = requiredVal;
   }
 
   if (!values.lastName.trim()) {
-    errors.lastName = "Last name is required.";
+    errors.lastName = requiredVal;
   }
 
   if (!values.email.trim()) {
-    errors.email = "Email is required.";
+    errors.email = requiredVal;
   } else if (!/^\S+@\S+\.\S+$/.test(values.email)) {
-    errors.email = "Enter a valid email address.";
+    errors.email = emailVal;
   }
 
   if (!values.password) {
-    errors.password = "Password is required.";
+    errors.password = requiredVal;
   } else {
     if (values.password.length < 8) {
       errors.password = "Password must be at least 8 characters.";
@@ -30,6 +32,28 @@ export const validateSignup = (values) => {
     if (!/[!@#$%^&*]/.test(values.password)) {
       errors.password = "Include at least one special character.";
     }
+  }
+
+  return errors;
+};
+
+export const validateAddMedicine = (values) => {
+  const errors = {};
+
+  if (!values.medicineName.trim()) {
+    errors.medicineName = requiredVal;
+  }
+
+  if (!values.medicineId.trim()) {
+    errors.medicineId = requiredVal;
+  }
+
+  if (!values.cost.trim()) {
+    errors.cost = requiredVal;
+  }
+
+  if (!values.batchNo.trim()) {
+    errors.batchNo = requiredVal;
   }
 
   return errors;
