@@ -1,4 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import Layout from "./layout/Layout";
 import Dashboard from "./components/dashboard/Dashboard";
 import MedicineStock from "./components/medicineStock/MedicineStoke";
@@ -13,6 +15,7 @@ import SignupPage from "./components/auth/Signup";
 function App() {
   return (
     <Router>
+      <ToastContainer position="top-right" autoClose={"5000"} theme="colored" />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />

@@ -1,19 +1,21 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Label } from "flowbite-react";
 
-export const MultiSelectDropdown = () => {
-  const [selectedOptions, setSelectedOptions] = useState([]);
+export const SelectWarehouseMultiSelect = ({ costingData, setCostingData }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
   const warehouses = ["Warehouse 1", "Warehouse 2", "Warehouse 3"];
 
   const toggleOption = (option) => {
-    setSelectedOptions((prev) =>
-      prev.includes(option)
-        ? prev.filter((o) => o !== option)
-        : [...prev, option]
-    );
+    setCostingData((prev) => {
+      const warehouse = prev.warehouse || [];
+      const updatedWarehouse = warehouse.includes(option)
+        ? warehouse.filter((o) => o !== option)
+        : [...warehouse, option];
+
+      return { ...prev, warehouse: updatedWarehouse };
+    });
   };
 
   useEffect(() => {
@@ -37,9 +39,9 @@ export const MultiSelectDropdown = () => {
         className="border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full cursor-pointer"
         onClick={() => setIsOpen((prev) => !prev)}
       >
-        {selectedOptions.length === 0
+        {costingData.warehouse.length === 0
           ? "Select options"
-          : selectedOptions.join(", ")}
+          : costingData.warehouse.join(", ")}
       </div>
 
       {isOpen && (
@@ -51,7 +53,7 @@ export const MultiSelectDropdown = () => {
             >
               <input
                 type="checkbox"
-                checked={selectedOptions.includes(warehouse)}
+                checked={costingData.warehouse.includes(warehouse)}
                 onChange={() => toggleOption(warehouse)}
                 className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
               />
@@ -63,3 +65,5 @@ export const MultiSelectDropdown = () => {
     </div>
   );
 };
+
+export default SelectWarehouseMultiSelect;
