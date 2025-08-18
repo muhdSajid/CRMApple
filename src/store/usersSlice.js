@@ -42,7 +42,7 @@ export const addUser = createAsyncThunk(
   'users/addUser',
   async (userData, { rejectWithValue }) => {
     try {
-      const response = await api.post('/v1/users/create', userData);
+      const response = await api.post('/v1/users/add', userData);
       return response.data;
     } catch (error) {
       const message = error.response?.data?.message || error.message || 'Failed to add user';
@@ -115,7 +115,8 @@ const usersSlice = createSlice({
       .addCase(addUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
-        state.users.push(action.payload);
+        // Don't automatically add to the users array to avoid N/A display
+        // Instead, let the user refresh or refetch to see the updated list
         state.message = 'User added successfully';
       })
       .addCase(addUser.rejected, (state, action) => {

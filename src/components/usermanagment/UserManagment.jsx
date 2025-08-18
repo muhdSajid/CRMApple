@@ -66,7 +66,15 @@ const UserManagement = () => {
       return;
     }
 
-    dispatch(addUser(formData));
+    // Map the form data to match the API format
+    const userPayload = {
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      email: formData.email,
+      role: [formData.role] // Convert role to array format
+    };
+
+    dispatch(addUser(userPayload));
     setFormData({
       firstName: '',
       lastName: '',
@@ -251,9 +259,9 @@ const UserManagement = () => {
                   className="border bg-white border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-1 focus:ring-blue-500 focus:outline-none block w-full p-2.5 disabled:bg-gray-100"
                 >
                   <option value="">Select Role</option>
-                  <option value="Admin">Admin</option>
-                  <option value="User">User</option>
-                  <option value="Location Admin">Location Admin</option>
+                  <option value="admin">Admin</option>
+                  <option value="user">User</option>
+                  <option value="location_admin">Location Admin</option>
                 </select>
               </div>
 
