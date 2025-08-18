@@ -1,6 +1,23 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../service/api';
 
+// Async thunk to fetch all roles
+export const fetchRoles = createAsyncThunk(
+  'users/fetchRoles',
+  async (_, { rejectWithValue }) => {
+    try {
+      console.log('Making API call to: /v1/users/getAllRoles');
+      const response = await api.get('/v1/users/getAllRoles');
+      console.log('Roles fetched successfully:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching roles:', error);
+      const message = error.response?.data?.message || error.message || 'Failed to fetch roles';
+      return rejectWithValue(message);
+    }
+  }
+);
+
 // Async thunk to fetch all users
 export const fetchUsers = createAsyncThunk(
   'users/fetchUsers',
@@ -15,6 +32,8 @@ export const fetchUsers = createAsyncThunk(
       
       const response = await api.get('/v1/users/getAll');
       console.log('Users fetched successfully:', response.data);
+      console.log('First user structure:', JSON.stringify(response.data[0], null, 2));
+      console.log('First user role details:', response.data[0]?.role);
       console.log('========================');
       
       return response.data;
@@ -84,6 +103,7 @@ export const assignRole = createAsyncThunk(
 
 const initialState = {
   users: [],
+  roles: [],
   isLoading: false,
   isError: false,
   isSuccess: false,
@@ -107,6 +127,22 @@ const usersSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // Fetch roles
+      .addCase(fetchRoles.pending, (state) => {
+        state.isLoading = true;
+        state.isError = false;
+        state.message = '';
+      })
+      .addCase(fetchRoles.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.roles = action.payload;
+      })
+      .addCase(fetchRoles.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload;
+      })
       // Fetch users
       .addCase(fetchUsers.pending, (state) => {
         state.isLoading = true;

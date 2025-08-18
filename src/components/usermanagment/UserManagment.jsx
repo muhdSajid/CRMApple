@@ -15,7 +15,7 @@ import {
   Label,
   Spinner,
 } from "flowbite-react";
-import { fetchUsers, addUser, assignRole, reset, clearError } from "../../store/usersSlice";
+import { fetchUsers, addUser, assignRole, fetchRoles, reset, clearError } from "../../store/usersSlice";
 
 const UserManagement = () => {
   const [showModal, setShowModal] = useState(false);
@@ -34,13 +34,34 @@ const UserManagement = () => {
   });
 
   const dispatch = useDispatch();
-  const { users, isLoading, isError, isSuccess, message } = useSelector((state) => state.users);
+  const { users, roles, isLoading, isError, isSuccess, message } = useSelector((state) => state.users);
+
+  // Debug users and roles when they change
+  useEffect(() => {
+    if (users.length > 0) {
+      console.log('=== USERS LOADED DEBUG ===');
+      console.log('Total users:', users.length);
+      console.log('First user:', JSON.stringify(users[0], null, 2));
+      console.log('User roles in array:', users.map(u => ({ email: u.email, role: u.role })));
+      console.log('=========================');
+    }
+  }, [users]);
+
+  useEffect(() => {
+    if (roles.length > 0) {
+      console.log('=== ROLES LOADED DEBUG ===');
+      console.log('Total roles:', roles.length);
+      console.log('Roles array:', JSON.stringify(roles, null, 2));
+      console.log('========================');
+    }
+  }, [roles]);
 
   useEffect(() => {
     // Prevent duplicate calls in development mode
     if (!hasInitialized) {
-      console.log('Fetching users - first call only');
+      console.log('Fetching users and roles - first call only');
       dispatch(fetchUsers());
+      dispatch(fetchRoles());
       setHasInitialized(true);
     }
   }, [dispatch, hasInitialized]);
@@ -77,6 +98,9 @@ const UserManagement = () => {
   };
 
   const handleViewUser = (user) => {
+    console.log('Opening view modal for user:', user);
+    console.log('User role structure:', user.role);
+    console.log('Available roles from service:', roles);
     setSelectedUser(user);
     setShowViewModal(true);
   };
@@ -85,42 +109,54 @@ const UserManagement = () => {
     setSelectedUser(user);
     console.log('Selected user for editing:', user);
     console.log('User role data:', user.role);
+    console.log('Available roles:', roles);
     
-    // Extract the role name and preselect it
-    let currentRole = '';
+    // Extract the role name and find matching role from roles array
+    let currentRoleName = '';
     
     if (Array.isArray(user.role)) {
       // If role is an array, get the first role
       if (user.role.length > 0) {
         const roleItem = user.role[0];
         if (typeof roleItem === 'string') {
-          currentRole = roleItem.toLowerCase();
+          currentRoleName = roleItem;
         } else if (typeof roleItem === 'object' && roleItem.name) {
-          // Handle role objects like {id: 1, name: "ROLE_ADMIN"}
-          const roleName = roleItem.name.replace('ROLE_', '').toLowerCase();
-          currentRole = roleName;
+          currentRoleName = roleItem.name;
         }
       }
+    } else if (typeof user.role === 'object' && user.role.name) {
+      // Handle role object
+      currentRoleName = user.role.name;
     } else if (typeof user.role === 'string') {
-      // If role is a string, use it directly
-      currentRole = user.role.toLowerCase();
+      currentRoleName = user.role;
     }
     
-    // Map backend role names to frontend options
-    const roleMapping = {
-      'role_admin': 'admin',
-      'admin': 'admin',
-      'role_user': 'user', 
-      'user': 'user',
-      'role_location_admin': 'location_admin',
-      'location_admin': 'location_admin'
-    };
+    console.log('Current role name extracted:', currentRoleName);
     
-    const mappedRole = roleMapping[currentRole] || currentRole;
-    console.log('Mapped role:', mappedRole);
+    // Find the matching role from the roles array
+    const matchingRole = roles.find(role => {
+      // Try exact match first
+      if (role.name === currentRoleName) return true;
+      
+      // Try with ROLE_ prefix
+      if (role.name === `ROLE_${currentRoleName.toUpperCase()}`) return true;
+      
+      // Try display name match
+      if (role.displayName === currentRoleName) return true;
+      
+      // Try partial match
+      if (currentRoleName.includes(role.name.replace('ROLE_', ''))) return true;
+      
+      // Try reverse partial match
+      if (role.name.includes(currentRoleName.replace('ROLE_', ''))) return true;
+      
+      return false;
+    });
+    
+    console.log('Matching role found:', matchingRole);
     
     setEditFormData({
-      role: mappedRole
+      role: matchingRole ? matchingRole.name : ''
     });
     setShowEditModal(true);
   };
@@ -133,26 +169,25 @@ const UserManagement = () => {
       return;
     }
 
-    // Map role name to role object with id
-    const getRoleId = (roleName) => {
-      const roleMap = {
-        'admin': 1,
-        'user': 2,
-        'location_admin': 3
-      };
-      return roleMap[roleName] || 2; // Default to user role
-    };
+    // Find the selected role from the roles array
+    const selectedRole = roles.find(role => role.name === editFormData.role);
+    
+    if (!selectedRole) {
+      toast.error('Invalid role selected');
+      return;
+    }
 
     const assignRolePayload = {
       userId: selectedUser.id,
       roles: [
         {
-          id: getRoleId(editFormData.role),
-          name: `ROLE_${editFormData.role.toUpperCase()}`
+          id: selectedRole.id,
+          name: selectedRole.name
         }
       ]
     };
 
+    console.log('Assigning role payload:', assignRolePayload);
     dispatch(assignRole(assignRolePayload));
     setShowEditModal(false);
     setSelectedUser(null);
@@ -172,7 +207,7 @@ const UserManagement = () => {
       firstName: formData.firstName,
       lastName: formData.lastName,
       email: formData.email,
-      role: [formData.role] // Convert role to array format
+      role: [formData.role] // Send the role name directly
     };
 
     dispatch(addUser(userPayload));
@@ -185,6 +220,125 @@ const UserManagement = () => {
     setShowModal(false);
   };
 
+  const getRoleDisplayName = (userRole) => {
+    console.log('=== getRoleDisplayName DEBUG ===');
+    console.log('Input userRole:', userRole);
+    console.log('Type of userRole:', typeof userRole);
+    console.log('userRole JSON:', JSON.stringify(userRole, null, 2));
+    console.log('Available roles from service:', roles);
+    console.log('Available roles JSON:', JSON.stringify(roles, null, 2));
+    
+    if (!userRole) {
+      console.log('No userRole provided, returning N/A');
+      return 'N/A';
+    }
+    
+    let roleName = '';
+    
+    if (Array.isArray(userRole)) {
+      console.log('userRole is array with length:', userRole.length);
+      // Handle array of roles
+      if (userRole.length > 0) {
+        const roleItem = userRole[0];
+        console.log('First role item:', roleItem);
+        console.log('Type of first role item:', typeof roleItem);
+        
+        if (typeof roleItem === 'string') {
+          roleName = roleItem;
+          console.log('Extracted role name from string:', roleName);
+        } else if (typeof roleItem === 'object' && roleItem.name) {
+          roleName = roleItem.name;
+          console.log('Extracted role name from object:', roleName);
+        } else if (typeof roleItem === 'object' && roleItem.roleName) {
+          roleName = roleItem.roleName;
+          console.log('Extracted role name from roleName property:', roleName);
+        } else {
+          console.log('Could not extract role name from object:', roleItem);
+        }
+      }
+    } else if (typeof userRole === 'object' && userRole !== null) {
+      console.log('userRole is object:', userRole);
+      if (userRole.name) {
+        roleName = userRole.name;
+        console.log('Extracted role name from object.name:', roleName);
+      } else if (userRole.roleName) {
+        roleName = userRole.roleName;
+        console.log('Extracted role name from object.roleName:', roleName);
+      } else if (userRole.role) {
+        roleName = userRole.role;
+        console.log('Extracted role name from object.role:', roleName);
+      } else {
+        console.log('Could not find role name in object properties:', Object.keys(userRole));
+      }
+    } else if (typeof userRole === 'string') {
+      roleName = userRole;
+      console.log('userRole is string:', roleName);
+    }
+    
+    console.log('Final extracted role name:', roleName);
+    
+    if (!roleName) {
+      console.log('No role name extracted, returning original userRole or N/A');
+      return userRole.toString() || 'N/A';
+    }
+    
+    // Try multiple matching strategies
+    let matchedRole = null;
+    
+    // Strategy 1: Exact name match
+    matchedRole = roles.find(r => r.name === roleName);
+    if (matchedRole) {
+      console.log('Found exact name match:', matchedRole);
+      return matchedRole.displayName;
+    }
+    
+    // Strategy 2: Case insensitive exact match
+    matchedRole = roles.find(r => r.name.toLowerCase() === roleName.toLowerCase());
+    if (matchedRole) {
+      console.log('Found case insensitive exact match:', matchedRole);
+      return matchedRole.displayName;
+    }
+    
+    // Strategy 3: Match with ROLE_ prefix
+    matchedRole = roles.find(r => r.name === `ROLE_${roleName.toUpperCase()}`);
+    if (matchedRole) {
+      console.log('Found ROLE_ prefix match:', matchedRole);
+      return matchedRole.displayName;
+    }
+    
+    // Strategy 4: Match without ROLE_ prefix
+    const roleNameWithoutPrefix = roleName.replace('ROLE_', '');
+    matchedRole = roles.find(r => r.name.replace('ROLE_', '') === roleNameWithoutPrefix);
+    if (matchedRole) {
+      console.log('Found match without ROLE_ prefix:', matchedRole);
+      return matchedRole.displayName;
+    }
+    
+    // Strategy 5: Contains match
+    matchedRole = roles.find(r => 
+      r.name.toLowerCase().includes(roleName.toLowerCase()) ||
+      roleName.toLowerCase().includes(r.name.toLowerCase())
+    );
+    if (matchedRole) {
+      console.log('Found contains match:', matchedRole);
+      return matchedRole.displayName;
+    }
+    
+    // Strategy 6: Display name match
+    matchedRole = roles.find(r => r.displayName === roleName);
+    if (matchedRole) {
+      console.log('Found display name match:', matchedRole);
+      return matchedRole.displayName;
+    }
+    
+    console.log('No matching role found, returning role name:', roleName);
+    console.log('Available role names:', roles.map(r => r.name));
+    console.log('Available display names:', roles.map(r => r.displayName));
+    console.log('================================');
+    
+    return roleName || 'N/A';
+  };
+
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     try {
@@ -194,18 +348,44 @@ const UserManagement = () => {
     }
   };
 
-  const getStatusColor = (status) => {
-    switch (status?.toLowerCase()) {
+  const getStatusIcon = (status) => {
+    const statusLower = status?.toLowerCase() || 'active';
+    
+    switch (statusLower) {
       case 'active':
       case 'approved':
-        return 'text-green-500';
+        return (
+          <div className="flex items-center justify-center">
+            <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" title="Active">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+          </div>
+        );
       case 'inactive':
       case 'rejected':
-        return 'text-red-500';
+        return (
+          <div className="flex items-center justify-center">
+            <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20" title="Inactive">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+            </svg>
+          </div>
+        );
       case 'pending':
-        return 'text-yellow-500';
+        return (
+          <div className="flex items-center justify-center">
+            <svg className="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20" title="Pending">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 000 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+            </svg>
+          </div>
+        );
       default:
-        return 'text-gray-500';
+        return (
+          <div className="flex items-center justify-center">
+            <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20" title="Unknown">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+            </svg>
+          </div>
+        );
     }
   };
 
@@ -278,12 +458,10 @@ const UserManagement = () => {
                       : user.name || user.username || 'N/A'}
                   </TableCell>
                   <TableCell>{user.email}</TableCell>
-                  <TableCell>{user.role || 'User'}</TableCell>
+                  <TableCell>{getRoleDisplayName(user.role)}</TableCell>
                   <TableCell>{formatDate(user.createdAt || user.dateCreated)}</TableCell>
                   <TableCell>
-                    <span className={`px-2 py-1 text-sm ${getStatusColor(user.status)}`}>
-                      {user.status || 'Active'}
-                    </span>
+                    {getStatusIcon(user.status || 'Active')}
                   </TableCell>
                   <TableCell className="flex gap-2">
                     <button
@@ -367,9 +545,11 @@ const UserManagement = () => {
                   className="border bg-white border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-1 focus:ring-blue-500 focus:outline-none block w-full p-2.5 disabled:bg-gray-100"
                 >
                   <option value="">Select Role</option>
-                  <option value="admin">Admin</option>
-                  <option value="user">User</option>
-                  <option value="location_admin">Location Admin</option>
+                  {roles.map(role => (
+                    <option key={role.id} value={role.name}>
+                      {role.displayName}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -449,7 +629,7 @@ const UserManagement = () => {
                 <Label>Role</Label>
                 <input
                   type="text"
-                  value={Array.isArray(selectedUser.role) ? selectedUser.role.join(', ') : selectedUser.role || 'User'}
+                  value={getRoleDisplayName(selectedUser.role)}
                   readOnly
                   className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-gray-50 cursor-not-allowed"
                 />
@@ -496,7 +676,7 @@ const UserManagement = () => {
                 <Label>Current Role</Label>
                 <input
                   type="text"
-                  value={Array.isArray(selectedUser.role) ? selectedUser.role.join(', ') : selectedUser.role || 'User'}
+                  value={getRoleDisplayName(selectedUser.role)}
                   readOnly
                   className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-gray-50 cursor-not-allowed"
                 />
@@ -512,9 +692,11 @@ const UserManagement = () => {
                   className="border bg-white border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-1 focus:ring-blue-500 focus:outline-none block w-full p-2.5 disabled:bg-gray-100"
                 >
                   <option value="">Select Role</option>
-                  <option value="admin">Admin</option>
-                  <option value="user">User</option>
-                  <option value="location_admin">Location Admin</option>
+                  {roles.map(role => (
+                    <option key={role.id} value={role.name}>
+                      {role.displayName}
+                    </option>
+                  ))}
                 </select>
               </div>
 

@@ -7,6 +7,7 @@ import flowbiteReact from "flowbite-react/plugin/vite";
 export default defineConfig({
   plugins: [react(), tailwindcss(), flowbiteReact()],
   server: {
+    port: 5174, // Force port 5174 to match CORS settings
     proxy: {
       '/api': {
         target: 'http://localhost:8081',
