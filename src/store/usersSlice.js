@@ -65,6 +65,23 @@ export const updateUser = createAsyncThunk(
   }
 );
 
+// Async thunk to assign role to user
+export const assignRole = createAsyncThunk(
+  'users/assignRole',
+  async ({ userId, roles }, { rejectWithValue }) => {
+    try {
+      const response = await api.put('/v1/users/assignRole', {
+        userId: userId,
+        roles: roles
+      });
+      return response.data;
+    } catch (error) {
+      const message = error.response?.data?.message || error.message || 'Failed to assign role';
+      return rejectWithValue(message);
+    }
+  }
+);
+
 const initialState = {
   users: [],
   isLoading: false,
@@ -140,6 +157,22 @@ const usersSlice = createSlice({
         state.message = 'User updated successfully';
       })
       .addCase(updateUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload;
+      })
+      // Assign role
+      .addCase(assignRole.pending, (state) => {
+        state.isLoading = true;
+        state.isError = false;
+        state.message = '';
+      })
+      .addCase(assignRole.fulfilled, (state) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.message = 'Role assigned successfully';
+      })
+      .addCase(assignRole.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
         state.message = action.payload;

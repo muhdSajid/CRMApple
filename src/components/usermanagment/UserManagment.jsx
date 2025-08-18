@@ -15,15 +15,21 @@ import {
   Label,
   Spinner,
 } from "flowbite-react";
-import { fetchUsers, addUser, reset, clearError } from "../../store/usersSlice";
+import { fetchUsers, addUser, assignRole, reset, clearError } from "../../store/usersSlice";
 
 const UserManagement = () => {
   const [showModal, setShowModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
   const [hasInitialized, setHasInitialized] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
+    role: ''
+  });
+  const [editFormData, setEditFormData] = useState({
     role: ''
   });
 
@@ -50,7 +56,7 @@ const UserManagement = () => {
       dispatch(reset());
       
       // Automatically refresh the users list after successful operations
-      if (message.includes('added successfully') || message.includes('updated successfully')) {
+      if (message.includes('added successfully') || message.includes('updated successfully') || message.includes('assigned successfully')) {
         dispatch(fetchUsers());
       }
     }
@@ -61,6 +67,96 @@ const UserManagement = () => {
       ...formData,
       [e.target.id]: e.target.value
     });
+  };
+
+  const handleEditInputChange = (e) => {
+    setEditFormData({
+      ...editFormData,
+      [e.target.id]: e.target.value
+    });
+  };
+
+  const handleViewUser = (user) => {
+    setSelectedUser(user);
+    setShowViewModal(true);
+  };
+
+  const handleEditUser = (user) => {
+    setSelectedUser(user);
+    console.log('Selected user for editing:', user);
+    console.log('User role data:', user.role);
+    
+    // Extract the role name and preselect it
+    let currentRole = '';
+    
+    if (Array.isArray(user.role)) {
+      // If role is an array, get the first role
+      if (user.role.length > 0) {
+        const roleItem = user.role[0];
+        if (typeof roleItem === 'string') {
+          currentRole = roleItem.toLowerCase();
+        } else if (typeof roleItem === 'object' && roleItem.name) {
+          // Handle role objects like {id: 1, name: "ROLE_ADMIN"}
+          const roleName = roleItem.name.replace('ROLE_', '').toLowerCase();
+          currentRole = roleName;
+        }
+      }
+    } else if (typeof user.role === 'string') {
+      // If role is a string, use it directly
+      currentRole = user.role.toLowerCase();
+    }
+    
+    // Map backend role names to frontend options
+    const roleMapping = {
+      'role_admin': 'admin',
+      'admin': 'admin',
+      'role_user': 'user', 
+      'user': 'user',
+      'role_location_admin': 'location_admin',
+      'location_admin': 'location_admin'
+    };
+    
+    const mappedRole = roleMapping[currentRole] || currentRole;
+    console.log('Mapped role:', mappedRole);
+    
+    setEditFormData({
+      role: mappedRole
+    });
+    setShowEditModal(true);
+  };
+
+  const handleEditSubmit = (e) => {
+    e.preventDefault();
+    
+    if (!editFormData.role) {
+      toast.error('Please select a role');
+      return;
+    }
+
+    // Map role name to role object with id
+    const getRoleId = (roleName) => {
+      const roleMap = {
+        'admin': 1,
+        'user': 2,
+        'location_admin': 3
+      };
+      return roleMap[roleName] || 2; // Default to user role
+    };
+
+    const assignRolePayload = {
+      userId: selectedUser.id,
+      roles: [
+        {
+          id: getRoleId(editFormData.role),
+          name: `ROLE_${editFormData.role.toUpperCase()}`
+        }
+      ]
+    };
+
+    dispatch(assignRole(assignRolePayload));
+    setShowEditModal(false);
+    setSelectedUser(null);
+    setEditFormData({ role: '' });
   };
 
   const handleSubmit = (e) => {
@@ -190,20 +286,27 @@ const UserManagement = () => {
                     </span>
                   </TableCell>
                   <TableCell className="flex gap-2">
-                    <Button
-                      size="xs"
-                      className="text-white bg-[#2D506B] border hover:bg-sky-900 font-medium rounded-lg text-sm px-5 py-2.5"
+                    <button
+                      onClick={() => handleViewUser(user)}
                       disabled={isLoading}
+                      className="p-2 text-[#2D506B] hover:bg-blue-50 border border-[#2D506B] rounded-lg disabled:opacity-50"
+                      title="View User"
                     >
-                      View
-                    </Button>
-                    <Button
-                      size="xs"
-                      className="bg-white text-[#2D506B] hover:bg-blue-50 border border-[#2D506B] font-medium rounded-lg text-sm px-5 py-2.5"
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => handleEditUser(user)}
                       disabled={isLoading}
+                      className="p-2 text-white bg-[#2D506B] hover:bg-sky-900 rounded-lg disabled:opacity-50"
+                      title="Edit Role"
                     >
-                      Update
-                    </Button>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </button>
                   </TableCell>
                 </TableRow>
               ))
@@ -300,6 +403,147 @@ const UserManagement = () => {
                   className="bg-white text-[#2D506B] hover:bg-blue-50 border border-[#2D506B] font-medium rounded-lg text-sm px-5 py-2.5 disabled:opacity-50"
                 >
                   Close
+                </Button>
+              </div>
+            </form>
+          </ModalBody>
+        </Modal>
+      )}
+
+      {/* View User Modal */}
+      {showViewModal && selectedUser && (
+        <Modal show={showViewModal} onClose={() => setShowViewModal(false)}>
+          <ModalHeader>USER DETAILS</ModalHeader>
+          <ModalBody>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>First Name</Label>
+                  <input
+                    type="text"
+                    value={selectedUser.firstName || 'N/A'}
+                    readOnly
+                    className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-gray-50 cursor-not-allowed"
+                  />
+                </div>
+                <div>
+                  <Label>Last Name</Label>
+                  <input
+                    type="text"
+                    value={selectedUser.lastName || 'N/A'}
+                    readOnly
+                    className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-gray-50 cursor-not-allowed"
+                  />
+                </div>
+              </div>
+              <div>
+                <Label>Email</Label>
+                <input
+                  type="text"
+                  value={selectedUser.email || 'N/A'}
+                  readOnly
+                  className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-gray-50 cursor-not-allowed"
+                />
+              </div>
+              <div>
+                <Label>Role</Label>
+                <input
+                  type="text"
+                  value={Array.isArray(selectedUser.role) ? selectedUser.role.join(', ') : selectedUser.role || 'User'}
+                  readOnly
+                  className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-gray-50 cursor-not-allowed"
+                />
+              </div>
+              <div>
+                <Label>Date Created</Label>
+                <input
+                  type="text"
+                  value={formatDate(selectedUser.createdAt || selectedUser.dateCreated)}
+                  readOnly
+                  className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-gray-50 cursor-not-allowed"
+                />
+              </div>
+            </div>
+            <div className="flex justify-center mt-6">
+              <Button
+                type="button"
+                onClick={() => setShowViewModal(false)}
+                className="bg-white text-[#2D506B] hover:bg-blue-50 border border-[#2D506B] font-medium rounded-lg text-sm px-5 py-2.5"
+              >
+                Close
+              </Button>
+            </div>
+          </ModalBody>
+        </Modal>
+      )}
+
+      {/* Edit Role Modal */}
+      {showEditModal && selectedUser && (
+        <Modal show={showEditModal} onClose={() => setShowEditModal(false)}>
+          <ModalHeader>EDIT USER ROLE</ModalHeader>
+          <ModalBody>
+            <form className="space-y-5" onSubmit={handleEditSubmit}>
+              <div>
+                <Label>User</Label>
+                <input
+                  type="text"
+                  value={`${selectedUser.firstName || ''} ${selectedUser.lastName || ''} (${selectedUser.email})`}
+                  readOnly
+                  className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-gray-50 cursor-not-allowed"
+                />
+              </div>
+              <div>
+                <Label>Current Role</Label>
+                <input
+                  type="text"
+                  value={Array.isArray(selectedUser.role) ? selectedUser.role.join(', ') : selectedUser.role || 'User'}
+                  readOnly
+                  className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-gray-50 cursor-not-allowed"
+                />
+              </div>
+              <div>
+                <Label htmlFor="role">New Role</Label>
+                <select
+                  id="role"
+                  required
+                  value={editFormData.role}
+                  onChange={handleEditInputChange}
+                  disabled={isLoading}
+                  className="border bg-white border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-1 focus:ring-blue-500 focus:outline-none block w-full p-2.5 disabled:bg-gray-100"
+                >
+                  <option value="">Select Role</option>
+                  <option value="admin">Admin</option>
+                  <option value="user">User</option>
+                  <option value="location_admin">Location Admin</option>
+                </select>
+              </div>
+
+              <div className="flex justify-center gap-2">
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className="text-white bg-[#2D506B] border hover:bg-sky-900 font-medium rounded-lg text-sm px-5 py-2.5 disabled:opacity-50"
+                >
+                  {isLoading ? (
+                    <>
+                      <Spinner size="sm" className="mr-2" />
+                      Updating...
+                    </>
+                  ) : (
+                    'Update Role'
+                  )}
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setSelectedUser(null);
+                    setEditFormData({ role: '' });
+                  }}
+                  disabled={isLoading}
+                  className="bg-white text-[#2D506B] hover:bg-blue-50 border border-[#2D506B] font-medium rounded-lg text-sm px-5 py-2.5 disabled:opacity-50"
+                >
+                  Cancel
                 </Button>
               </div>
             </form>
