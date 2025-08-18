@@ -112,7 +112,7 @@ const usersSlice = createSlice({
         state.isError = false;
         state.message = '';
       })
-      .addCase(addUser.fulfilled, (state, action) => {
+      .addCase(addUser.fulfilled, (state) => {
         state.isLoading = false;
         state.isSuccess = true;
         // Don't automatically add to the users array to avoid N/A display

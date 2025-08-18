@@ -48,6 +48,11 @@ const UserManagement = () => {
     if (isSuccess && message) {
       toast.success(message);
       dispatch(reset());
+      
+      // Automatically refresh the users list after successful operations
+      if (message.includes('added successfully') || message.includes('updated successfully')) {
+        dispatch(fetchUsers());
+      }
     }
   }, [isError, isSuccess, message, dispatch]);
 
