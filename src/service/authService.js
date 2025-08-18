@@ -15,4 +15,22 @@ export const getUserToken = () => {
   return token;
 };
 
+export const getUserInfo = () => {
+  const userInfo = JSON.parse(localStorage.getItem('userInfo')) || null;
+  const userToken = getUserToken();
+  
+  // If token is expired or doesn't exist, return null
+  if (!userToken) {
+    localStorage.removeItem('userInfo');
+    return null;
+  }
+  
+  return userInfo;
+};
+
+export const isAuthenticated = () => {
+  const token = getUserToken();
+  return !!token;
+};
+
 

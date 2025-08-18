@@ -1,8 +1,26 @@
 import { useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import profilePic from "../Assets/download.jpeg";
+import { logoutUser } from "../store/authSlice";
 
 const Navbar = () => {
   const [showMenu, setShowMenu] = useState(false);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { user } = useSelector((state) => state.auth);
+
+  const handleLogout = async () => {
+    try {
+      await dispatch(logoutUser()).unwrap();
+      toast.success("Logged out successfully");
+      navigate("/login");
+    } catch {
+      toast.error("Error logging out");
+    }
+    setShowMenu(false);
+  };
 
   return (
     <nav className="fixed top-0 left-[220px] w-[calc(100%-220px)] z-50 bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
@@ -25,9 +43,11 @@ const Navbar = () => {
               />
               <div className="text-left">
                 <div className="text-sm font-medium text-gray-900">
-                  Kristin Watson
+                  {user?.name || user?.email || "User"}
                 </div>
-                <div className="text-xs text-gray-500">@estherhoward</div>
+                <div className="text-xs text-gray-500">
+                  {user?.email || "@user"}
+                </div>
               </div>
             </button>
 
@@ -46,9 +66,12 @@ const Navbar = () => {
                     </a>
                   </li>
                   <li>
-                    <a href="/" className="block px-4 py-2 hover:bg-gray-100">
+                    <button 
+                      onClick={handleLogout}
+                      className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                    >
                       Sign out
-                    </a>
+                    </button>
                   </li>
                 </ul>
               </div>

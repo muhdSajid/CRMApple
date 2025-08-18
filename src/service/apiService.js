@@ -1,4 +1,4 @@
-import axios from "axios";
+import api from "./api";
 import { getUserToken } from "./authService";
 import { apiDomain } from "../constants/constants";
 
@@ -13,17 +13,27 @@ const _fetch = async (url, method, data = null, props, token = null) => {
   } else {
     userToken = getUserToken();
   }
-  const bearer = `Bearer ${userToken.token}`;
-  const headers = {
-    Authorization: bearer,
-  };
-  let body;
+
   let response;
+  
   if (method !== "GET") {
-    body = data ? data : null;
-    response = axios.post(`${apiDomain}${url}`, body, { headers });
-    return response;
+    const body = data ? data : null;
+    
+    // Use the authenticated API instance for requests that need auth
+    if (userToken && userToken.token) {
+      response = await api.post(url.replace(apiDomain + '/api', ''), body);
+    } else {
+      // For requests without auth (like login), use full URL
+      response = await api.post(url, body);
+    }
+  } else {
+    // Use the authenticated API instance for GET requests
+    if (userToken && userToken.token) {
+      response = await api.get(url.replace(apiDomain + '/api', ''));
+    } else {
+      response = await api.get(url);
+    }
   }
-  response = axios.get(`${apiDomain}${url}`, { headers });
+  
   return response;
 };
