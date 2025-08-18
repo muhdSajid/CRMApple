@@ -3,7 +3,7 @@ import { getUserToken } from "./authService";
 
 // Create axios instance with better configuration for CORS
 const api = axios.create({
-  baseURL: 'http://localhost:8081/api',
+  baseURL: '/api',
   timeout: 10000, // 10 seconds timeout
   headers: {
     'Content-Type': 'application/json',
