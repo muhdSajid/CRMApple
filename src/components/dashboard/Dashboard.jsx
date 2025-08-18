@@ -1,3 +1,4 @@
+import { useState, useEffect, useCallback } from "react";
 import LocationCard from "./Card";
 import FilterPopover from "../common/Filter";
 import CriticalStock from "./CriticalStock";
@@ -6,6 +7,32 @@ import ExpensesReport from "./ExpenseReport";
 import PurchaseAnalytics from "./PurchaseAnalytics";
 
 const Dashboard = () => {
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [selectedLocationId, setSelectedLocationId] = useState(null);
+
+  // Load selected location from sessionStorage on component mount
+  useEffect(() => {
+    const savedLocationId = sessionStorage.getItem('selectedLocationId');
+    const savedLocationData = sessionStorage.getItem('selectedLocationData');
+    
+    if (savedLocationId && savedLocationData) {
+      try {
+        const locationData = JSON.parse(savedLocationData);
+        setSelectedLocationId(parseInt(savedLocationId));
+        setSelectedLocation(locationData);
+      } catch (error) {
+        console.error('Error parsing saved location data:', error);
+        // Clear invalid data
+        sessionStorage.removeItem('selectedLocationId');
+        sessionStorage.removeItem('selectedLocationData');
+      }
+    }
+  }, []);
+
+  const handleLocationSelect = useCallback((location) => {
+    setSelectedLocation(location);
+    setSelectedLocationId(location.locationId);
+  }, []);
   return (
     <div className="p-4 space-y-6 bg-[#f9f9f9]">
       <div className="bg-white rounded-2xl shadow p-6">
@@ -13,15 +40,58 @@ const Dashboard = () => {
           <h3 className="text-xl font-semibold">
             Location Specific-Medicine Status
           </h3>
-          <select className="border border-gray-300 rounded-md px-3 py-1.5 text-sm">
-            <option>This Month</option>
-            <option>Last Month</option>
-          </select>
+          {selectedLocation && (
+            <div className="text-sm text-gray-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
+              Selected: <span className="font-semibold text-blue-700">{selectedLocation.locationName}</span>
+              <button 
+                onClick={() => {
+                  setSelectedLocation(null);
+                  setSelectedLocationId(null);
+                  sessionStorage.removeItem('selectedLocationId');
+                  sessionStorage.removeItem('selectedLocationData');
+                }}
+                className="ml-2 text-blue-700 hover:text-blue-900"
+              >
+                ✕
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          <LocationCard />
+          <LocationCard 
+            onLocationSelect={handleLocationSelect}
+            selectedLocationId={selectedLocationId}
+          />
         </div>
+
+        {selectedLocation && (
+          <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
+            <h4 className="text-lg font-semibold text-gray-800 mb-3">
+              📍 {selectedLocation.locationName} - Detailed View
+            </h4>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="bg-white p-4 rounded-lg shadow-sm border-l-4 border-blue-500">
+                <div className="text-sm text-gray-600">Out of Stock</div>
+                <div className="text-2xl font-bold text-blue-700">{selectedLocation.outOfStockCount}</div>
+                <div className="text-xs text-gray-500">Items</div>
+              </div>
+              <div className="bg-white p-4 rounded-lg shadow-sm border-l-4 border-red-500">
+                <div className="text-sm text-gray-600">Expired</div>
+                <div className="text-2xl font-bold text-red-700">{selectedLocation.expiredCount}</div>
+                <div className="text-xs text-gray-500">Items</div>
+              </div>
+              <div className="bg-white p-4 rounded-lg shadow-sm border-l-4 border-orange-500">
+                <div className="text-sm text-gray-600">Near Expiry</div>
+                <div className="text-2xl font-bold text-orange-700">{selectedLocation.nearExpiryCount}</div>
+                <div className="text-xs text-gray-500">Items</div>
+              </div>
+            </div>
+            <div className="mt-3 text-xs text-gray-600">
+              📅 Last Updated: {new Date(selectedLocation.lastUpdated).toLocaleString()}
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
