@@ -41,8 +41,9 @@ const UserManagement = () => {
     if (users.length > 0) {
       console.log('=== USERS LOADED DEBUG ===');
       console.log('Total users:', users.length);
-      console.log('First user:', JSON.stringify(users[0], null, 2));
-      console.log('User roles in array:', users.map(u => ({ email: u.email, role: u.role })));
+      console.log('Sample user:', users[0]);
+      console.log('Sample user roles:', users[0].roles);
+      console.log('User roles in array:', users.map(u => ({ email: u.email, roles: u.roles })));
       console.log('=========================');
     }
   }, [users]);
@@ -51,7 +52,8 @@ const UserManagement = () => {
     if (roles.length > 0) {
       console.log('=== ROLES LOADED DEBUG ===');
       console.log('Total roles:', roles.length);
-      console.log('Roles array:', JSON.stringify(roles, null, 2));
+      console.log('Sample role:', roles[0]);
+      console.log('All roles:', roles);
       console.log('========================');
     }
   }, [roles]);
@@ -99,7 +101,7 @@ const UserManagement = () => {
 
   const handleViewUser = (user) => {
     console.log('Opening view modal for user:', user);
-    console.log('User role structure:', user.role);
+    console.log('User roles structure:', user.roles);
     console.log('Available roles from service:', roles);
     setSelectedUser(user);
     setShowViewModal(true);
@@ -108,50 +110,21 @@ const UserManagement = () => {
   const handleEditUser = (user) => {
     setSelectedUser(user);
     console.log('Selected user for editing:', user);
-    console.log('User role data:', user.role);
+    console.log('User roles data:', user.roles);
     console.log('Available roles:', roles);
     
-    // Extract the role name and find matching role from roles array
+    // Extract the role name from the roles array
     let currentRoleName = '';
     
-    if (Array.isArray(user.role)) {
-      // If role is an array, get the first role
-      if (user.role.length > 0) {
-        const roleItem = user.role[0];
-        if (typeof roleItem === 'string') {
-          currentRoleName = roleItem;
-        } else if (typeof roleItem === 'object' && roleItem.name) {
-          currentRoleName = roleItem.name;
-        }
-      }
-    } else if (typeof user.role === 'object' && user.role.name) {
-      // Handle role object
-      currentRoleName = user.role.name;
-    } else if (typeof user.role === 'string') {
-      currentRoleName = user.role;
+    if (Array.isArray(user.roles) && user.roles.length > 0) {
+      // Get the first role name from the array
+      currentRoleName = user.roles[0];
     }
     
     console.log('Current role name extracted:', currentRoleName);
     
     // Find the matching role from the roles array
-    const matchingRole = roles.find(role => {
-      // Try exact match first
-      if (role.name === currentRoleName) return true;
-      
-      // Try with ROLE_ prefix
-      if (role.name === `ROLE_${currentRoleName.toUpperCase()}`) return true;
-      
-      // Try display name match
-      if (role.displayName === currentRoleName) return true;
-      
-      // Try partial match
-      if (currentRoleName.includes(role.name.replace('ROLE_', ''))) return true;
-      
-      // Try reverse partial match
-      if (role.name.includes(currentRoleName.replace('ROLE_', ''))) return true;
-      
-      return false;
-    });
+    const matchingRole = roles.find(role => role.name === currentRoleName);
     
     console.log('Matching role found:', matchingRole);
     
@@ -220,123 +193,46 @@ const UserManagement = () => {
     setShowModal(false);
   };
 
-  const getRoleDisplayName = (userRole) => {
-    console.log('=== getRoleDisplayName DEBUG ===');
-    console.log('Input userRole:', userRole);
-    console.log('Type of userRole:', typeof userRole);
-    console.log('userRole JSON:', JSON.stringify(userRole, null, 2));
-    console.log('Available roles from service:', roles);
-    console.log('Available roles JSON:', JSON.stringify(roles, null, 2));
+  const getRoleDisplayName = (userRoles) => {
+    // Debug: log actual structure
+    console.log('Role debug - userRoles:', userRoles, 'roles available:', roles.length);
     
-    if (!userRole) {
-      console.log('No userRole provided, returning N/A');
+    if (!userRoles) {
       return 'N/A';
     }
-    
-    let roleName = '';
-    
-    if (Array.isArray(userRole)) {
-      console.log('userRole is array with length:', userRole.length);
-      // Handle array of roles
-      if (userRole.length > 0) {
-        const roleItem = userRole[0];
-        console.log('First role item:', roleItem);
-        console.log('Type of first role item:', typeof roleItem);
-        
-        if (typeof roleItem === 'string') {
-          roleName = roleItem;
-          console.log('Extracted role name from string:', roleName);
-        } else if (typeof roleItem === 'object' && roleItem.name) {
-          roleName = roleItem.name;
-          console.log('Extracted role name from object:', roleName);
-        } else if (typeof roleItem === 'object' && roleItem.roleName) {
-          roleName = roleItem.roleName;
-          console.log('Extracted role name from roleName property:', roleName);
-        } else {
-          console.log('Could not extract role name from object:', roleItem);
-        }
+
+    // If roles haven't loaded yet, show loading
+    if (!roles || roles.length === 0) {
+      return 'Loading...';
+    }
+
+    // Handle array of role names (which is the actual API format)
+    if (Array.isArray(userRoles)) {
+      if (userRoles.length === 0) return 'N/A';
+      
+      // Get the first role name (string)
+      const firstRoleName = userRoles[0];
+      
+      // Find the matching role in the roles array
+      const matchedRole = roles.find(r => r.name === firstRoleName);
+      if (matchedRole) {
+        return matchedRole.displayName;
       }
-    } else if (typeof userRole === 'object' && userRole !== null) {
-      console.log('userRole is object:', userRole);
-      if (userRole.name) {
-        roleName = userRole.name;
-        console.log('Extracted role name from object.name:', roleName);
-      } else if (userRole.roleName) {
-        roleName = userRole.roleName;
-        console.log('Extracted role name from object.roleName:', roleName);
-      } else if (userRole.role) {
-        roleName = userRole.role;
-        console.log('Extracted role name from object.role:', roleName);
-      } else {
-        console.log('Could not find role name in object properties:', Object.keys(userRole));
+      
+      // If no match found, return the role name without ROLE_ prefix for readability
+      return firstRoleName.replace('ROLE_', '');
+    }
+    
+    // Handle single role string (fallback)
+    if (typeof userRoles === 'string') {
+      const matchedRole = roles.find(r => r.name === userRoles);
+      if (matchedRole) {
+        return matchedRole.displayName;
       }
-    } else if (typeof userRole === 'string') {
-      roleName = userRole;
-      console.log('userRole is string:', roleName);
+      return userRoles.replace('ROLE_', '');
     }
-    
-    console.log('Final extracted role name:', roleName);
-    
-    if (!roleName) {
-      console.log('No role name extracted, returning original userRole or N/A');
-      return userRole.toString() || 'N/A';
-    }
-    
-    // Try multiple matching strategies
-    let matchedRole = null;
-    
-    // Strategy 1: Exact name match
-    matchedRole = roles.find(r => r.name === roleName);
-    if (matchedRole) {
-      console.log('Found exact name match:', matchedRole);
-      return matchedRole.displayName;
-    }
-    
-    // Strategy 2: Case insensitive exact match
-    matchedRole = roles.find(r => r.name.toLowerCase() === roleName.toLowerCase());
-    if (matchedRole) {
-      console.log('Found case insensitive exact match:', matchedRole);
-      return matchedRole.displayName;
-    }
-    
-    // Strategy 3: Match with ROLE_ prefix
-    matchedRole = roles.find(r => r.name === `ROLE_${roleName.toUpperCase()}`);
-    if (matchedRole) {
-      console.log('Found ROLE_ prefix match:', matchedRole);
-      return matchedRole.displayName;
-    }
-    
-    // Strategy 4: Match without ROLE_ prefix
-    const roleNameWithoutPrefix = roleName.replace('ROLE_', '');
-    matchedRole = roles.find(r => r.name.replace('ROLE_', '') === roleNameWithoutPrefix);
-    if (matchedRole) {
-      console.log('Found match without ROLE_ prefix:', matchedRole);
-      return matchedRole.displayName;
-    }
-    
-    // Strategy 5: Contains match
-    matchedRole = roles.find(r => 
-      r.name.toLowerCase().includes(roleName.toLowerCase()) ||
-      roleName.toLowerCase().includes(r.name.toLowerCase())
-    );
-    if (matchedRole) {
-      console.log('Found contains match:', matchedRole);
-      return matchedRole.displayName;
-    }
-    
-    // Strategy 6: Display name match
-    matchedRole = roles.find(r => r.displayName === roleName);
-    if (matchedRole) {
-      console.log('Found display name match:', matchedRole);
-      return matchedRole.displayName;
-    }
-    
-    console.log('No matching role found, returning role name:', roleName);
-    console.log('Available role names:', roles.map(r => r.name));
-    console.log('Available display names:', roles.map(r => r.displayName));
-    console.log('================================');
-    
-    return roleName || 'N/A';
+
+    return 'N/A';
   };
 
   const formatDate = (dateString) => {
@@ -458,7 +354,7 @@ const UserManagement = () => {
                       : user.name || user.username || 'N/A'}
                   </TableCell>
                   <TableCell>{user.email}</TableCell>
-                  <TableCell>{getRoleDisplayName(user.role)}</TableCell>
+                  <TableCell>{getRoleDisplayName(user.roles)}</TableCell>
                   <TableCell>{formatDate(user.createdAt || user.dateCreated)}</TableCell>
                   <TableCell>
                     {getStatusIcon(user.status || 'Active')}
@@ -629,7 +525,7 @@ const UserManagement = () => {
                 <Label>Role</Label>
                 <input
                   type="text"
-                  value={getRoleDisplayName(selectedUser.role)}
+                  value={getRoleDisplayName(selectedUser.roles)}
                   readOnly
                   className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-gray-50 cursor-not-allowed"
                 />
@@ -676,7 +572,7 @@ const UserManagement = () => {
                 <Label>Current Role</Label>
                 <input
                   type="text"
-                  value={getRoleDisplayName(selectedUser.role)}
+                  value={getRoleDisplayName(selectedUser.roles)}
                   readOnly
                   className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-gray-50 cursor-not-allowed"
                 />
