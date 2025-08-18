@@ -69,7 +69,6 @@ export const AddMedicineModal = ({ open, onClose }) => {
               <Label>No</Label>
             </div>
           </div>
-
           <div className="flex gap-4">
             <Label>Mode of Medicine?</Label>
             <div className="flex items-center gap-3">
@@ -91,9 +90,8 @@ export const AddMedicineModal = ({ open, onClose }) => {
               <Label>Donation</Label>
             </div>
           </div>
-
           <div>
-            <Label>Date</Label>
+            <Label>Purchase Date</Label>
             <Datepicker
               id="distributionDate"
               className="custom-datepicker"
@@ -171,7 +169,45 @@ export const AddMedicineModal = ({ open, onClose }) => {
               value={medicineData.lowStockWarning}
             />
           </div>
-
+          <div>
+            <Label>Medicine ID</Label>
+            <input
+              type="text"
+              className="w-full border rounded-lg p-2.5 text-sm border-gray-300"
+            />
+          </div>
+          <div>
+            <Label>Expiry Date</Label>
+            <Datepicker
+              id="distributionDate"
+              className="custom-datepicker"
+              defaultDate={new Date()}
+            />
+          </div>
+          <div>
+            <Label>Medicine Type</Label>
+            <select className="w-full border rounded-lg p-2.5 text-sm border-gray-300">
+              <option>Tablet</option>
+              <option>Syrup</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div>
+            <Label>Quantity</Label>
+            <input
+              type="number"
+              min="0"
+              className="w-full border rounded-lg p-2.5 text-sm border-gray-300"
+            />
+          </div>
+          <div>
+            <Label>Medicine Name</Label>
+            <input
+              type="search"
+              placeholder="search"
+              className="w-full border rounded-lg p-2.5 text-sm border-gray-300"
+            />
+          </div>
           <div>
             <Label>Cost</Label>
             <input
@@ -185,7 +221,6 @@ export const AddMedicineModal = ({ open, onClose }) => {
               <p className="text-red-500 text-xs mt-1">{errors.cost}</p>
             )}
           </div>
-
           <div>
             <Label>Batch No</Label>
             <input

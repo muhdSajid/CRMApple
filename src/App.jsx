@@ -11,6 +11,7 @@ import FaqPage from "./components/faq/Faq";
 import UserGuide from "./components/common/userGuide/UserGuide";
 import LoginPage from "./components/auth/Login";
 import SignupPage from "./components/auth/Signup";
+import UserManagement from "./components/usermanagment/UserManagment";
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
           <Route path="/helpcenter" element={<HelpCenter />} />
           <Route path="/faq" element={<FaqPage />} />
           <Route path="/userguide" element={<UserGuide />} />
+          <Route path="/usermanagment" element={<UserManagement />} />
         </Route>
       </Routes>
     </Router>
