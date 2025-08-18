@@ -1,3 +1,67 @@
 @import "tailwindcss";
 @plugin "flowbite-react/plugin/tailwindcss";
 @source "../.flowbite-react/class-list.json";
+
+@layer base {
+  [role="tab"] {
+    @apply cursor-pointer;
+  }
+}
+@layer base {
+  button,
+  [role="button"] {
+    @apply cursor-pointer;
+  }
+}
+
+/* @layer base {
+  body {
+    @apply font-serif;
+  }
+} */
+@layer base {
+  select {
+    @apply cursor-pointer;
+  }
+  label {
+    @apply cursor-pointer;
+  }
+}
+
+@layer base {
+  input[type="radio"] {
+    @apply cursor-pointer;
+  }
+
+  label:has(input[type="radio"]) {
+    @apply cursor-pointer;
+  }
+}
+
+/* Remove eye icon from Chrome, Edge, Safari */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+
+input[type="password"]::-webkit-credentials-auto-fill-button,
+input[type="password"]::-webkit-password-toggle-button,
+input[type="password"]::-webkit-clear-button {
+  display: none !important;
+}
+
+input[type="password"] {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.custom-datepicker input[type="text"] {
+  @apply bg-white rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none cursor-pointer;
+}
+
+.custom-datepicker .mt-2.flex.space-x-2 {
+  display: none !important;
+}
+
+
