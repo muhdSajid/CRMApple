@@ -3,6 +3,20 @@
 @source "../.flowbite-react/class-list.json";
 
 @layer base {
+  body {
+    font-family: "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+  
+  * {
+    font-family: "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+  
+  input, textarea, select, button {
+    font-family: "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+}
+
+@layer base {
   [role="tab"] {
     @apply cursor-pointer;
   }

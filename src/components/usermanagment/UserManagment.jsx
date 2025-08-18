@@ -296,21 +296,6 @@ const UserManagement = () => {
         >
           Add User
         </Button>
-        <Button
-          size="xs"
-          onClick={() => dispatch(fetchUsers())}
-          disabled={isLoading}
-          className="bg-white text-[#2D506B] hover:bg-blue-50 border border-[#2D506B] font-medium rounded-lg text-sm px-5 py-2.5"
-        >
-          {isLoading ? (
-            <>
-              <Spinner size="sm" className="mr-2" />
-              Refreshing...
-            </>
-          ) : (
-            'Refresh'
-          )}
-        </Button>
       </div>
       <div className="bg-white rounded-xl p-16 shadow ">
         <h2 className="text-2xl font-bold mb-4">User Management</h2>
