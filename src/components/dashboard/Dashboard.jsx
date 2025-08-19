@@ -64,34 +64,6 @@ const Dashboard = () => {
             selectedLocationId={selectedLocationId}
           />
         </div>
-
-        {selectedLocation && (
-          <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
-            <h4 className="text-lg font-semibold text-gray-800 mb-3">
-              📍 {selectedLocation.locationName} - Detailed View
-            </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="bg-white p-4 rounded-lg shadow-sm border-l-4 border-blue-500">
-                <div className="text-sm text-gray-600">Out of Stock</div>
-                <div className="text-2xl font-bold text-blue-700">{selectedLocation.outOfStockCount}</div>
-                <div className="text-xs text-gray-500">Items</div>
-              </div>
-              <div className="bg-white p-4 rounded-lg shadow-sm border-l-4 border-red-500">
-                <div className="text-sm text-gray-600">Expired</div>
-                <div className="text-2xl font-bold text-red-700">{selectedLocation.expiredCount}</div>
-                <div className="text-xs text-gray-500">Items</div>
-              </div>
-              <div className="bg-white p-4 rounded-lg shadow-sm border-l-4 border-orange-500">
-                <div className="text-sm text-gray-600">Near Expiry</div>
-                <div className="text-2xl font-bold text-orange-700">{selectedLocation.nearExpiryCount}</div>
-                <div className="text-xs text-gray-500">Items</div>
-              </div>
-            </div>
-            <div className="mt-3 text-xs text-gray-600">
-              📅 Last Updated: {new Date(selectedLocation.lastUpdated).toLocaleString()}
-            </div>
-          </div>
-        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -100,7 +72,10 @@ const Dashboard = () => {
             <div className="border-b-2 border-gray-200 pb-2 mb-2">
               <h3 className="text-xl font-semibold">Purchase Analytics</h3>
             </div>
-            <PurchaseAnalytics />
+            <PurchaseAnalytics 
+              selectedLocationId={selectedLocationId} 
+              selectedLocation={selectedLocation} 
+            />
           </div>
 
           <div className="bg-white rounded-2xl shadow p-4">
