@@ -8,20 +8,21 @@ import {
   Datepicker,
 } from "flowbite-react";
 import { validateAddMedicine } from "../../utils/validate";
-import { getMedicineTypes } from "../../service/apiService";
+import { getMedicineTypes, addMedicine } from "../../service/apiService";
 
 export const AddMedicineModal = ({ open, onClose }) => {
   const [medicineData, setMedicineData] = useState({
-    modeOfMedicine: "purchased",
     medicineName: "",
-    medicineType: "Tablet",
-    lowStockWarning: 0,
+    typeId: 1,
+    stockThreshold: 0,
   });
   const [errors, setErrors] = useState({
     medicineName: "",
+    stockThreshold: "",
   });
   const [medicineTypes, setMedicineTypes] = useState([]);
   const [loadingTypes, setLoadingTypes] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Fetch medicine types when component mounts
   useEffect(() => {
@@ -34,7 +35,7 @@ export const AddMedicineModal = ({ open, onClose }) => {
         if (types && types.length > 0) {
           setMedicineData(prev => ({
             ...prev,
-            medicineType: types[0].typeName
+            typeId: types[0].id
           }));
         }
       } catch (error) {
@@ -55,18 +56,53 @@ export const AddMedicineModal = ({ open, onClose }) => {
     }
   }, [open]);
   const handleChange = (e) => {
-    if (e.target.type == "radio") {
-      setMedicineData({ ...medicineData, [e.target.name]: e.target.id });
-    } else {
-      setMedicineData({ ...medicineData, [e.target.id]: e.target.value });
+    const { id, value } = e.target;
+    let processedValue = value;
+
+    // Convert typeId to number and stockThreshold to number
+    if (id === 'typeId') {
+      processedValue = parseInt(value, 10);
+    } else if (id === 'stockThreshold') {
+      processedValue = parseInt(value, 10) || 0;
+    }
+
+    setMedicineData({ ...medicineData, [id]: processedValue });
+
+    // Clear error when user starts typing
+    if (errors[id]) {
+      setErrors({ ...errors, [id]: "" });
     }
   };
-  const handleSubmit = () => {
+
+  const handleSubmit = async () => {
     const validationErrors = validateAddMedicine(medicineData);
     setErrors(validationErrors);
+    
     if (Object.keys(validationErrors).length === 0) {
-      console.log("medicineData", medicineData);
-      // proceed with API call
+      try {
+        setIsSubmitting(true);
+        await addMedicine(medicineData);
+        
+        // Reset form data
+        setMedicineData({
+          medicineName: "",
+          typeId: medicineTypes.length > 0 ? medicineTypes[0].id : 1,
+          stockThreshold: 0,
+        });
+        setErrors({
+          medicineName: "",
+          stockThreshold: "",
+        });
+        
+        // Close modal and show success message
+        onClose();
+        alert('Medicine added successfully!'); // You can replace this with a toast notification
+      } catch (error) {
+        console.error('Error adding medicine:', error);
+        alert('Failed to add medicine. Please try again.'); // You can replace this with a toast notification
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
   return (
@@ -93,16 +129,16 @@ export const AddMedicineModal = ({ open, onClose }) => {
             <Label>Medicine Type</Label>
             <select
               className="w-full border rounded-lg p-2.5 text-sm border-gray-300"
-              id="medicineType"
+              id="typeId"
               onChange={handleChange}
-              value={medicineData.medicineType}
+              value={medicineData.typeId}
               disabled={loadingTypes}
             >
               {loadingTypes ? (
                 <option>Loading...</option>
               ) : (
                 medicineTypes.map((type) => (
-                  <option key={type.id} value={type.typeName}>
+                  <option key={type.id} value={type.id}>
                     {type.typeName}
                   </option>
                 ))
@@ -114,15 +150,19 @@ export const AddMedicineModal = ({ open, onClose }) => {
           </div>
 
           <div>
-            <Label>Low Stock Warning</Label>
+            <Label>Stock Threshold</Label>
             <input
               type="number"
               min="0"
               className="w-full border rounded-lg p-2.5 text-sm border-gray-300"
-              id="lowStockWarning"
+              id="stockThreshold"
               onChange={handleChange}
-              value={medicineData.lowStockWarning}
+              value={medicineData.stockThreshold}
+              placeholder="Enter minimum stock level"
             />
+            {errors.stockThreshold && (
+              <p className="text-red-500 text-xs mt-1">{errors.stockThreshold}</p>
+            )}
           </div>
         </form>
       </ModalBody>
@@ -130,14 +170,16 @@ export const AddMedicineModal = ({ open, onClose }) => {
         <Button
           className="bg-white  px-2 py-1 h-8 text-[#2D506B] hover:bg-blue-50 border border-[#2D506B]  "
           onClick={onClose}
+          disabled={isSubmitting}
         >
           Cancel
         </Button>
         <Button
-          className="text-xs px-2 py-1 h-8 bg-sky-800 hover:bg-sky-900"
+          className="text-xs px-2 py-1 h-8 bg-sky-800 hover:bg-sky-900 disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={handleSubmit}
+          disabled={isSubmitting}
         >
-          Add Medicine
+          {isSubmitting ? 'Adding...' : 'Add Medicine'}
         </Button>
       </div>
     </Modal>

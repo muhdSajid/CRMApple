@@ -44,16 +44,8 @@ export const validateAddMedicine = (values) => {
     errors.medicineName = requiredVal;
   }
 
-  if (!values.medicineId.trim()) {
-    errors.medicineId = requiredVal;
-  }
-
-  if (!values.cost.trim()) {
-    errors.cost = requiredVal;
-  }
-
-  if (!values.batchNo.trim()) {
-    errors.batchNo = requiredVal;
+  if (!values.stockThreshold || values.stockThreshold < 0) {
+    errors.stockThreshold = "Stock threshold must be a positive number";
   }
 
   return errors;

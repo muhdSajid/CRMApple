@@ -29,6 +29,16 @@ export const getMedicineTypes = async () => {
   }
 };
 
+export const addMedicine = async (medicineData) => {
+  try {
+    const response = await post(`${apiDomain}/api/v1/medicines`, medicineData);
+    return response.data;
+  } catch (error) {
+    console.error('Error adding medicine:', error);
+    throw error;
+  }
+};
+
 const _fetch = async (url, method, data = null, props, token = null) => {
   let userToken;
   if (token !== null) {
