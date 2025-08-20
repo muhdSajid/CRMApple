@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getUserToken } from "./authService";
+import { getUserToken, getUserId } from "./authService";
 
 // Create axios instance with better configuration for CORS
 const api = axios.create({
@@ -13,22 +13,32 @@ const api = axios.create({
   withCredentials: false,
 });
 
-// Request interceptor to add auth token
+// Request interceptor to add auth token and user_id header
 api.interceptors.request.use(
   (config) => {
     const userToken = getUserToken();
+    const userId = getUserId();
     
     console.log('=== API REQUEST DEBUG ===');
     console.log('URL:', config.baseURL + config.url);
     console.log('Method:', config.method?.toUpperCase());
     console.log('Has userToken:', !!userToken);
     console.log('Token value:', userToken?.token ? `${userToken.token.substring(0, 20)}...` : 'No token');
+    console.log('User ID:', userId);
     
     if (userToken && userToken.token) {
       config.headers.Authorization = `Bearer ${userToken.token}`;
       console.log('Authorization header set');
     } else {
       console.log('No authorization header - no token available');
+    }
+
+    // Add user_id header if available
+    if (userId) {
+      config.headers.user_id = userId;
+      console.log('user_id header set:', userId);
+    } else {
+      console.log('No user_id header - no user ID available');
     }
     
     console.log('Final headers:', config.headers);

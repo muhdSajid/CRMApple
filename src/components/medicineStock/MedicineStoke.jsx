@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Tabs,
   TabItem,
@@ -18,117 +18,188 @@ import FilterPopover from "../common/Filter";
 import PaginationComponant from "../common/Pagination";
 import ViewStock from "./ViewStock";
 import { AddMedicineModal } from "./AddMedicineModal";
+import { get } from "../../service/apiService";
+import { apiDomain } from "../../constants/constants";
 
 const MedicineStock = () => {
-  const data = [
-    {
-      name: "Blood Lancet",
-      id: "A3256FD6974B",
-      type: "Other",
-      batches: "02",
-      updatedBy: "Arvind Jain",
-      updatedDate: "10-04-2024",
-      stockStatus: "Out of Stock",
-      stockColor: "text-red-600",
-      stockBg: "bg-red-100",
-      stockCount: "12/200",
-      expiryStatus: "",
-      expiryBg: "",
-    },
-    {
-      name: "Aldine Ointment",
-      id: "A3256FD6974B",
-      type: "Inj",
-      batches: "27",
-      updatedBy: "Deepak Lohani",
-      updatedDate: "10-04-2024",
-      stockStatus: "In Stock",
-      stockColor: "text-green-600",
-      stockBg: "bg-green-100",
-      stockCount: "",
-      expiryStatus: "07/100 Expired",
-      expiryBg: "bg-red-200",
-    },
-    {
-      name: "Blood Lancet",
-      id: "A3256FD6974B",
-      type: "Other",
-      batches: "02",
-      updatedBy: "Arvind Jain",
-      updatedDate: "10-04-2024",
-      stockStatus: "Out of Stock",
-      stockColor: "text-red-600",
-      stockBg: "bg-red-100",
-      stockCount: "12/200",
-      expiryStatus: "",
-      expiryBg: "",
-    },
-    {
-      name: "Aldine Ointment",
-      id: "A3256FD6974B",
-      type: "Inj",
-      batches: "27",
-      updatedBy: "Deepak Lohani",
-      updatedDate: "10-04-2024",
-      stockStatus: "In Stock",
-      stockColor: "text-green-600",
-      stockBg: "bg-green-100",
-      stockCount: "",
-      expiryStatus: "07/100 Expired",
-      expiryBg: "bg-red-200",
-    },
-    {
-      name: "Blood Lancet",
-      id: "A3256FD6974B",
-      type: "Other",
-      batches: "02",
-      updatedBy: "Arvind Jain",
-      updatedDate: "10-04-2024",
-      stockStatus: "Out of Stock",
-      stockColor: "text-red-600",
-      stockBg: "bg-red-100",
-      stockCount: "12/200",
-      expiryStatus: "",
-      expiryBg: "",
-    },
-    {
-      name: "Aldine Ointment",
-      id: "A3256FD6974B",
-      type: "Inj",
-      batches: "27",
-      updatedBy: "Deepak Lohani",
-      updatedDate: "10-04-2024",
-      stockStatus: "In Stock",
-      stockColor: "text-green-600",
-      stockBg: "bg-green-100",
-      stockCount: "",
-      expiryStatus: "07/100 Expired",
-      expiryBg: "bg-red-200",
-    },
-    // Add the remaining entries following the above format
-  ];
   const [isOpen, setIsOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [locations, setLocations] = useState([]);
+  const [selectedLocationId, setSelectedLocationId] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [medicineData, setMedicineData] = useState([]);
+  const [medicineLoading, setMedicineLoading] = useState(false);
+  const [medicineError, setMedicineError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Fetch locations on component mount
+  useEffect(() => {
+    const fetchLocations = async () => {
+      try {
+        setLoading(true);
+        const url = `${apiDomain}/api/v1/locations`;
+        const response = await get(url);
+        setLocations(response.data);
+        
+        // Set first active location as default
+        const activeLocations = response.data.filter(loc => loc.isActive);
+        if (activeLocations.length > 0) {
+          setSelectedLocationId(activeLocations[0].id);
+        }
+        
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching locations:', err);
+        setError(err.message || 'Failed to fetch locations');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLocations();
+  }, []);
+
+  // Fetch medicine data when location changes
+  useEffect(() => {
+    const fetchMedicineData = async () => {
+      if (!selectedLocationId) return;
+
+      try {
+        setMedicineLoading(true);
+        const url = `${apiDomain}/api/v1/medicine-list/location/${selectedLocationId}`;
+        const response = await get(url);
+        setMedicineData(response.data);
+        setMedicineError(null);
+      } catch (err) {
+        console.error('Error fetching medicine data:', err);
+        setMedicineError(err.message || 'Failed to fetch medicine data');
+      } finally {
+        setMedicineLoading(false);
+      }
+    };
+
+    fetchMedicineData();
+  }, [selectedLocationId]);
+
+  const handleTabClick = (locationId) => {
+    setSelectedLocationId(locationId);
+  };
+
+  // Helper function to get stock status styling
+  const getStockStatusStyling = (stockStatus) => {
+    switch (stockStatus) {
+      case 'Out of Stock':
+        return {
+          color: 'text-red-600',
+          bg: 'bg-red-100'
+        };
+      case 'In Stock':
+        return {
+          color: 'text-green-600',
+          bg: 'bg-green-100'
+        };
+      case 'Low Stock':
+        return {
+          color: 'text-orange-600',
+          bg: 'bg-orange-100'
+        };
+      default:
+        return {
+          color: 'text-gray-600',
+          bg: 'bg-gray-100'
+        };
+    }
+  };
+
+  // Filter medicine data based on search term
+  const filteredMedicineData = medicineData.filter(item =>
+    item.medicineName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.medicineTypeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.stockStatus.toLowerCase().includes(searchTerm.toLowerCase())
+  );
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <div className="bg-white rounded-xl p-6 shadow">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold">Medicine Stock List</h2>
+          {selectedLocationId && locations.length > 0 && !loading && (
+            <div className="text-sm text-gray-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
+              Selected: <span className="font-semibold text-blue-700">
+                {locations.find(loc => loc.id === selectedLocationId)?.name || 'Unknown Location'}
+              </span>
+            </div>
+          )}
         </div>
 
         <Tabs variant="default">
-          <TabItem active title="Bangalore" />
-          <TabItem title="Mangaluru" />
-          <TabItem title="Udupi" />
-          <TabItem title="Hassan" />
+          {loading ? (
+            <TabItem title="Loading..." />
+          ) : error ? (
+            <TabItem title="Error loading locations" />
+          ) : locations.length > 0 ? (
+            locations
+              .filter(location => location.isActive)
+              .map((location) => (
+                <TabItem
+                  key={location.id}
+                  active={selectedLocationId === location.id}
+                  title={location.name}
+                  onClick={() => handleTabClick(location.id)}
+                />
+              ))
+          ) : (
+            <TabItem title="No locations available" />
+          )}
         </Tabs>
 
+        {error && (
+          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
+            <p className="text-sm text-red-700">
+              ⚠️ Error loading locations: {error}
+            </p>
+          </div>
+        )}
+
+        {loading && (
+          <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-md">
+            <p className="text-sm text-gray-600">
+              🔄 Loading locations...
+            </p>
+          </div>
+        )}
+
+        {medicineLoading && (
+          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+            <p className="text-sm text-blue-600">
+              🔄 Loading medicine data...
+            </p>
+          </div>
+        )}
+
+        {medicineError && (
+          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
+            <p className="text-sm text-red-700">
+              ⚠️ Error loading medicine data: {medicineError}
+            </p>
+          </div>
+        )}
+
         <div className="flex justify-between items-center mt-4">
-          <input
-            type="text"
-            placeholder="Search..."
-            className="border px-3 py-2 border-gray-300 rounded-md w-1/4 text-sm focus:outline-none focus:ring-0 focus:border-gray-300"
-          />
+          <div className="flex items-center gap-4">
+            <input
+              type="text"
+              placeholder="Search medicines..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="border px-3 py-2 border-gray-300 rounded-md w-64 text-sm focus:outline-none focus:ring-0 focus:border-gray-300"
+            />
+            {!medicineLoading && !medicineError && (
+              <span className="text-sm text-gray-600">
+                Showing {filteredMedicineData.length} of {medicineData.length} medicines
+              </span>
+            )}
+          </div>
 
           <div className="flex gap-2">
             <Button
@@ -166,49 +237,82 @@ const MedicineStock = () => {
               </TableRow>
             </TableHead>
             <TableBody className="divide-y">
-              {data.map((item, index) => (
-                <TableRow key={index}>
-                  <TableCell>{item.name}</TableCell>
-                  <TableCell>{item.id}</TableCell>
-                  <TableCell>{item.type}</TableCell>
-                  <TableCell>{item.batches}</TableCell>
-                  <TableCell>{item.updatedBy}</TableCell>
-                  <TableCell>{item.updatedDate}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      {item.stockStatus && (
-                        <span className={`${item.stockColor} text-sm`}>
-                          {item.stockStatus}
-                        </span>
-                      )}
-                      {item.stockCount && (
-                        <span className="bg-red-600 text-white px-2 py-0.5 rounded text-xs">
-                          {item.stockCount}
-                        </span>
-                      )}
+              {medicineLoading ? (
+                <TableRow>
+                  <TableCell colSpan={9} className="text-center py-8">
+                    <div className="flex items-center justify-center">
+                      <span className="text-gray-500">Loading medicine data...</span>
                     </div>
                   </TableCell>
-                  <TableCell>
-                    {item.expiryStatus && (
-                      <span
-                        className={`${item.expiryBg} text-xs px-2 py-1 rounded-full`}
-                      >
-                        {item.expiryStatus}
-                      </span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <button className="flex text-base font-medium">
-                      <Tooltip content="Edit Stock">
-                        <MdEdit />
-                      </Tooltip>
-                      <Tooltip content="View Stock">
-                        <IoEyeOutline onClick={() => setIsOpen(true)} />
-                      </Tooltip>
-                    </button>
+                </TableRow>
+              ) : medicineError ? (
+                <TableRow>
+                  <TableCell colSpan={9} className="text-center py-8">
+                    <div className="flex items-center justify-center">
+                      <span className="text-red-500">Error loading medicine data</span>
+                    </div>
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : filteredMedicineData.length === 0 && searchTerm ? (
+                <TableRow>
+                  <TableCell colSpan={9} className="text-center py-8">
+                    <div className="flex items-center justify-center">
+                      <span className="text-gray-500">No medicines found matching "{searchTerm}"</span>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : medicineData.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={9} className="text-center py-8">
+                    <div className="flex items-center justify-center">
+                      <span className="text-gray-500">No medicine data available for this location</span>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredMedicineData.map((item, index) => {
+                  const stockStyling = getStockStatusStyling(item.stockStatus);
+                  return (
+                    <TableRow key={`${item.medicineId}-${index}`}>
+                      <TableCell>{item.medicineName}</TableCell>
+                      <TableCell>{item.medicineId}</TableCell>
+                      <TableCell>{item.medicineTypeName}</TableCell>
+                      <TableCell>{item.numberOfBatches}</TableCell>
+                      <TableCell>-</TableCell>
+                      <TableCell>-</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <span className={`${stockStyling.color} text-sm`}>
+                            {item.stockStatus}
+                          </span>
+                          {item.totalNumberOfMedicines > 0 && (
+                            <span className="bg-blue-600 text-white px-2 py-0.5 rounded text-xs">
+                              Total: {item.totalNumberOfMedicines}
+                            </span>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {item.hasExpiredBatches && item.numberOfMedExpired > 0 && (
+                          <span className="bg-red-200 text-xs px-2 py-1 rounded-full">
+                            {item.numberOfMedExpired} Expired
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <button className="flex text-base font-medium">
+                          <Tooltip content="Edit Stock">
+                            <MdEdit />
+                          </Tooltip>
+                          <Tooltip content="View Stock">
+                            <IoEyeOutline onClick={() => setIsOpen(true)} />
+                          </Tooltip>
+                        </button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
             </TableBody>
           </Table>
         </div>

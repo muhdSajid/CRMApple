@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import profilePic from "../Assets/download.jpeg";
 import { logoutUser } from "../store/authSlice";
+import { getUserFullName } from "../service/authService";
 
 const Navbar = () => {
   const [showMenu, setShowMenu] = useState(false);
@@ -43,7 +44,7 @@ const Navbar = () => {
               />
               <div className="text-left">
                 <div className="text-sm font-medium text-gray-900">
-                  {user?.name || user?.email || "User"}
+                  {getUserFullName()}
                 </div>
                 <div className="text-xs text-gray-500">
                   {user?.email || "@user"}
