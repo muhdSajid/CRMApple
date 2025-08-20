@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Modal,
   Button,
@@ -8,26 +8,52 @@ import {
   Datepicker,
 } from "flowbite-react";
 import { validateAddMedicine } from "../../utils/validate";
+import { getMedicineTypes } from "../../service/apiService";
 
 export const AddMedicineModal = ({ open, onClose }) => {
   const [medicineData, setMedicineData] = useState({
-    existingBatch: "yes",
     modeOfMedicine: "purchased",
-    date: new Date(),
     medicineName: "",
-    medicineId: "",
     medicineType: "Tablet",
-    quantity: 0,
     lowStockWarning: 0,
-    cost: "",
-    batchNo: "",
   });
   const [errors, setErrors] = useState({
     medicineName: "",
-    medicineId: "",
-    cost: "",
-    batchNo: "",
   });
+  const [medicineTypes, setMedicineTypes] = useState([]);
+  const [loadingTypes, setLoadingTypes] = useState(true);
+
+  // Fetch medicine types when component mounts
+  useEffect(() => {
+    const fetchMedicineTypes = async () => {
+      try {
+        setLoadingTypes(true);
+        const types = await getMedicineTypes();
+        setMedicineTypes(types);
+        // Set first type as default if available
+        if (types && types.length > 0) {
+          setMedicineData(prev => ({
+            ...prev,
+            medicineType: types[0].typeName
+          }));
+        }
+      } catch (error) {
+        console.error('Failed to fetch medicine types:', error);
+        // Fallback to hardcoded types if API fails
+        setMedicineTypes([
+          { id: 1, typeName: "Tablet", description: "Tablet form medicine" },
+          { id: 2, typeName: "Syrup", description: "Liquid form medicine" },
+          { id: 3, typeName: "Other", description: "Other forms of medicine" }
+        ]);
+      } finally {
+        setLoadingTypes(false);
+      }
+    };
+
+    if (open) {
+      fetchMedicineTypes();
+    }
+  }, [open]);
   const handleChange = (e) => {
     if (e.target.type == "radio") {
       setMedicineData({ ...medicineData, [e.target.name]: e.target.id });
@@ -48,87 +74,18 @@ export const AddMedicineModal = ({ open, onClose }) => {
       <ModalHeader>Add Medicine</ModalHeader>
       <ModalBody>
         <form className="grid grid-cols-2 gap-6 mx-5 mt-3">
-          <div className="flex gap-4">
-            <Label>Add medicine to existing batch no?</Label>
-            <div className="flex items-center gap-3">
-              <input
-                type="radio"
-                name="existingBatch"
-                id="yes"
-                onChange={handleChange}
-                checked={medicineData.existingBatch == "yes"}
-              />
-              <Label>Yes</Label>
-              <input
-                type="radio"
-                name="existingBatch"
-                id="no"
-                onChange={handleChange}
-                checked={medicineData.existingBatch == "no"}
-              />
-              <Label>No</Label>
-            </div>
-          </div>
-          <div className="flex gap-4">
-            <Label>Mode of Medicine?</Label>
-            <div className="flex items-center gap-3">
-              <input
-                type="radio"
-                name="modeOfMedicine"
-                id="purchased"
-                onChange={handleChange}
-                checked={medicineData.modeOfMedicine == "purchased"}
-              />
-              <Label>Purchased</Label>
-              <input
-                type="radio"
-                name="modeOfMedicine"
-                id="donation"
-                onChange={handleChange}
-                checked={medicineData.modeOfMedicine == "donation"}
-              />
-              <Label>Donation</Label>
-            </div>
-          </div>
-          <div>
-            <Label>Purchase Date</Label>
-            <Datepicker
-              id="distributionDate"
-              className="custom-datepicker"
-              defaultDate={new Date()}
-              onChange={handleChange}
-            />
-          </div>
-
           <div>
             <Label>Medicine Name</Label>
-            <select
+            <input
+              type="text"
               className="w-full border rounded-lg p-2.5 text-sm border-gray-300"
               onChange={handleChange}
               id="medicineName"
               value={medicineData.medicineName}
-            >
-              <option value="">Select</option>
-              <option value="Paracetamol">Paracetamol</option>
-              <option value="Ibuprofen">Ibuprofen</option>
-              <option value="Amoxicillin">Amoxicillin</option>
-            </select>
+              placeholder="Enter medicine name"
+            />
             {errors.medicineName && (
               <p className="text-red-500 text-xs mt-1">{errors.medicineName}</p>
-            )}
-          </div>
-
-          <div>
-            <Label>Medicine ID</Label>
-            <input
-              type="text"
-              id="medicineId"
-              className="w-full border rounded-lg p-2.5 text-sm border-gray-300"
-              onChange={handleChange}
-              value={medicineData.medicineId}
-            />
-            {errors.medicineId && (
-              <p className="text-red-500 text-xs mt-1">{errors.medicineId}</p>
             )}
           </div>
 
@@ -139,23 +96,21 @@ export const AddMedicineModal = ({ open, onClose }) => {
               id="medicineType"
               onChange={handleChange}
               value={medicineData.medicineType}
+              disabled={loadingTypes}
             >
-              <option>Tablet</option>
-              <option>Syrup</option>
-              <option>Other</option>
+              {loadingTypes ? (
+                <option>Loading...</option>
+              ) : (
+                medicineTypes.map((type) => (
+                  <option key={type.id} value={type.typeName}>
+                    {type.typeName}
+                  </option>
+                ))
+              )}
             </select>
-          </div>
-
-          <div>
-            <Label>Quantity</Label>
-            <input
-              type="number"
-              min="0"
-              className="w-full border rounded-lg p-2.5 text-sm border-gray-300"
-              id="quantity"
-              onChange={handleChange}
-              value={medicineData.quantity}
-            />
+            {loadingTypes && (
+              <p className="text-gray-500 text-xs mt-1">Loading medicine types...</p>
+            )}
           </div>
 
           <div>
@@ -168,71 +123,6 @@ export const AddMedicineModal = ({ open, onClose }) => {
               onChange={handleChange}
               value={medicineData.lowStockWarning}
             />
-          </div>
-          <div>
-            <Label>Medicine ID</Label>
-            <input
-              type="text"
-              className="w-full border rounded-lg p-2.5 text-sm border-gray-300"
-            />
-          </div>
-          <div>
-            <Label>Expiry Date</Label>
-            <Datepicker
-              id="distributionDate"
-              className="custom-datepicker"
-              defaultDate={new Date()}
-            />
-          </div>
-          <div>
-            <Label>Medicine Type</Label>
-            <select className="w-full border rounded-lg p-2.5 text-sm border-gray-300">
-              <option>Tablet</option>
-              <option>Syrup</option>
-              <option>Other</option>
-            </select>
-          </div>
-          <div>
-            <Label>Quantity</Label>
-            <input
-              type="number"
-              min="0"
-              className="w-full border rounded-lg p-2.5 text-sm border-gray-300"
-            />
-          </div>
-          <div>
-            <Label>Medicine Name</Label>
-            <input
-              type="search"
-              placeholder="search"
-              className="w-full border rounded-lg p-2.5 text-sm border-gray-300"
-            />
-          </div>
-          <div>
-            <Label>Cost</Label>
-            <input
-              type="text"
-              className="w-full border rounded-lg p-2.5 text-sm border-gray-300"
-              id="cost"
-              onChange={handleChange}
-              value={medicineData.cost}
-            />
-            {errors.cost && (
-              <p className="text-red-500 text-xs mt-1">{errors.cost}</p>
-            )}
-          </div>
-          <div>
-            <Label>Batch No</Label>
-            <input
-              type="text"
-              className="w-full border rounded-lg p-2.5 text-sm border-gray-300"
-              id="batchNo"
-              onChange={handleChange}
-              value={medicineData.batchNo}
-            />
-            {errors.batchNo && (
-              <p className="text-red-500 text-xs mt-1">{errors.batchNo}</p>
-            )}
           </div>
         </form>
       </ModalBody>

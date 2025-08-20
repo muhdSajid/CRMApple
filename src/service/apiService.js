@@ -6,6 +6,29 @@ export const get = (url, props) => _fetch(url, "GET", null, props);
 export const post = (url, data, props, token) =>
   _fetch(url, "POST", data, props, token);
 
+// Cache for medicine types to avoid frequent API calls
+let medicineTypesCache = null;
+let cacheTimestamp = null;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
+
+export const getMedicineTypes = async () => {
+  // Check if cache is valid
+  if (medicineTypesCache && cacheTimestamp && 
+      (Date.now() - cacheTimestamp < CACHE_DURATION)) {
+    return medicineTypesCache;
+  }
+
+  try {
+    const response = await get(`${apiDomain}/api/v1/medicine-types`);
+    medicineTypesCache = response.data;
+    cacheTimestamp = Date.now();
+    return medicineTypesCache;
+  } catch (error) {
+    console.error('Error fetching medicine types:', error);
+    throw error;
+  }
+};
+
 const _fetch = async (url, method, data = null, props, token = null) => {
   let userToken;
   if (token !== null) {
