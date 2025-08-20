@@ -243,10 +243,10 @@ const PurchaseAnalytics = ({ selectedLocationId, selectedLocation }) => {
           <p className="text-sm text-gray-500">spent this year</p>
         </div>
         <div className="flex items-center justify-end gap-2">
-          <FilterPopover />
+          {/* <FilterPopover /> */}
           <select className="border border-gray-300 rounded-md px-3 py-1.5 text-sm">
-            <option>This Month</option>
-            <option>Last Month</option>
+            <option>This Year</option>
+            <option>Last Year</option>
           </select>
         </div>
       </div>

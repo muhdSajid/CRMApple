@@ -91,6 +91,21 @@ const Dashboard = () => {
             <h3 className="text-xl font-semibold">Expense Report</h3>
           </div>
 
+          {!selectedLocationId && (
+            <div className="mb-4 p-2 bg-yellow-50 border border-yellow-200 rounded-md">
+              <p className="text-sm text-yellow-700">
+                📍 Select a location from above to view specific expense report, or viewing default data
+              </p>
+            </div>
+          )}
+          {selectedLocationId && selectedLocation && (
+            <div className="mb-4 p-2 bg-blue-50 border border-blue-200 rounded-md">
+              <p className="text-sm text-blue-700">
+                📍 Showing expense report for <span className="font-semibold">{selectedLocation.locationName}</span>
+              </p>
+            </div>
+          )}
+
           <div className="flex items-center justify-end gap-2 mb-4">
             <FilterPopover />
             <select className="border border-gray-300 rounded-md px-3 py-1.5 text-sm">
@@ -99,7 +114,10 @@ const Dashboard = () => {
             </select>
           </div>
 
-          <ExpensesReport />
+          <ExpensesReport 
+            selectedLocationId={selectedLocationId} 
+            selectedLocation={selectedLocation} 
+          />
         </div>
       </div>
 
