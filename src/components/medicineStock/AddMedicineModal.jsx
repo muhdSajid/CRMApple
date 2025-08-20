@@ -10,7 +10,7 @@ import {
 import { validateAddMedicine } from "../../utils/validate";
 import { getMedicineTypes, addMedicine } from "../../service/apiService";
 
-export const AddMedicineModal = ({ open, onClose }) => {
+export const AddMedicineModal = ({ open, onClose, onMedicineAdded, onShowSuccess }) => {
   const [medicineData, setMedicineData] = useState({
     medicineName: "",
     typeId: 1,
@@ -96,7 +96,16 @@ export const AddMedicineModal = ({ open, onClose }) => {
         
         // Close modal and show success message
         onClose();
-        alert('Medicine added successfully!'); // You can replace this with a toast notification
+        
+        // Show success message on parent component
+        if (onShowSuccess) {
+          onShowSuccess();
+        }
+        
+        // Trigger refresh of medicine data in parent component
+        if (onMedicineAdded) {
+          onMedicineAdded();
+        }
       } catch (error) {
         console.error('Error adding medicine:', error);
         alert('Failed to add medicine. Please try again.'); // You can replace this with a toast notification

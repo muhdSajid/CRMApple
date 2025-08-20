@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Tabs,
   TabItem,
@@ -32,6 +32,7 @@ const MedicineStock = () => {
   const [medicineLoading, setMedicineLoading] = useState(false);
   const [medicineError, setMedicineError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [showSuccess, setShowSuccess] = useState(false);
 
   // Fetch locations on component mount
   useEffect(() => {
@@ -61,29 +62,37 @@ const MedicineStock = () => {
   }, []);
 
   // Fetch medicine data when location changes
-  useEffect(() => {
-    const fetchMedicineData = async () => {
-      if (!selectedLocationId) return;
+  const fetchMedicineData = useCallback(async () => {
+    if (!selectedLocationId) return;
 
-      try {
-        setMedicineLoading(true);
-        const url = `${apiDomain}/api/v1/medicine-list/location/${selectedLocationId}`;
-        const response = await get(url);
-        setMedicineData(response.data);
-        setMedicineError(null);
-      } catch (err) {
-        console.error('Error fetching medicine data:', err);
-        setMedicineError(err.message || 'Failed to fetch medicine data');
-      } finally {
-        setMedicineLoading(false);
-      }
-    };
-
-    fetchMedicineData();
+    try {
+      setMedicineLoading(true);
+      const url = `${apiDomain}/api/v1/medicine-list/location/${selectedLocationId}`;
+      const response = await get(url);
+      setMedicineData(response.data);
+      setMedicineError(null);
+    } catch (err) {
+      console.error('Error fetching medicine data:', err);
+      setMedicineError(err.message || 'Failed to fetch medicine data');
+    } finally {
+      setMedicineLoading(false);
+    }
   }, [selectedLocationId]);
+
+  useEffect(() => {
+    fetchMedicineData();
+  }, [fetchMedicineData]);
 
   const handleTabClick = (locationId) => {
     setSelectedLocationId(locationId);
+  };
+
+  const handleShowSuccess = () => {
+    setShowSuccess(true);
+    // Auto-hide success message after 5 seconds
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 5000);
   };
 
   // Helper function to get stock status styling
@@ -185,6 +194,36 @@ const MedicineStock = () => {
           </div>
         )}
 
+        {showSuccess && (
+          <div className="mb-4 p-4 bg-green-50 border-l-4 border-green-400 rounded-md">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm font-medium text-green-800">
+                    Medicine added successfully!
+                  </p>
+                  <p className="text-xs text-green-600 mt-1">
+                    The medicine has been added to the inventory and the table has been updated.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowSuccess(false)}
+                className="text-green-400 hover:text-green-600"
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="flex justify-between items-center mt-4">
           <div className="flex items-center gap-4">
             <input
@@ -278,8 +317,17 @@ const MedicineStock = () => {
                       <TableCell>{item.medicineId}</TableCell>
                       <TableCell>{item.medicineTypeName}</TableCell>
                       <TableCell>{item.numberOfBatches}</TableCell>
-                      <TableCell>-</TableCell>
-                      <TableCell>-</TableCell>
+                      <TableCell>{item.updatedByFullName || '-'}</TableCell>
+                      <TableCell>
+                        {item.updatedAt 
+                          ? new Date(item.updatedAt).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric'
+                            })
+                          : '-'
+                        }
+                      </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <span className={`${stockStyling.color} text-sm`}>
@@ -323,6 +371,8 @@ const MedicineStock = () => {
         <AddMedicineModal
           open={isModalOpen}
           onClose={() => setIsModalOpen(false)}
+          onMedicineAdded={fetchMedicineData}
+          onShowSuccess={handleShowSuccess}
         />
       )}
     </div>
