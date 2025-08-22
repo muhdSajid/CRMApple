@@ -3,8 +3,15 @@
 @source "../.flowbite-react/class-list.json";
 
 @layer base {
+  * {
+    box-sizing: border-box;
+  }
+  
   body {
     font-family: "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
   }
   
   * {
@@ -13,6 +20,29 @@
   
   input, textarea, select, button {
     font-family: "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+}
+
+/* Prevent layout shifts and flickering */
+@layer components {
+  .page-container {
+    @apply min-h-screen w-full;
+    contain: layout style paint;
+    will-change: contents;
+  }
+  
+  .table-container {
+    contain: layout;
+    will-change: contents;
+  }
+  
+  .fade-in {
+    animation: fadeIn 0.2s ease-in-out;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
 }
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import {
@@ -16,6 +16,7 @@ import {
   Spinner,
 } from "flowbite-react";
 import { fetchUsers, addUser, fetchRoles, reset, clearError, updateUserComplete } from "../../store/usersSlice";
+import PageWrapper from "../common/PageWrapper";
 
 const UserManagement = () => {
   const [showModal, setShowModal] = useState(false);
@@ -38,41 +39,47 @@ const UserManagement = () => {
     role: '',
     isActive: true
   });
+  const [isComponentMounted, setIsComponentMounted] = useState(false);
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
   const dispatch = useDispatch();
   const { users, roles, isLoading, isError, isSuccess, message } = useSelector((state) => state.users);
 
-  // Debug users and roles when they change
+  // Debug users and roles when they change (reduced logging)
   useEffect(() => {
     if (users.length > 0) {
-      console.log('=== USERS LOADED DEBUG ===');
-      console.log('Total users:', users.length);
-      console.log('Sample user:', users[0]);
-      console.log('Sample user roles:', users[0].roles);
-      console.log('User roles in array:', users.map(u => ({ email: u.email, roles: u.roles })));
-      console.log('=========================');
+      console.log('Users loaded:', users.length, 'total');
     }
-  }, [users]);
+  }, [users.length]); // Only log when length changes
 
   useEffect(() => {
     if (roles.length > 0) {
-      console.log('=== ROLES LOADED DEBUG ===');
-      console.log('Total roles:', roles.length);
-      console.log('Sample role:', roles[0]);
-      console.log('All roles:', roles);
-      console.log('========================');
+      console.log('Roles loaded:', roles.length, 'total');
     }
-  }, [roles]);
+  }, [roles.length]); // Only log when length changes
+
+  // Track initial load completion to prevent flickering
+  useEffect(() => {
+    if (users.length > 0 && roles.length > 0 && !initialLoadComplete) {
+      setInitialLoadComplete(true);
+    }
+  }, [users.length, roles.length, initialLoadComplete]);
+
+  // Component mounting effect
+  useEffect(() => {
+    setIsComponentMounted(true);
+    return () => setIsComponentMounted(false);
+  }, []);
 
   useEffect(() => {
-    // Prevent duplicate calls in development mode
-    if (!hasInitialized) {
+    // Prevent duplicate calls in development mode and ensure component is mounted
+    if (!hasInitialized && isComponentMounted) {
       console.log('Fetching users and roles - first call only');
       dispatch(fetchUsers());
       dispatch(fetchRoles());
       setHasInitialized(true);
     }
-  }, [dispatch, hasInitialized]);
+  }, [dispatch, hasInitialized, isComponentMounted]);
 
   useEffect(() => {
     if (isError) {
@@ -228,17 +235,17 @@ const UserManagement = () => {
     setShowModal(false);
   };
 
-  const getRoleDisplayName = (userRoles) => {
-    // Debug: log actual structure
-    console.log('Role debug - userRoles:', userRoles, 'roles available:', roles.length);
+  const getRoleDisplayName = useCallback((userRoles) => {
+    // Don't log on every render to reduce console noise
+    // console.log('Role debug - userRoles:', userRoles, 'roles available:', roles.length);
     
     if (!userRoles) {
       return 'N/A';
     }
 
-    // If roles haven't loaded yet, show loading
+    // If roles haven't loaded yet, show a stable placeholder to prevent flickering
     if (!roles || roles.length === 0) {
-      return 'Loading...';
+      return '—'; // Using em dash for a cleaner look
     }
 
     // Handle array of role names (which is the actual API format)
@@ -268,7 +275,7 @@ const UserManagement = () => {
     }
 
     return 'N/A';
-  };
+  }, [roles]);
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
@@ -309,8 +316,10 @@ const UserManagement = () => {
     }
   };
 
-  // Filter and sort users
-  const getFilteredAndSortedUsers = () => {
+  // Filter and sort users with memoization to prevent flickering
+  const getFilteredAndSortedUsers = useMemo(() => {
+    if (!users || users.length === 0) return [];
+    
     let filteredUsers = [...users]; // Create a copy of the array first
 
     // Apply search filter
@@ -368,7 +377,7 @@ const UserManagement = () => {
     }
 
     return filteredUsers;
-  };
+  }, [users, searchTerm, sortConfig, getRoleDisplayName]); // Updated dependency
 
   const handleSort = (key) => {
     let direction = 'asc';
@@ -399,22 +408,23 @@ const UserManagement = () => {
   };
 
   return (
-    <div className="p-6 mx-auto">
-      <div className="bg-white rounded-xl p-16 shadow ">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold">User Management</h2>
-          <Button
-            size="sm"
-            onClick={() => setShowModal(true)}
-            disabled={isLoading}
-            className="flex items-center gap-2 text-white bg-[#2D506B] border hover:bg-sky-900 font-medium rounded-lg text-sm px-4 py-2.5"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            Add User
-          </Button>
-        </div>
+    <PageWrapper isLoading={!initialLoadComplete && isLoading}>
+      <div className="page-container p-6 mx-auto">
+        <div className="bg-white rounded-xl p-16 shadow ">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold">User Management</h2>
+            <Button
+              size="sm"
+              onClick={() => setShowModal(true)}
+              disabled={isLoading}
+              className="flex items-center gap-2 text-white bg-[#2D506B] border hover:bg-sky-900 font-medium rounded-lg text-sm px-4 py-2.5"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Add User
+            </Button>
+          </div>
 
         {/* Search Bar */}
         <div className="mb-4">
@@ -434,14 +444,14 @@ const UserManagement = () => {
           </div>
           {searchTerm && (
             <p className="text-sm text-gray-600 mt-2">
-              Showing {getFilteredAndSortedUsers().length} of {users.length} users
+              Showing {getFilteredAndSortedUsers.length} of {users.length} users
             </p>
           )}
         </div>
 
         <Table
           striped
-          className="[&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&>tbody>tr:nth-child(odd)]:bg-gray-200"
+          className="table-container [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&>tbody>tr:nth-child(odd)]:bg-gray-200"
         >
           <TableHead className="[&>tr>th]:bg-sky-900 [&>tr>th]:text-white">
             <TableRow>
@@ -494,7 +504,7 @@ const UserManagement = () => {
             </TableRow>
           </TableHead>
           <TableBody className="divide-y">
-            {isLoading ? (
+            {(isLoading && !initialLoadComplete) ? (
               <TableRow>
                 <TableCell colSpan="6" className="text-center py-8">
                   <div className="flex justify-center items-center">
@@ -503,14 +513,14 @@ const UserManagement = () => {
                   </div>
                 </TableCell>
               </TableRow>
-            ) : getFilteredAndSortedUsers().length === 0 ? (
+            ) : getFilteredAndSortedUsers.length === 0 ? (
               <TableRow>
                 <TableCell colSpan="6" className="text-center py-8 text-gray-500">
                   {searchTerm ? `No users found matching "${searchTerm}"` : 'No users found'}
                 </TableCell>
               </TableRow>
             ) : (
-              getFilteredAndSortedUsers().map((user) => (
+              getFilteredAndSortedUsers.map((user) => (
                 <TableRow key={user.id || user.email}>
                   <TableCell>
                     {user.firstName && user.lastName 
@@ -822,7 +832,8 @@ const UserManagement = () => {
           </ModalBody>
         </Modal>
       )}
-    </div>
+      </div>
+    </PageWrapper>
   );
 };
 

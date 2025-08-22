@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import {
   Table,
   TableBody,
@@ -18,6 +18,7 @@ import ViewStock from "./ViewStock";
 import { AddMedicineModal } from "./AddMedicineModal";
 import { get } from "../../service/apiService";
 import { apiDomain } from "../../constants/constants";
+import PageWrapper from "../common/PageWrapper";
 
 const MedicineStock = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -41,8 +42,23 @@ const MedicineStock = () => {
     const saved = localStorage.getItem('medicineStock_itemsPerPage');
     return saved ? parseInt(saved, 10) : 10;
   });
+  const [isComponentMounted, setIsComponentMounted] = useState(false);
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const filterButtonRef = useRef(null);
   const filterPopoverRef = useRef(null);
+
+  // Component mounting effect
+  useEffect(() => {
+    setIsComponentMounted(true);
+    return () => setIsComponentMounted(false);
+  }, []);
+
+  // Track initial load completion
+  useEffect(() => {
+    if (!loading && !medicineLoading && locations.length > 0 && isComponentMounted) {
+      setInitialLoadComplete(true);
+    }
+  }, [loading, medicineLoading, locations.length, isComponentMounted]);
 
   // Fetch locations on component mount
   useEffect(() => {
@@ -190,50 +206,65 @@ const MedicineStock = () => {
     }
   };
 
-  // Filter medicine data based on search term, stock status, and medicine type
-  const filteredMedicineData = medicineData.filter(item => {
-    const matchesSearch = item.medicineName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.medicineTypeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.stockStatus.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesStockStatus = stockStatusFilter === "" || 
-      (stockStatusFilter === "out-of-stock" && item.stockStatus === "Out of Stock") ||
-      (stockStatusFilter === "in-stock" && item.stockStatus === "In Stock") ||
-      (stockStatusFilter === "low-stock" && item.stockStatus === "Low Stock");
-    
-    const matchesMedicineType = medicineTypeFilter === "" || 
-      item.medicineTypeName.toLowerCase().includes(medicineTypeFilter.toLowerCase());
-    
-    return matchesSearch && matchesStockStatus && matchesMedicineType;
-  });
+  // Filter medicine data based on search term, stock status, and medicine type with memoization
+  const filteredMedicineData = useMemo(() => {
+    return medicineData.filter(item => {
+      const matchesSearch = item.medicineName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.medicineTypeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.stockStatus.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesStockStatus = stockStatusFilter === "" || 
+        (stockStatusFilter === "out-of-stock" && item.stockStatus === "Out of Stock") ||
+        (stockStatusFilter === "in-stock" && item.stockStatus === "In Stock") ||
+        (stockStatusFilter === "low-stock" && item.stockStatus === "Low Stock");
+      
+      const matchesMedicineType = medicineTypeFilter === "" || 
+        item.medicineTypeName.toLowerCase().includes(medicineTypeFilter.toLowerCase());
+      
+      return matchesSearch && matchesStockStatus && matchesMedicineType;
+    });
+  }, [medicineData, searchTerm, stockStatusFilter, medicineTypeFilter]);
 
-  // Get unique medicine types for filter dropdown
-  const uniqueMedicineTypes = [...new Set(medicineData.map(item => item.medicineTypeName))].filter(Boolean);
+  // Get unique medicine types for filter dropdown with memoization
+  const uniqueMedicineTypes = useMemo(() => {
+    return [...new Set(medicineData.map(item => item.medicineTypeName))].filter(Boolean);
+  }, [medicineData]);
   
-  // Calculate pagination
-  const totalItems = filteredMedicineData.length;
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const paginatedData = filteredMedicineData.slice(startIndex, endIndex);
+  // Calculate pagination with memoization
+  const { totalItems, totalPages, startIndex, endIndex, paginatedData } = useMemo(() => {
+    const totalItems = filteredMedicineData.length;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const paginatedData = filteredMedicineData.slice(startIndex, endIndex);
+    
+    return {
+      totalItems,
+      totalPages,
+      startIndex,
+      endIndex: Math.min(endIndex, totalItems),
+      paginatedData
+    };
+  }, [filteredMedicineData, currentPage, itemsPerPage]);
 
   // Reset to first page when filters change
   useEffect(() => {
     setCurrentPage(1);
   }, [stockStatusFilter, medicineTypeFilter, searchTerm]);
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <div className="bg-white rounded-xl p-6 shadow">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold">Medicine Stock List</h2>
-          {selectedLocationId && locations.length > 0 && !loading && (
-            <div className="text-sm text-gray-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
-              Selected: <span className="font-semibold text-blue-700">
-                {locations.find(loc => loc.id === selectedLocationId)?.name || 'Unknown Location'}
-              </span>
-            </div>
-          )}
-        </div>
+    <PageWrapper isLoading={!initialLoadComplete}>
+      <div className="page-container p-6 bg-gray-50 min-h-screen fade-in">
+        <div className="bg-white rounded-xl p-6 shadow">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold">Medicine Stock List</h2>
+            {selectedLocationId && locations.length > 0 && !loading && (
+              <div className="text-sm text-gray-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
+                Selected: <span className="font-semibold text-blue-700">
+                  {locations.find(loc => loc.id === selectedLocationId)?.name || 'Unknown Location'}
+                </span>
+              </div>
+            )}
+          </div>
 
         {/* Custom Tab Implementation for better styling */}
         <div className="border-b border-gray-200 mb-4">
@@ -590,17 +621,19 @@ const MedicineStock = () => {
           currentPage={currentPage}
           onPageChange={handlePageChange}
         />
+        
+        {isOpen && <ViewStock isOpen={isOpen} onClose={() => setIsOpen(false)} />}
+        {isModalOpen && (
+          <AddMedicineModal
+            open={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onMedicineAdded={fetchMedicineData}
+            onShowSuccess={handleShowSuccess}
+          />
+        )}
       </div>
-      {isOpen && <ViewStock isOpen={isOpen} onClose={() => setIsOpen(false)} />}
-      {isModalOpen && (
-        <AddMedicineModal
-          open={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          onMedicineAdded={fetchMedicineData}
-          onShowSuccess={handleShowSuccess}
-        />
-      )}
-    </div>
+      </div>
+    </PageWrapper>
   );
 };
 

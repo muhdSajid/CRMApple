@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import Layout from "./layout/Layout";
+import Layout from "./Layout/Layout";
 import Dashboard from "./components/dashboard/Dashboard";
 import MedicineStock from "./components/medicineStock/MedicineStoke";
 import { Costing } from "./components/costing/Costing";
@@ -16,6 +16,7 @@ import SignupPage from "./components/auth/Signup";
 import UserManagement from "./components/usermanagment/UserManagment";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import NetworkRequestTracker from "./components/common/NetworkRequestTracker";
+import ErrorBoundary from "./components/common/ErrorBoundary";
 import { checkAuthStatus } from "./store/authSlice";
 // Import manual token setup utility (available in console as window.setupManualToken)
 import "./utils/manualTokenSetup";
@@ -29,24 +30,26 @@ function App() {
   }, [dispatch]);
 
   return (
-    <Router>
-      <NetworkRequestTracker />
-      <ToastContainer position="top-right" autoClose={"5000"} theme="colored" />
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
-        <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-          <Route index element={<Dashboard />} />
-          <Route path="/stock" element={<MedicineStock />} />
-          <Route path="/cost" element={<Costing />} />
-          <Route path="/distribution" element={<Distribution />} />
-          <Route path="/helpcenter" element={<HelpCenter />} />
-          <Route path="/faq" element={<FaqPage />} />
-          <Route path="/userguide" element={<UserGuide />} />
-          <Route path="/usermanagment" element={<UserManagement />} />
-        </Route>
-      </Routes>
-    </Router>
+    <ErrorBoundary>
+      <Router>
+        <NetworkRequestTracker />
+        <ToastContainer position="top-right" autoClose={"5000"} theme="colored" />
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+            <Route index element={<Dashboard />} />
+            <Route path="/stock" element={<MedicineStock />} />
+            <Route path="/cost" element={<Costing />} />
+            <Route path="/distribution" element={<Distribution />} />
+            <Route path="/helpcenter" element={<HelpCenter />} />
+            <Route path="/faq" element={<FaqPage />} />
+            <Route path="/userguide" element={<UserGuide />} />
+            <Route path="/usermanagment" element={<UserManagement />} />
+          </Route>
+        </Routes>
+      </Router>
+    </ErrorBoundary>
   );
 }
 

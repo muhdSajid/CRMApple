@@ -5,10 +5,26 @@ import CriticalStock from "./CriticalStock";
 import DonationReport from "./DonationReport";
 import ExpensesReport from "./ExpenseReport";
 import PurchaseAnalytics from "./PurchaseAnalytics";
+import PageWrapper from "../common/PageWrapper";
 
 const Dashboard = () => {
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [selectedLocationId, setSelectedLocationId] = useState(null);
+  const [isComponentMounted, setIsComponentMounted] = useState(false);
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+
+  // Component mounting effect
+  useEffect(() => {
+    setIsComponentMounted(true);
+    return () => setIsComponentMounted(false);
+  }, []);
+
+  // Track initial load completion
+  useEffect(() => {
+    if (isComponentMounted) {
+      setInitialLoadComplete(true);
+    }
+  }, [isComponentMounted]);
 
   // Load selected location from sessionStorage on component mount
   useEffect(() => {
@@ -33,30 +49,32 @@ const Dashboard = () => {
     setSelectedLocation(location);
     setSelectedLocationId(location.locationId);
   }, []);
+  
   return (
-    <div className="p-4 space-y-6 bg-[#f9f9f9]">
-      <div className="bg-white rounded-2xl shadow p-6">
-        <div className="flex items-center justify-between border-b-2 border-gray-300 pb-2 mb-4">
-          <h3 className="text-xl font-semibold">
-            Location Specific-Medicine Status
-          </h3>
-          {selectedLocation && (
-            <div className="text-sm text-gray-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
-              Selected: <span className="font-semibold text-blue-700">{selectedLocation.locationName}</span>
-              <button 
-                onClick={() => {
-                  setSelectedLocation(null);
-                  setSelectedLocationId(null);
-                  sessionStorage.removeItem('selectedLocationId');
-                  sessionStorage.removeItem('selectedLocationData');
-                }}
-                className="ml-2 text-blue-700 hover:text-blue-900"
-              >
-                ✕
-              </button>
-            </div>
-          )}
-        </div>
+    <PageWrapper isLoading={!initialLoadComplete}>
+      <div className="page-container p-4 space-y-6 bg-[#f9f9f9] fade-in">
+        <div className="bg-white rounded-2xl shadow p-6">
+          <div className="flex items-center justify-between border-b-2 border-gray-300 pb-2 mb-4">
+            <h3 className="text-xl font-semibold">
+              Location Specific-Medicine Status
+            </h3>
+            {selectedLocation && (
+              <div className="text-sm text-gray-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
+                Selected: <span className="font-semibold text-blue-700">{selectedLocation.locationName}</span>
+                <button 
+                  onClick={() => {
+                    setSelectedLocation(null);
+                    setSelectedLocationId(null);
+                    sessionStorage.removeItem('selectedLocationId');
+                    sessionStorage.removeItem('selectedLocationData');
+                  }}
+                  className="ml-2 text-blue-700 hover:text-blue-900"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+          </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           <LocationCard 
@@ -143,7 +161,8 @@ const Dashboard = () => {
         </div>
         <CriticalStock />
       </div>
-    </div>
+      </div>
+    </PageWrapper>
   );
 };
 
