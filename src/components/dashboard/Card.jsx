@@ -30,15 +30,26 @@ const LocationCard = ({ onLocationSelect, selectedLocationId }) => {
     fetchLocationStatistics();
   }, []);
 
-  // Separate useEffect for handling session storage restoration
+  // Separate useEffect for handling session storage restoration and default selection
   useEffect(() => {
     if (data.length > 0) {
       const savedLocationId = sessionStorage.getItem('selectedLocationId');
+      
       if (savedLocationId && onLocationSelect) {
+        // Restore previously selected location
         const savedLocation = data.find(loc => loc.locationId.toString() === savedLocationId);
         if (savedLocation) {
           onLocationSelect(savedLocation);
+          return;
         }
+      }
+      
+      // If no saved location or saved location not found, select the first location as default
+      if (onLocationSelect && data.length > 0) {
+        const defaultLocation = data[0];
+        sessionStorage.setItem('selectedLocationId', defaultLocation.locationId.toString());
+        sessionStorage.setItem('selectedLocationData', JSON.stringify(defaultLocation));
+        onLocationSelect(defaultLocation);
       }
     }
   }, [data, onLocationSelect]);

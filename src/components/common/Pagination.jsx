@@ -1,7 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 
-const PaginationComponant = ({ totalPages = 10 }) => {
-  const [currentPage, setCurrentPage] = useState(1);
+const PaginationComponant = ({ 
+  totalPages = 10, 
+  currentPage = 1, 
+  onPageChange = () => {} 
+}) => {
 
   const getPageNumbers = () => {
     const pages = [];
@@ -27,15 +30,15 @@ const PaginationComponant = ({ totalPages = 10 }) => {
 
   const changePage = (page) => {
     if (page === "..." || page === currentPage) return;
-    setCurrentPage(page);
+    onPageChange(page);
   };
 
   const goToPrevious = () => {
-    if (currentPage > 1) setCurrentPage(currentPage - 1);
+    if (currentPage > 1) onPageChange(currentPage - 1);
   };
 
   const goToNext = () => {
-    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+    if (currentPage < totalPages) onPageChange(currentPage + 1);
   };
 
   return (

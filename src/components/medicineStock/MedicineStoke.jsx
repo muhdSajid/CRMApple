@@ -1,7 +1,5 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
-  Tabs,
-  TabItem,
   Table,
   TableBody,
   TableCell,
@@ -12,9 +10,8 @@ import {
   Tooltip,
 } from "flowbite-react";
 import { FaPlus } from "react-icons/fa6";
-import { MdEdit } from "react-icons/md";
+import { MdEdit, MdFilterList } from "react-icons/md";
 import { IoEyeOutline } from "react-icons/io5";
-import FilterPopover from "../common/Filter";
 import PaginationComponant from "../common/Pagination";
 import ViewStock from "./ViewStock";
 import { AddMedicineModal } from "./AddMedicineModal";
@@ -33,6 +30,18 @@ const MedicineStock = () => {
   const [medicineError, setMedicineError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
+  const [stockStatusFilter, setStockStatusFilter] = useState("");
+  const [medicineTypeFilter, setMedicineTypeFilter] = useState("");
+  const [tempStockStatusFilter, setTempStockStatusFilter] = useState("");
+  const [tempMedicineTypeFilter, setTempMedicineTypeFilter] = useState("");
+  const [showFilterPopover, setShowFilterPopover] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(() => {
+    const saved = localStorage.getItem('medicineStock_itemsPerPage');
+    return saved ? parseInt(saved, 10) : 10;
+  });
+  const filterButtonRef = useRef(null);
+  const filterPopoverRef = useRef(null);
 
   // Fetch locations on component mount
   useEffect(() => {
@@ -83,6 +92,42 @@ const MedicineStock = () => {
     fetchMedicineData();
   }, [fetchMedicineData]);
 
+  // Handle click outside to close popover
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        filterPopoverRef.current &&
+        !filterPopoverRef.current.contains(event.target) &&
+        filterButtonRef.current &&
+        !filterButtonRef.current.contains(event.target)
+      ) {
+        setShowFilterPopover(false);
+        // Reset temporary filters when closing without applying
+        setTempStockStatusFilter(stockStatusFilter);
+        setTempMedicineTypeFilter(medicineTypeFilter);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [stockStatusFilter, medicineTypeFilter]);
+
+  // Initialize temp filters when opening popover
+  useEffect(() => {
+    if (showFilterPopover) {
+      setTempStockStatusFilter(stockStatusFilter);
+      setTempMedicineTypeFilter(medicineTypeFilter);
+    }
+  }, [showFilterPopover, stockStatusFilter, medicineTypeFilter]);
+
+  // Update selected location display when selectedLocationId changes
+  useEffect(() => {
+    // This effect will trigger a re-render when selectedLocationId changes
+    // ensuring the "Selected:" display updates immediately
+  }, [selectedLocationId]);
+
   const handleTabClick = (locationId) => {
     setSelectedLocationId(locationId);
   };
@@ -93,6 +138,29 @@ const MedicineStock = () => {
     setTimeout(() => {
       setShowSuccess(false);
     }, 5000);
+  };
+
+  const handleApplyFilters = () => {
+    setStockStatusFilter(tempStockStatusFilter);
+    setMedicineTypeFilter(tempMedicineTypeFilter);
+    setShowFilterPopover(false);
+  };
+
+  const handleClearFilters = () => {
+    setTempStockStatusFilter("");
+    setTempMedicineTypeFilter("");
+    setStockStatusFilter("");
+    setMedicineTypeFilter("");
+  };
+
+  const handleItemsPerPageChange = (newItemsPerPage) => {
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1); // Reset to first page when changing items per page
+    localStorage.setItem('medicineStock_itemsPerPage', newItemsPerPage.toString());
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
   };
 
   // Helper function to get stock status styling
@@ -121,12 +189,37 @@ const MedicineStock = () => {
     }
   };
 
-  // Filter medicine data based on search term
-  const filteredMedicineData = medicineData.filter(item =>
-    item.medicineName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.medicineTypeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.stockStatus.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filter medicine data based on search term, stock status, and medicine type
+  const filteredMedicineData = medicineData.filter(item => {
+    const matchesSearch = item.medicineName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.medicineTypeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.stockStatus.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesStockStatus = stockStatusFilter === "" || 
+      (stockStatusFilter === "out-of-stock" && item.stockStatus === "Out of Stock") ||
+      (stockStatusFilter === "in-stock" && item.stockStatus === "In Stock") ||
+      (stockStatusFilter === "low-stock" && item.stockStatus === "Low Stock");
+    
+    const matchesMedicineType = medicineTypeFilter === "" || 
+      item.medicineTypeName.toLowerCase().includes(medicineTypeFilter.toLowerCase());
+    
+    return matchesSearch && matchesStockStatus && matchesMedicineType;
+  });
+
+  // Get unique medicine types for filter dropdown
+  const uniqueMedicineTypes = [...new Set(medicineData.map(item => item.medicineTypeName))].filter(Boolean);
+  
+  // Calculate pagination
+  const totalItems = filteredMedicineData.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedData = filteredMedicineData.slice(startIndex, endIndex);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [stockStatusFilter, medicineTypeFilter, searchTerm]);
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <div className="bg-white rounded-xl p-6 shadow">
@@ -141,26 +234,40 @@ const MedicineStock = () => {
           )}
         </div>
 
-        <Tabs variant="default">
-          {loading ? (
-            <TabItem title="Loading..." />
-          ) : error ? (
-            <TabItem title="Error loading locations" />
-          ) : locations.length > 0 ? (
-            locations
-              .filter(location => location.isActive)
-              .map((location) => (
-                <TabItem
-                  key={location.id}
-                  active={selectedLocationId === location.id}
-                  title={location.name}
-                  onClick={() => handleTabClick(location.id)}
-                />
-              ))
-          ) : (
-            <TabItem title="No locations available" />
-          )}
-        </Tabs>
+        {/* Custom Tab Implementation for better styling */}
+        <div className="border-b border-gray-200 mb-4">
+          <nav className="-mb-px flex space-x-8">
+            {loading ? (
+              <span className="border-transparent text-gray-500 py-2 px-1 border-b-2 font-medium text-sm">
+                Loading...
+              </span>
+            ) : error ? (
+              <span className="border-transparent text-red-500 py-2 px-1 border-b-2 font-medium text-sm">
+                Error loading locations
+              </span>
+            ) : locations.length > 0 ? (
+              locations
+                .filter(location => location.isActive)
+                .map((location) => (
+                  <button
+                    key={location.id}
+                    onClick={() => handleTabClick(location.id)}
+                    className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors duration-200 ${
+                      selectedLocationId === location.id
+                        ? 'border-blue-500 text-blue-600 bg-blue-50 rounded-t-md px-3'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    {location.name}
+                  </button>
+                ))
+            ) : (
+              <span className="border-transparent text-gray-500 py-2 px-1 border-b-2 font-medium text-sm">
+                No locations available
+              </span>
+            )}
+          </nav>
+        </div>
 
         {error && (
           <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
@@ -234,9 +341,25 @@ const MedicineStock = () => {
               className="border px-3 py-2 border-gray-300 rounded-md w-64 text-sm focus:outline-none focus:ring-0 focus:border-gray-300"
             />
             {!medicineLoading && !medicineError && (
-              <span className="text-sm text-gray-600">
-                Showing {filteredMedicineData.length} of {medicineData.length} medicines
-              </span>
+              <div className="flex items-center gap-4">
+                <span className="text-sm text-gray-600">
+                  Showing {startIndex + 1}-{Math.min(endIndex, totalItems)} of {totalItems} medicines
+                </span>
+                <div className="flex items-center gap-2">
+                  <label className="text-sm text-gray-600">Rows per page:</label>
+                  <select
+                    value={itemsPerPage}
+                    onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+                    className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value={5}>5</option>
+                    <option value={10}>10</option>
+                    <option value={25}>25</option>
+                    <option value={50}>50</option>
+                    <option value={100}>100</option>
+                  </select>
+                </div>
+              </div>
             )}
           </div>
 
@@ -249,11 +372,93 @@ const MedicineStock = () => {
             >
               <FaPlus className="mr-2" /> Add Medicine
             </Button>
-            <FilterPopover />
-            <select className="border border-gray-300 rounded-md px-3 py-1.5 text-sm">
-              <option>This Year</option>
-              <option>Last Year</option>
-            </select>
+            <div className="relative">
+              <button
+                ref={filterButtonRef}
+                onClick={() => setShowFilterPopover(!showFilterPopover)}
+                className="flex items-center gap-2 px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              >
+                <MdFilterList className="text-base" />
+                Filters
+                {(stockStatusFilter || medicineTypeFilter) && (
+                  <span className="bg-blue-500 text-white text-xs rounded-full px-1.5 py-0.5 ml-1">
+                    {[stockStatusFilter, medicineTypeFilter].filter(Boolean).length}
+                  </span>
+                )}
+              </button>
+
+              {/* Filter Popover */}
+              {showFilterPopover && (
+                <div 
+                  ref={filterPopoverRef}
+                  className="absolute right-0 top-full mt-2 w-80 bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-lg shadow-xl z-50 p-4 backdrop-blur-sm"
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-sm font-semibold text-gray-800">Filter Options</h3>
+                    <button
+                      onClick={() => setShowFilterPopover(false)}
+                      className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-2">
+                        Stock Status
+                      </label>
+                      <select 
+                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                        value={tempStockStatusFilter}
+                        onChange={(e) => setTempStockStatusFilter(e.target.value)}
+                      >
+                        <option value="">All Stock Status</option>
+                        <option value="in-stock">In Stock</option>
+                        <option value="out-of-stock">Out of Stock</option>
+                        <option value="low-stock">Low Stock</option>
+                      </select>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-2">
+                        Medicine Type
+                      </label>
+                      <select 
+                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                        value={tempMedicineTypeFilter}
+                        onChange={(e) => setTempMedicineTypeFilter(e.target.value)}
+                      >
+                        <option value="">All Medicine Types</option>
+                        {uniqueMedicineTypes.map(type => (
+                          <option key={type} value={type}>
+                            {type}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Filter Actions */}
+                    <div className="flex items-center justify-between pt-3 border-t border-gray-200">
+                      <button
+                        onClick={handleClearFilters}
+                        className="text-xs text-gray-500 hover:text-gray-700 underline transition-colors"
+                      >
+                        Clear all filters
+                      </button>
+                      <button
+                        onClick={handleApplyFilters}
+                        className="px-4 py-2 text-xs bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors shadow-sm font-medium"
+                      >
+                        Apply Filters
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -308,8 +513,16 @@ const MedicineStock = () => {
                     </div>
                   </TableCell>
                 </TableRow>
+              ) : paginatedData.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={9} className="text-center py-8">
+                    <div className="flex items-center justify-center">
+                      <span className="text-gray-500">No data available for this page</span>
+                    </div>
+                  </TableCell>
+                </TableRow>
               ) : (
-                filteredMedicineData.map((item, index) => {
+                paginatedData.map((item, index) => {
                   const stockStyling = getStockStatusStyling(item.stockStatus);
                   return (
                     <TableRow key={`${item.medicineId}-${index}`}>
@@ -364,7 +577,11 @@ const MedicineStock = () => {
             </TableBody>
           </Table>
         </div>
-        <PaginationComponant />
+        <PaginationComponant 
+          totalPages={totalPages}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+        />
       </div>
       {isOpen && <ViewStock isOpen={isOpen} onClose={() => setIsOpen(false)} />}
       {isModalOpen && (
