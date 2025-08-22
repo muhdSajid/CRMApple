@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import profilePic from "../Assets/download.jpeg";
+import profilePic from "../assets/man-icon.png";
 import { logoutUser } from "../store/authSlice";
 import { getUserFullName } from "../service/authService";
 

@@ -582,25 +582,7 @@ const UserManagement = () => {
                 />
               </div>
               <div>
-                <Label>Current Role</Label>
-                <input
-                  type="text"
-                  value={getRoleDisplayName(selectedUser.roles)}
-                  readOnly
-                  className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-gray-50 cursor-not-allowed"
-                />
-              </div>
-              <div>
-                <Label>Current Status</Label>
-                <input
-                  type="text"
-                  value={selectedUser.isActive === true ? 'Active' : selectedUser.isActive === false ? 'Inactive' : 'Unknown'}
-                  readOnly
-                  className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-gray-50 cursor-not-allowed"
-                />
-              </div>
-              <div>
-                <Label htmlFor="role">New Role</Label>
+                <Label htmlFor="role">Role</Label>
                 <select
                   id="role"
                   required
