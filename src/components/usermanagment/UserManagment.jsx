@@ -23,6 +23,11 @@ const UserManagement = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [hasInitialized, setHasInitialized] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortConfig, setSortConfig] = useState({
+    key: null,
+    direction: 'asc'
+  });
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -304,6 +309,95 @@ const UserManagement = () => {
     }
   };
 
+  // Filter and sort users
+  const getFilteredAndSortedUsers = () => {
+    let filteredUsers = [...users]; // Create a copy of the array first
+
+    // Apply search filter
+    if (searchTerm) {
+      filteredUsers = filteredUsers.filter(user => {
+        const fullName = `${user.firstName || ''} ${user.lastName || ''}`.toLowerCase();
+        const email = (user.email || '').toLowerCase();
+        const role = getRoleDisplayName(user.roles).toLowerCase();
+        const search = searchTerm.toLowerCase();
+
+        return fullName.includes(search) || 
+               email.includes(search) || 
+               role.includes(search);
+      });
+    }
+
+    // Apply sorting (now safe because we have a copy)
+    if (sortConfig.key) {
+      filteredUsers.sort((a, b) => {
+        let aValue, bValue;
+
+        switch (sortConfig.key) {
+          case 'name':
+            aValue = `${a.firstName || ''} ${a.lastName || ''}`.trim().toLowerCase();
+            bValue = `${b.firstName || ''} ${b.lastName || ''}`.trim().toLowerCase();
+            break;
+          case 'email':
+            aValue = (a.email || '').toLowerCase();
+            bValue = (b.email || '').toLowerCase();
+            break;
+          case 'role':
+            aValue = getRoleDisplayName(a.roles).toLowerCase();
+            bValue = getRoleDisplayName(b.roles).toLowerCase();
+            break;
+          case 'dateCreated':
+            aValue = new Date(a.createdAt || a.dateCreated || 0);
+            bValue = new Date(b.createdAt || b.dateCreated || 0);
+            break;
+          case 'status':
+            aValue = a.isActive === true ? 1 : 0;
+            bValue = b.isActive === true ? 1 : 0;
+            break;
+          default:
+            return 0;
+        }
+
+        if (aValue < bValue) {
+          return sortConfig.direction === 'asc' ? -1 : 1;
+        }
+        if (aValue > bValue) {
+          return sortConfig.direction === 'asc' ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+
+    return filteredUsers;
+  };
+
+  const handleSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const getSortIcon = (columnKey) => {
+    if (sortConfig.key !== columnKey) {
+      return (
+        <svg className="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M5 8l4-4 4 4H5zM5 12l4 4 4-4H5z" />
+        </svg>
+      );
+    }
+    
+    return sortConfig.direction === 'asc' ? (
+      <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+        <path d="M5 8l4-4 4 4H5z" />
+      </svg>
+    ) : (
+      <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+        <path d="M5 12l4 4 4-4H5z" />
+      </svg>
+    );
+  };
+
   return (
     <div className="p-6 mx-auto">
       <div className="flex gap-2 mb-4">
@@ -319,17 +413,80 @@ const UserManagement = () => {
       <div className="bg-white rounded-xl p-16 shadow ">
         <h2 className="text-2xl font-bold mb-4">User Management</h2>
 
+        {/* Search Bar */}
+        <div className="mb-4">
+          <div className="relative max-w-md">
+            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+              <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m21 21-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <input
+              type="search"
+              placeholder="Search by name, email, or role..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          {searchTerm && (
+            <p className="text-sm text-gray-600 mt-2">
+              Showing {getFilteredAndSortedUsers().length} of {users.length} users
+            </p>
+          )}
+        </div>
+
         <Table
           striped
           className="[&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&>tbody>tr:nth-child(odd)]:bg-gray-200"
         >
           <TableHead className="[&>tr>th]:bg-sky-900 [&>tr>th]:text-white">
             <TableRow>
-              <TableHeadCell>Name</TableHeadCell>
-              <TableHeadCell>Email</TableHeadCell>
-              <TableHeadCell>Role</TableHeadCell>
-              <TableHeadCell>Date Created</TableHeadCell>
-              <TableHeadCell>Status</TableHeadCell>
+              <TableHeadCell 
+                className="cursor-pointer hover:bg-sky-800 select-none"
+                onClick={() => handleSort('name')}
+              >
+                <div className="flex items-center justify-between">
+                  <span>Name</span>
+                  {getSortIcon('name')}
+                </div>
+              </TableHeadCell>
+              <TableHeadCell 
+                className="cursor-pointer hover:bg-sky-800 select-none"
+                onClick={() => handleSort('email')}
+              >
+                <div className="flex items-center justify-between">
+                  <span>Email</span>
+                  {getSortIcon('email')}
+                </div>
+              </TableHeadCell>
+              <TableHeadCell 
+                className="cursor-pointer hover:bg-sky-800 select-none"
+                onClick={() => handleSort('role')}
+              >
+                <div className="flex items-center justify-between">
+                  <span>Role</span>
+                  {getSortIcon('role')}
+                </div>
+              </TableHeadCell>
+              <TableHeadCell 
+                className="cursor-pointer hover:bg-sky-800 select-none"
+                onClick={() => handleSort('dateCreated')}
+              >
+                <div className="flex items-center justify-between">
+                  <span>Date Created</span>
+                  {getSortIcon('dateCreated')}
+                </div>
+              </TableHeadCell>
+              <TableHeadCell 
+                className="cursor-pointer hover:bg-sky-800 select-none"
+                onClick={() => handleSort('status')}
+              >
+                <div className="flex items-center justify-between">
+                  <span>Status</span>
+                  {getSortIcon('status')}
+                </div>
+              </TableHeadCell>
               <TableHeadCell>Actions</TableHeadCell>
             </TableRow>
           </TableHead>
@@ -343,14 +500,14 @@ const UserManagement = () => {
                   </div>
                 </TableCell>
               </TableRow>
-            ) : users.length === 0 ? (
+            ) : getFilteredAndSortedUsers().length === 0 ? (
               <TableRow>
                 <TableCell colSpan="6" className="text-center py-8 text-gray-500">
-                  No users found
+                  {searchTerm ? `No users found matching "${searchTerm}"` : 'No users found'}
                 </TableCell>
               </TableRow>
             ) : (
-              users.map((user) => (
+              getFilteredAndSortedUsers().map((user) => (
                 <TableRow key={user.id || user.email}>
                   <TableCell>
                     {user.firstName && user.lastName 
