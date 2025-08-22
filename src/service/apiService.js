@@ -60,6 +60,52 @@ export const addMedicine = async (medicineData) => {
   }
 };
 
+export const addBatch = async (batchData) => {
+  try {
+    console.log('Adding batch with data:', batchData);
+    const response = await post(`${apiDomain}/api/v1/batches`, batchData);
+    console.log('Add batch response:', response);
+    return response.data;
+  } catch (error) {
+    console.error('Error adding batch:', error);
+    throw error;
+  }
+};
+
+export const updateBatch = async (batchId, updateData) => {
+  try {
+    console.log('Updating batch ID:', batchId, 'with data:', updateData);
+    const response = await _fetch(`${apiDomain}/api/v1/batches/${batchId}`, "PATCH", updateData);
+    console.log('Update batch response:', response);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating batch:', error);
+    throw error;
+  }
+};
+
+export const getBatches = async (locationId, medicineId) => {
+  try {
+    console.log('Fetching batches for location:', locationId, 'medicine:', medicineId);
+    const response = await get(`${apiDomain}/api/v1/batches/available?locationId=${locationId}&medicineId=${medicineId}`);
+    console.log('Batches API response:', response);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching batches:', error);
+    throw error;
+  }
+};
+
+export const getLocations = async () => {
+  try {
+    const response = await get(`${apiDomain}/api/v1/locations`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching locations:', error);
+    throw error;
+  }
+};
+
 const _fetch = async (url, method, data = null, props, token = null) => {
   let userToken;
   if (token !== null) {
@@ -70,7 +116,14 @@ const _fetch = async (url, method, data = null, props, token = null) => {
 
   let response;
   
-  if (method !== "GET") {
+  if (method === "GET") {
+    // Use the authenticated API instance for GET requests
+    if (userToken && userToken.token) {
+      response = await api.get(url.replace(apiDomain + '/api', ''));
+    } else {
+      response = await api.get(url);
+    }
+  } else if (method === "POST") {
     const body = data ? data : null;
     
     // Use the authenticated API instance for requests that need auth
@@ -80,12 +133,31 @@ const _fetch = async (url, method, data = null, props, token = null) => {
       // For requests without auth (like login), use full URL
       response = await api.post(url, body);
     }
-  } else {
-    // Use the authenticated API instance for GET requests
+  } else if (method === "PATCH") {
+    const body = data ? data : null;
+    
+    // Use the authenticated API instance for PATCH requests
     if (userToken && userToken.token) {
-      response = await api.get(url.replace(apiDomain + '/api', ''));
+      response = await api.patch(url.replace(apiDomain + '/api', ''), body);
     } else {
-      response = await api.get(url);
+      response = await api.patch(url, body);
+    }
+  } else {
+    // Fallback for other methods (PUT, DELETE, etc.)
+    const body = data ? data : null;
+    
+    if (userToken && userToken.token) {
+      response = await api.request({
+        method: method,
+        url: url.replace(apiDomain + '/api', ''),
+        data: body
+      });
+    } else {
+      response = await api.request({
+        method: method,
+        url: url,
+        data: body
+      });
     }
   }
   
