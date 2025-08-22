@@ -84,6 +84,27 @@ export const updateUser = createAsyncThunk(
   }
 );
 
+// Async thunk to update user (both role and status)
+export const updateUserComplete = createAsyncThunk(
+  'users/updateUserComplete',
+  async ({ userId, roles, isActive }, { rejectWithValue }) => {
+    try {
+      console.log('Making API call to update user:', { userId, roles, isActive });
+      const response = await api.put('/v1/users/update', {
+        userId: userId,
+        roles: roles,
+        isActive: isActive
+      });
+      console.log('User updated successfully:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating user:', error);
+      const message = error.response?.data?.message || error.message || 'Failed to update user';
+      return rejectWithValue(message);
+    }
+  }
+);
+
 // Async thunk to assign role to user
 export const assignRole = createAsyncThunk(
   'users/assignRole',
@@ -193,6 +214,22 @@ const usersSlice = createSlice({
         state.message = 'User updated successfully';
       })
       .addCase(updateUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload;
+      })
+      // Update user complete (role and status)
+      .addCase(updateUserComplete.pending, (state) => {
+        state.isLoading = true;
+        state.isError = false;
+        state.message = '';
+      })
+      .addCase(updateUserComplete.fulfilled, (state) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.message = 'User updated successfully';
+      })
+      .addCase(updateUserComplete.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
         state.message = action.payload;

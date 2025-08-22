@@ -15,7 +15,7 @@ import {
   Label,
   Spinner,
 } from "flowbite-react";
-import { fetchUsers, addUser, assignRole, fetchRoles, reset, clearError } from "../../store/usersSlice";
+import { fetchUsers, addUser, fetchRoles, reset, clearError, updateUserComplete } from "../../store/usersSlice";
 
 const UserManagement = () => {
   const [showModal, setShowModal] = useState(false);
@@ -30,7 +30,8 @@ const UserManagement = () => {
     role: ''
   });
   const [editFormData, setEditFormData] = useState({
-    role: ''
+    role: '',
+    isActive: true
   });
 
   const dispatch = useDispatch();
@@ -85,6 +86,33 @@ const UserManagement = () => {
     }
   }, [isError, isSuccess, message, dispatch]);
 
+  // Effect to sync editFormData when selectedUser changes (for edit modal)
+  useEffect(() => {
+    if (selectedUser && showEditModal) {
+      console.log('=== SYNC FORM DATA EFFECT ===');
+      console.log('Syncing form data for user:', selectedUser);
+      console.log('User isActive:', selectedUser.isActive);
+      
+      // Extract the role name from the roles array
+      let currentRoleName = '';
+      if (Array.isArray(selectedUser.roles) && selectedUser.roles.length > 0) {
+        currentRoleName = selectedUser.roles[0];
+      }
+      
+      // Find the matching role from the roles array
+      const matchingRole = roles.find(role => role.name === currentRoleName);
+      
+      const syncedFormData = {
+        role: matchingRole ? matchingRole.name : '',
+        isActive: selectedUser.isActive === true
+      };
+      
+      console.log('Synced form data:', syncedFormData);
+      setEditFormData(syncedFormData);
+      console.log('============================');
+    }
+  }, [selectedUser, showEditModal, roles]);
+
   const handleInputChange = (e) => {
     setFormData({
       ...formData,
@@ -93,10 +121,26 @@ const UserManagement = () => {
   };
 
   const handleEditInputChange = (e) => {
+    const { id, value, type, checked } = e.target;
     setEditFormData({
       ...editFormData,
-      [e.target.id]: e.target.value
+      [id]: type === 'checkbox' ? checked : value
     });
+  };
+
+  const handleStatusToggle = (checked) => {
+    console.log('=== TOGGLE DEBUG ===');
+    console.log('Toggle called with:', checked);
+    console.log('Current editFormData:', editFormData);
+    console.log('Selected user:', selectedUser);
+    
+    setEditFormData({
+      ...editFormData,
+      isActive: checked
+    });
+    
+    console.log('Updated editFormData isActive to:', checked);
+    console.log('===================');
   };
 
   const handleViewUser = (user) => {
@@ -108,29 +152,14 @@ const UserManagement = () => {
   };
 
   const handleEditUser = (user) => {
+    console.log('=== EDIT USER CLICKED ===');
+    console.log('Selected user:', user);
+    console.log('User isActive:', user.isActive);
+    console.log('========================');
+    
+    // Set the selected user and show modal
+    // The useEffect will handle syncing the form data
     setSelectedUser(user);
-    console.log('Selected user for editing:', user);
-    console.log('User roles data:', user.roles);
-    console.log('Available roles:', roles);
-    
-    // Extract the role name from the roles array
-    let currentRoleName = '';
-    
-    if (Array.isArray(user.roles) && user.roles.length > 0) {
-      // Get the first role name from the array
-      currentRoleName = user.roles[0];
-    }
-    
-    console.log('Current role name extracted:', currentRoleName);
-    
-    // Find the matching role from the roles array
-    const matchingRole = roles.find(role => role.name === currentRoleName);
-    
-    console.log('Matching role found:', matchingRole);
-    
-    setEditFormData({
-      role: matchingRole ? matchingRole.name : ''
-    });
     setShowEditModal(true);
   };
 
@@ -150,21 +179,22 @@ const UserManagement = () => {
       return;
     }
 
-    const assignRolePayload = {
+    const updateUserPayload = {
       userId: selectedUser.id,
       roles: [
         {
           id: selectedRole.id,
           name: selectedRole.name
         }
-      ]
+      ],
+      isActive: editFormData.isActive
     };
 
-    console.log('Assigning role payload:', assignRolePayload);
-    dispatch(assignRole(assignRolePayload));
+    console.log('Updating user with payload:', updateUserPayload);
+    dispatch(updateUserComplete(updateUserPayload));
     setShowEditModal(false);
     setSelectedUser(null);
-    setEditFormData({ role: '' });
+    setEditFormData({ role: '', isActive: true });
   };
 
   const handleSubmit = (e) => {
@@ -244,44 +274,33 @@ const UserManagement = () => {
     }
   };
 
-  const getStatusIcon = (status) => {
-    const statusLower = status?.toLowerCase() || 'active';
-    
-    switch (statusLower) {
-      case 'active':
-      case 'approved':
-        return (
-          <div className="flex items-center justify-center">
-            <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" title="Active">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-            </svg>
-          </div>
-        );
-      case 'inactive':
-      case 'rejected':
-        return (
-          <div className="flex items-center justify-center">
-            <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20" title="Inactive">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-            </svg>
-          </div>
-        );
-      case 'pending':
-        return (
-          <div className="flex items-center justify-center">
-            <svg className="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20" title="Pending">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 000 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
-            </svg>
-          </div>
-        );
-      default:
-        return (
-          <div className="flex items-center justify-center">
-            <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20" title="Unknown">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
-            </svg>
-          </div>
-        );
+  const getStatusIcon = (isActive) => {
+    // Handle boolean values from isActive field
+    if (isActive === true) {
+      return (
+        <div className="flex items-center justify-center">
+          <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" title="Active">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+          </svg>
+        </div>
+      );
+    } else if (isActive === false) {
+      return (
+        <div className="flex items-center justify-center">
+          <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20" title="Inactive">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+          </svg>
+        </div>
+      );
+    } else {
+      // Handle null or undefined values
+      return (
+        <div className="flex items-center justify-center">
+          <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20" title="Unknown">
+            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+          </svg>
+        </div>
+      );
     }
   };
 
@@ -342,7 +361,7 @@ const UserManagement = () => {
                   <TableCell>{getRoleDisplayName(user.roles)}</TableCell>
                   <TableCell>{formatDate(user.createdAt || user.dateCreated)}</TableCell>
                   <TableCell>
-                    {getStatusIcon(user.status || 'Active')}
+                    {getStatusIcon(user.isActive)}
                   </TableCell>
                   <TableCell className="flex gap-2">
                     <button
@@ -360,7 +379,7 @@ const UserManagement = () => {
                       onClick={() => handleEditUser(user)}
                       disabled={isLoading}
                       className="p-2 text-white bg-[#2D506B] hover:bg-sky-900 rounded-lg disabled:opacity-50"
-                      title="Edit Role"
+                      title="Edit User"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -524,6 +543,15 @@ const UserManagement = () => {
                   className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-gray-50 cursor-not-allowed"
                 />
               </div>
+              <div>
+                <Label>Status</Label>
+                <input
+                  type="text"
+                  value={selectedUser.isActive === true ? 'Active' : selectedUser.isActive === false ? 'Inactive' : 'Unknown'}
+                  readOnly
+                  className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-gray-50 cursor-not-allowed"
+                />
+              </div>
             </div>
             <div className="flex justify-center mt-6">
               <Button
@@ -538,10 +566,10 @@ const UserManagement = () => {
         </Modal>
       )}
 
-      {/* Edit Role Modal */}
+      {/* Edit User Modal */}
       {showEditModal && selectedUser && (
         <Modal show={showEditModal} onClose={() => setShowEditModal(false)}>
-          <ModalHeader>EDIT USER ROLE</ModalHeader>
+          <ModalHeader>EDIT USER</ModalHeader>
           <ModalBody>
             <form className="space-y-5" onSubmit={handleEditSubmit}>
               <div>
@@ -558,6 +586,15 @@ const UserManagement = () => {
                 <input
                   type="text"
                   value={getRoleDisplayName(selectedUser.roles)}
+                  readOnly
+                  className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-gray-50 cursor-not-allowed"
+                />
+              </div>
+              <div>
+                <Label>Current Status</Label>
+                <input
+                  type="text"
+                  value={selectedUser.isActive === true ? 'Active' : selectedUser.isActive === false ? 'Inactive' : 'Unknown'}
                   readOnly
                   className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-gray-50 cursor-not-allowed"
                 />
@@ -580,6 +617,37 @@ const UserManagement = () => {
                   ))}
                 </select>
               </div>
+              <div>
+                <Label>User Status</Label>
+                <div className="mt-2">
+                  {/* Custom Toggle Switch Implementation */}
+                  <div className="flex items-center space-x-3">
+                    <button
+                      type="button"
+                      onClick={() => handleStatusToggle(!editFormData.isActive)}
+                      disabled={isLoading}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 ${
+                        editFormData.isActive ? 'bg-blue-600' : 'bg-gray-200'
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          editFormData.isActive ? 'translate-x-6' : 'translate-x-1'
+                        }`}
+                      />
+                    </button>
+                    <span className={`text-sm font-medium ${editFormData.isActive ? 'text-blue-600' : 'text-gray-500'}`}>
+                      {editFormData.isActive ? "Active" : "Inactive"}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {editFormData.isActive 
+                      ? "User can access the system" 
+                      : "User access is disabled"
+                    }
+                  </p>
+                </div>
+              </div>
 
               <div className="flex justify-center gap-2">
                 <Button
@@ -593,7 +661,7 @@ const UserManagement = () => {
                       Updating...
                     </>
                   ) : (
-                    'Update Role'
+                    'Update User'
                   )}
                 </Button>
                 <Button
@@ -601,7 +669,7 @@ const UserManagement = () => {
                   onClick={() => {
                     setShowEditModal(false);
                     setSelectedUser(null);
-                    setEditFormData({ role: '' });
+                    setEditFormData({ role: '', isActive: true });
                   }}
                   disabled={isLoading}
                   className="bg-white text-[#2D506B] hover:bg-blue-50 border border-[#2D506B] font-medium rounded-lg text-sm px-5 py-2.5 disabled:opacity-50"
