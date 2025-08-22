@@ -29,6 +29,27 @@ export const getMedicineTypes = async () => {
   }
 };
 
+export const getPurchaseTypes = async () => {
+  try {
+    console.log('Making API call to fetch purchase types...');
+    const response = await get(`${apiDomain}/api/v1/purchase-types`);
+    console.log('Raw API response:', response);
+    
+    // Transform the response to match expected structure
+    const transformedData = response.data.map(item => ({
+      id: item.id,
+      name: item.typeName,
+      description: item.description
+    }));
+    
+    console.log('Transformed purchase types data:', transformedData);
+    return transformedData;
+  } catch (error) {
+    console.error('Error fetching purchase types:', error);
+    throw error;
+  }
+};
+
 export const addMedicine = async (medicineData) => {
   try {
     const response = await post(`${apiDomain}/api/v1/medicines`, medicineData);

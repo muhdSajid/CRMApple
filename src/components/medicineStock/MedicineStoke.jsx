@@ -10,8 +10,9 @@ import {
   Tooltip,
 } from "flowbite-react";
 import { FaPlus } from "react-icons/fa6";
-import { MdEdit, MdFilterList } from "react-icons/md";
+import { MdEdit, MdFilterList, MdInventory } from "react-icons/md";
 import { IoEyeOutline } from "react-icons/io5";
+import { HiViewList } from "react-icons/hi";
 import PaginationComponant from "../common/Pagination";
 import ViewStock from "./ViewStock";
 import { AddMedicineModal } from "./AddMedicineModal";
@@ -561,14 +562,21 @@ const MedicineStock = () => {
                         )}
                       </TableCell>
                       <TableCell>
-                        <button className="flex text-base font-medium">
-                          <Tooltip content="Edit Stock">
-                            <MdEdit />
+                        <div className="flex items-center gap-3">
+                          <Tooltip content="Manage Batches">
+                            <button className="group relative flex items-center justify-center w-8 h-8 text-blue-600 hover:text-white bg-blue-50 hover:bg-blue-600 border border-blue-200 hover:border-blue-600 rounded-lg transition-all duration-200">
+                              <MdInventory className="text-lg" />
+                            </button>
                           </Tooltip>
-                          <Tooltip content="View Stock">
-                            <IoEyeOutline onClick={() => setIsOpen(true)} />
+                          <Tooltip content="View All Batches">
+                            <button 
+                              onClick={() => setIsOpen(true)} 
+                              className="group relative flex items-center justify-center w-8 h-8 text-green-600 hover:text-white bg-green-50 hover:bg-green-600 border border-green-200 hover:border-green-600 rounded-lg transition-all duration-200"
+                            >
+                              <HiViewList className="text-lg" />
+                            </button>
                           </Tooltip>
-                        </button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
