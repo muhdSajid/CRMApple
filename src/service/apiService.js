@@ -60,6 +60,56 @@ export const addMedicine = async (medicineData) => {
   }
 };
 
+export const createBatch = async (batchData) => {
+  try {
+    const response = await post(`${apiDomain}/api/v1/batches`, batchData);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating batch:', error);
+    throw error;
+  }
+};
+
+export const getMedicines = async () => {
+  try {
+    const response = await get(`${apiDomain}/api/v1/medicines`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching medicines:', error);
+    throw error;
+  }
+};
+
+export const getLocations = async () => {
+  try {
+    const response = await get(`${apiDomain}/api/v1/locations`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching locations:', error);
+    throw error;
+  }
+};
+
+export const getAvailableBatches = async (locationId, medicineId) => {
+  try {
+    const response = await get(`${apiDomain}/api/v1/batches/available?locationId=${locationId}&medicineId=${medicineId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching available batches:', error);
+    throw error;
+  }
+};
+
+export const updateBatch = async (batchId, updateData) => {
+  try {
+    const response = await _fetch(`${apiDomain}/api/v1/batches/${batchId}`, "PATCH", updateData);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating batch:', error);
+    throw error;
+  }
+};
+
 const _fetch = async (url, method, data = null, props, token = null) => {
   let userToken;
   if (token !== null) {
@@ -70,22 +120,40 @@ const _fetch = async (url, method, data = null, props, token = null) => {
 
   let response;
   
-  if (method !== "GET") {
-    const body = data ? data : null;
-    
-    // Use the authenticated API instance for requests that need auth
-    if (userToken && userToken.token) {
-      response = await api.post(url.replace(apiDomain + '/api', ''), body);
-    } else {
-      // For requests without auth (like login), use full URL
-      response = await api.post(url, body);
-    }
-  } else {
+  if (method === "GET") {
     // Use the authenticated API instance for GET requests
     if (userToken && userToken.token) {
       response = await api.get(url.replace(apiDomain + '/api', ''));
     } else {
       response = await api.get(url);
+    }
+  } else {
+    // Handle POST, PATCH, PUT, DELETE requests
+    const body = data ? data : null;
+    
+    // Use the authenticated API instance for requests that need auth
+    if (userToken && userToken.token) {
+      const endpoint = url.replace(apiDomain + '/api', '');
+      if (method === "PATCH") {
+        response = await api.patch(endpoint, body);
+      } else if (method === "PUT") {
+        response = await api.put(endpoint, body);
+      } else if (method === "DELETE") {
+        response = await api.delete(endpoint);
+      } else {
+        response = await api.post(endpoint, body);
+      }
+    } else {
+      // For requests without auth (like login), use full URL
+      if (method === "PATCH") {
+        response = await api.patch(url, body);
+      } else if (method === "PUT") {
+        response = await api.put(url, body);
+      } else if (method === "DELETE") {
+        response = await api.delete(url);
+      } else {
+        response = await api.post(url, body);
+      }
     }
   }
   

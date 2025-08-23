@@ -23,6 +23,7 @@ import PageWrapper from "../common/PageWrapper";
 const MedicineStock = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedMedicineId, setSelectedMedicineId] = useState(null);
   const [locations, setLocations] = useState([]);
   const [selectedLocationId, setSelectedLocationId] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -601,7 +602,13 @@ const MedicineStock = () => {
                           </Tooltip>
                           <Tooltip content="View All Batches">
                             <button 
-                              onClick={() => setIsOpen(true)} 
+                              onClick={() => {
+                                console.log('Setting selectedMedicineId to:', item.medicineId);
+                                console.log('Current item data:', item);
+                                // Set medicine ID and open modal directly
+                                setSelectedMedicineId(item.medicineId);
+                                setIsOpen(true);
+                              }} 
                               className="group relative flex items-center justify-center w-8 h-8 text-green-600 hover:text-white bg-green-50 hover:bg-green-600 border border-green-200 hover:border-green-600 rounded-lg transition-all duration-200"
                             >
                               <HiViewList className="text-lg" />
@@ -622,7 +629,20 @@ const MedicineStock = () => {
           onPageChange={handlePageChange}
         />
         
-        {isOpen && <ViewStock isOpen={isOpen} onClose={() => setIsOpen(false)} />}
+        {isOpen && (
+          <>
+            {console.log('Rendering ViewStock with selectedMedicineId:', selectedMedicineId)}
+            <ViewStock 
+              isOpen={isOpen} 
+              onClose={() => {
+                console.log('Closing ViewStock modal');
+                setIsOpen(false);
+                setSelectedMedicineId(null);
+              }} 
+              selectedMedicineId={selectedMedicineId}
+            />
+          </>
+        )}
         {isModalOpen && (
           <AddMedicineModal
             open={isModalOpen}
