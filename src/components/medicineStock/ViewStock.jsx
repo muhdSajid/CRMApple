@@ -28,6 +28,7 @@ const ViewStock = ({ isOpen, onClose, selectedMedicineId = null }) => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [saving, setSaving] = useState(false);
   const [tableData, setTableData] = useState([]);
+  const [showDeletePopover, setShowDeletePopover] = useState(null); // null or index of item to delete
   const [newBatch, setNewBatch] = useState({
     batchName: '',
     medicineId: '', // Will be set by useEffect when selectedMedicineId is available
@@ -138,6 +139,20 @@ const ViewStock = ({ isOpen, onClose, selectedMedicineId = null }) => {
 
     fetchBatches();
   }, [isOpen, selectedMedicineId, locations, purchaseTypes]);
+
+  // Close popover when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showDeletePopover !== null && !event.target.closest('.delete-popover-container')) {
+        setShowDeletePopover(null);
+      }
+    };
+
+    if (showDeletePopover !== null) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showDeletePopover]);
 
   // Update selected medicine when prop changes
   useEffect(() => {
@@ -402,11 +417,18 @@ const ViewStock = ({ isOpen, onClose, selectedMedicineId = null }) => {
   };
 
   const handleDelete = (index) => {
-    if (window.confirm('Are you sure you want to delete this stock entry?')) {
-      const updatedData = tableData.filter((_, i) => i !== index);
-      setTableData(updatedData);
-      toast.success('Stock entry deleted successfully');
-    }
+    setShowDeletePopover(index);
+  };
+
+  const confirmDelete = (index) => {
+    const updatedData = tableData.filter((_, i) => i !== index);
+    setTableData(updatedData);
+    toast.success('Batch deleted successfully');
+    setShowDeletePopover(null);
+  };
+
+  const cancelDelete = () => {
+    setShowDeletePopover(null);
   };
 
   const formatDate = (dateString) => {
@@ -422,7 +444,7 @@ const ViewStock = ({ isOpen, onClose, selectedMedicineId = null }) => {
   };
 
   return (
-    <Modal show={isOpen} size="7xl" onClose={onClose}>
+    <Modal show={isOpen} size="7xl" onClose={onClose} className="h-[90vh]">
       <ModalHeader>
         <div className="flex justify-between items-center w-full">
           <h2 className="text-lg font-semibold">Medicine Stock</h2>
@@ -438,7 +460,7 @@ const ViewStock = ({ isOpen, onClose, selectedMedicineId = null }) => {
           </div>
         </div>
       </ModalHeader>
-      <ModalBody>
+      <ModalBody className="h-[75vh] overflow-y-auto pb-20">
         <div className="overflow-x-auto">
           <Table
             hoverable
@@ -576,7 +598,7 @@ const ViewStock = ({ isOpen, onClose, selectedMedicineId = null }) => {
               )}
               
               {tableData.map((item, index) => (
-                <TableRow key={item.id || index}>
+                <TableRow key={item.id || index} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
                   <TableCell className="flex items-center gap-2">
                     {item.badge && (
                       <span className={`w-3 h-3 rounded-full ${item.badge}`}></span>
@@ -720,13 +742,38 @@ const ViewStock = ({ isOpen, onClose, selectedMedicineId = null }) => {
                           >
                             <FaEdit size={14} />
                           </button>
-                          <button 
-                            onClick={() => handleDelete(index)}
-                            className="text-gray-600 hover:text-red-500 p-1"
-                            title="Delete"
-                          >
-                            <FaTrash size={14} />
-                          </button>
+                          <div className="relative inline-block delete-popover-container">
+                            <button 
+                              onClick={() => handleDelete(index)}
+                              className="text-gray-600 hover:text-red-500 p-1"
+                              title="Delete"
+                            >
+                              <FaTrash size={14} />
+                            </button>
+                            {showDeletePopover === index && (
+                              <div className={`absolute right-8 top-0 bg-white border border-gray-200 rounded-lg shadow-lg p-3 z-[100] min-w-[200px] ${
+                                index >= tableData.length - 2 ? 'translate-y-[-50%]' : 'translate-y-0'
+                              }`}>
+                                <p className="text-sm text-gray-700 mb-3">
+                                  Delete this batch?
+                                </p>
+                                <div className="flex justify-end space-x-2">
+                                  <button
+                                    onClick={cancelDelete}
+                                    className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded border"
+                                  >
+                                    Cancel
+                                  </button>
+                                  <button
+                                    onClick={() => confirmDelete(index)}
+                                    className="px-3 py-1 text-xs bg-red-500 hover:bg-red-600 text-white rounded"
+                                  >
+                                    Delete
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
                         </>
                       )}
                     </div>
