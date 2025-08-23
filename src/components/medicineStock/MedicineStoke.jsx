@@ -22,7 +22,6 @@ import PageWrapper from "../common/PageWrapper";
 
 const MedicineStock = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedMedicineId, setSelectedMedicineId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [locations, setLocations] = useState([]);
   const [selectedLocationId, setSelectedLocationId] = useState(null);
@@ -602,10 +601,7 @@ const MedicineStock = () => {
                           </Tooltip>
                           <Tooltip content="View All Batches">
                             <button 
-                              onClick={() => {
-                                setSelectedMedicineId(item.medicineId);
-                                setIsOpen(true);
-                              }} 
+                              onClick={() => setIsOpen(true)} 
                               className="group relative flex items-center justify-center w-8 h-8 text-green-600 hover:text-white bg-green-50 hover:bg-green-600 border border-green-200 hover:border-green-600 rounded-lg transition-all duration-200"
                             >
                               <HiViewList className="text-lg" />
@@ -626,17 +622,7 @@ const MedicineStock = () => {
           onPageChange={handlePageChange}
         />
         
-        {isOpen && (
-          <ViewStock 
-            isOpen={isOpen} 
-            onClose={() => {
-              setIsOpen(false);
-              setSelectedMedicineId(null);
-            }} 
-            medicineId={selectedMedicineId}
-            locationId={selectedLocationId}
-          />
-        )}
+        {isOpen && <ViewStock isOpen={isOpen} onClose={() => setIsOpen(false)} />}
         {isModalOpen && (
           <AddMedicineModal
             open={isModalOpen}
