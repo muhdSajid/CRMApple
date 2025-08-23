@@ -110,6 +110,16 @@ export const updateBatch = async (batchId, updateData) => {
   }
 };
 
+export const softDeleteBatch = async (batchId) => {
+  try {
+    const response = await _fetch(`${apiDomain}/api/v1/batches/${batchId}/soft`, "DELETE", null);
+    return response.data;
+  } catch (error) {
+    console.error('Error soft deleting batch:', error);
+    throw error;
+  }
+};
+
 const _fetch = async (url, method, data = null, props, token = null) => {
   let userToken;
   if (token !== null) {

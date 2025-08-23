@@ -15,7 +15,7 @@ import {
   Spinner,
 } from "flowbite-react";
 import { FaEdit, FaTrash, FaPlus } from "react-icons/fa";
-import { getPurchaseTypes, createBatch, getLocations, getAvailableBatches, updateBatch } from "../../service/apiService";
+import { getPurchaseTypes, createBatch, getLocations, getAvailableBatches, updateBatch, softDeleteBatch } from "../../service/apiService";
 import { toast } from "react-toastify";
 
 const ViewStock = ({ isOpen, onClose, selectedMedicineId = null }) => {
@@ -420,11 +420,56 @@ const ViewStock = ({ isOpen, onClose, selectedMedicineId = null }) => {
     setShowDeletePopover(index);
   };
 
-  const confirmDelete = (index) => {
-    const updatedData = tableData.filter((_, i) => i !== index);
-    setTableData(updatedData);
-    toast.success('Batch deleted successfully');
-    setShowDeletePopover(null);
+  const confirmDelete = async (index) => {
+    try {
+      setSaving(true);
+      const currentItem = tableData[index];
+      
+      console.log('Soft deleting batch with ID:', currentItem.id);
+      
+      // Call the API to soft delete the batch
+      await softDeleteBatch(currentItem.id);
+      
+      // Refresh the batch list after successful deletion
+      if (locations.length > 0 && selectedMedicineId) {
+        const locationId = locations[0].id;
+        const updatedBatches = await getAvailableBatches(locationId, selectedMedicineId);
+        
+        // Transform the updated response
+        const transformedBatches = updatedBatches.map(batch => {
+          const purchaseType = purchaseTypes.find(pt => pt.id === batch.purchaseTypeId);
+          
+          return {
+            id: batch.id,
+            batchName: batch.batchName,
+            expiryDate: batch.expiryDate.split('T')[0],
+            initialQuantity: batch.initialQuantity,
+            currentQuantity: batch.currentQuantity,
+            totalPrice: batch.totalPrice,
+            unitPrice: batch.unitPrice,
+            purchaseType: purchaseType ? purchaseType.name : (batch.purchaseTypeId === 1 ? 'Purchase' : 'Donation'),
+            medicineId: batch.medicineId,
+            locationId: batch.locationId,
+            isActive: batch.isActive
+          };
+        });
+        
+        setTableData(transformedBatches);
+      } else {
+        // Fallback: Remove from local state if API refresh fails
+        const updatedData = tableData.filter((_, i) => i !== index);
+        setTableData(updatedData);
+      }
+      
+      setShowDeletePopover(null);
+      toast.success('Batch deleted successfully');
+    } catch (error) {
+      console.error('Error deleting batch:', error);
+      toast.error(`Failed to delete batch: ${error.message || 'Unknown error'}`);
+      setShowDeletePopover(null);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const cancelDelete = () => {
@@ -760,14 +805,17 @@ const ViewStock = ({ isOpen, onClose, selectedMedicineId = null }) => {
                                 <div className="flex justify-end space-x-2">
                                   <button
                                     onClick={cancelDelete}
-                                    className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded border"
+                                    disabled={saving}
+                                    className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded border disabled:opacity-50"
                                   >
                                     Cancel
                                   </button>
                                   <button
                                     onClick={() => confirmDelete(index)}
-                                    className="px-3 py-1 text-xs bg-red-500 hover:bg-red-600 text-white rounded"
+                                    disabled={saving}
+                                    className="px-3 py-1 text-xs bg-red-500 hover:bg-red-600 text-white rounded disabled:opacity-50 flex items-center"
                                   >
+                                    {saving && <Spinner size="xs" className="mr-1" />}
                                     Delete
                                   </button>
                                 </div>
