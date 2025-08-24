@@ -18,8 +18,9 @@ import { FaEdit, FaTrash, FaPlus } from "react-icons/fa";
 import { getPurchaseTypes, createBatch, getLocations, getAvailableBatches, updateBatch, softDeleteBatch, getMedicineDetails } from "../../service/apiService";
 import { toast } from "react-toastify";
 
-const ViewStock = ({ isOpen, onClose, selectedMedicineId = null, medicineData = null, onBatchAdded = null }) => {
+const ViewStock = ({ isOpen, onClose, selectedMedicineId = null, selectedLocationId = null, medicineData = null, onBatchAdded = null }) => {
   console.log('ViewStock component rendered with selectedMedicineId:', selectedMedicineId);
+  console.log('ViewStock component rendered with selectedLocationId:', selectedLocationId);
   console.log('ViewStock component rendered with medicineData:', medicineData);
   
   const [editingRow, setEditingRow] = useState(null);
@@ -131,13 +132,21 @@ const ViewStock = ({ isOpen, onClose, selectedMedicineId = null, medicineData = 
   // Fetch available batches when modal opens and selectedMedicineId is available
   useEffect(() => {
     const fetchBatches = async () => {
-      if (isOpen && selectedMedicineId && locations.length > 0) {
+      if (isOpen && selectedMedicineId && (selectedLocationId || locations.length > 0)) {
         try {
           setLoading(true);
-          console.log('Fetching batches for medicineId:', selectedMedicineId, 'and locationId:', locations[0].id);
           
-          // Use first location as default for now
-          const locationId = locations[0].id;
+          // Use selectedLocationId if provided, otherwise fall back to first location
+          const locationId = selectedLocationId || locations[0]?.id;
+          
+          if (!locationId) {
+            console.error('No location ID available for batch fetch');
+            setTableData([]);
+            return;
+          }
+          
+          console.log('Fetching batches for medicineId:', selectedMedicineId, 'and locationId:', locationId);
+          
           const batchesResponse = await getAvailableBatches(locationId, selectedMedicineId);
           console.log('Batches response:', batchesResponse);
           
@@ -174,7 +183,7 @@ const ViewStock = ({ isOpen, onClose, selectedMedicineId = null, medicineData = 
     };
 
     fetchBatches();
-  }, [isOpen, selectedMedicineId, locations, purchaseTypes]);
+  }, [isOpen, selectedMedicineId, selectedLocationId, locations, purchaseTypes]);
 
   // Close popover when clicking outside
   useEffect(() => {
@@ -200,15 +209,22 @@ const ViewStock = ({ isOpen, onClose, selectedMedicineId = null, medicineData = 
     }
   }, [selectedMedicineId]);
 
-  // Update location ID when locations are loaded
+  // Update location ID when locations are loaded or selectedLocationId changes
   useEffect(() => {
-    if (locations.length > 0 && !newBatch.locationId) {
+    if (selectedLocationId && locations.length > 0) {
+      // Use the passed selectedLocationId
+      setNewBatch(prev => ({
+        ...prev,
+        locationId: selectedLocationId
+      }));
+    } else if (locations.length > 0 && !newBatch.locationId) {
+      // Fallback to first location if no selectedLocationId is provided
       setNewBatch(prev => ({
         ...prev,
         locationId: locations[0].id
       }));
     }
-  }, [locations, newBatch.locationId]);
+  }, [locations, selectedLocationId, newBatch.locationId]);
 
   const handleEdit = (index) => {
     setEditingRow(index);
@@ -231,30 +247,32 @@ const ViewStock = ({ isOpen, onClose, selectedMedicineId = null, medicineData = 
       await updateBatch(currentItem.id, updateData);
       
       // Refresh the batch list after successful update
-      if (locations.length > 0 && selectedMedicineId) {
-        const locationId = locations[0].id;
-        const updatedBatches = await getAvailableBatches(locationId, selectedMedicineId);
+      if ((selectedLocationId || locations.length > 0) && selectedMedicineId) {
+        const locationId = selectedLocationId || locations[0]?.id;
+        if (locationId) {
+          const updatedBatches = await getAvailableBatches(locationId, selectedMedicineId);
         
-        // Transform the updated response
-        const transformedBatches = updatedBatches.map(batch => {
-          const purchaseType = purchaseTypes.find(pt => pt.id === batch.purchaseTypeId);
+          // Transform the updated response
+          const transformedBatches = updatedBatches.map(batch => {
+            const purchaseType = purchaseTypes.find(pt => pt.id === batch.purchaseTypeId);
+            
+            return {
+              id: batch.id,
+              batchName: batch.batchName,
+              expiryDate: batch.expiryDate.split('T')[0],
+              initialQuantity: batch.initialQuantity,
+              currentQuantity: batch.currentQuantity,
+              totalPrice: batch.totalPrice,
+              unitPrice: batch.unitPrice,
+              purchaseType: purchaseType ? purchaseType.name : (batch.purchaseTypeId === 1 ? 'Purchase' : 'Donation'),
+              medicineId: batch.medicineId,
+              locationId: batch.locationId,
+              isActive: batch.isActive
+            };
+          });
           
-          return {
-            id: batch.id,
-            batchName: batch.batchName,
-            expiryDate: batch.expiryDate.split('T')[0],
-            initialQuantity: batch.initialQuantity,
-            currentQuantity: batch.currentQuantity,
-            totalPrice: batch.totalPrice,
-            unitPrice: batch.unitPrice,
-            purchaseType: purchaseType ? purchaseType.name : (batch.purchaseTypeId === 1 ? 'Purchase' : 'Donation'),
-            medicineId: batch.medicineId,
-            locationId: batch.locationId,
-            isActive: batch.isActive
-          };
-        });
-        
-        setTableData(transformedBatches);
+          setTableData(transformedBatches);
+        }
       }
       
       setEditingRow(null);
@@ -291,7 +309,7 @@ const ViewStock = ({ isOpen, onClose, selectedMedicineId = null, medicineData = 
       totalPrice: '',
       unitPrice: '',
       purchaseTypeId: purchaseTypes.length > 0 ? purchaseTypes[0].id : 1,
-      locationId: locations.length > 0 ? locations[0].id : 1, // Default to 1 if no locations loaded yet
+      locationId: selectedLocationId || (locations.length > 0 ? locations[0].id : 1), // Use selectedLocationId if available
       isActive: true
     };
     console.log('Setting form data:', formData);
@@ -322,8 +340,8 @@ const ViewStock = ({ isOpen, onClose, selectedMedicineId = null, medicineData = 
       return;
     }
 
-    // Ensure locationId is set (use default if needed)
-    const locationId = newBatch.locationId || (locations.length > 0 ? locations[0].id : 1);
+    // Ensure locationId is set (use selectedLocationId if available, otherwise use default)
+    const locationId = selectedLocationId || newBatch.locationId || (locations.length > 0 ? locations[0].id : 1);
     console.log('Using locationId:', locationId);
     
     if (!locationId) {
@@ -355,30 +373,32 @@ const ViewStock = ({ isOpen, onClose, selectedMedicineId = null, medicineData = 
       console.log('Batch created successfully:', createdBatch);
 
       // Refresh the batch list by fetching updated data from API
-      if (locations.length > 0) {
-        const locationId = locations[0].id;
-        const updatedBatches = await getAvailableBatches(locationId, selectedMedicineId);
+      if (selectedLocationId || locations.length > 0) {
+        const refreshLocationId = selectedLocationId || locations[0]?.id;
+        if (refreshLocationId) {
+          const updatedBatches = await getAvailableBatches(refreshLocationId, selectedMedicineId);
         
-        // Transform the updated response
-        const transformedBatches = updatedBatches.map(batch => {
-          const purchaseType = purchaseTypes.find(pt => pt.id === batch.purchaseTypeId);
+          // Transform the updated response
+          const transformedBatches = updatedBatches.map(batch => {
+            const purchaseType = purchaseTypes.find(pt => pt.id === batch.purchaseTypeId);
+            
+            return {
+              id: batch.id,
+              batchName: batch.batchName,
+              expiryDate: batch.expiryDate.split('T')[0],
+              initialQuantity: batch.initialQuantity,
+              currentQuantity: batch.currentQuantity,
+              totalPrice: batch.totalPrice,
+              unitPrice: batch.unitPrice,
+              purchaseType: purchaseType ? purchaseType.name : (batch.purchaseTypeId === 1 ? 'Purchase' : 'Donation'),
+              medicineId: batch.medicineId,
+              locationId: batch.locationId,
+              isActive: batch.isActive
+            };
+          });
           
-          return {
-            id: batch.id,
-            batchName: batch.batchName,
-            expiryDate: batch.expiryDate.split('T')[0],
-            initialQuantity: batch.initialQuantity,
-            currentQuantity: batch.currentQuantity,
-            totalPrice: batch.totalPrice,
-            unitPrice: batch.unitPrice,
-            purchaseType: purchaseType ? purchaseType.name : (batch.purchaseTypeId === 1 ? 'Purchase' : 'Donation'),
-            medicineId: batch.medicineId,
-            locationId: batch.locationId,
-            isActive: batch.isActive
-          };
-        });
-        
-        setTableData(transformedBatches);
+          setTableData(transformedBatches);
+        }
       }
       setShowAddForm(false);
       
@@ -422,7 +442,7 @@ const ViewStock = ({ isOpen, onClose, selectedMedicineId = null, medicineData = 
       totalPrice: '',
       unitPrice: '',
       purchaseTypeId: purchaseTypes.length > 0 ? purchaseTypes[0].id : 1,
-      locationId: locations.length > 0 ? locations[0].id : 1, // Default to 1 if no locations loaded yet
+      locationId: selectedLocationId || (locations.length > 0 ? locations[0].id : 1), // Use selectedLocationId if available
       isActive: true
     });
   };
@@ -488,30 +508,32 @@ const ViewStock = ({ isOpen, onClose, selectedMedicineId = null, medicineData = 
       await softDeleteBatch(currentItem.id);
       
       // Refresh the batch list after successful deletion
-      if (locations.length > 0 && selectedMedicineId) {
-        const locationId = locations[0].id;
-        const updatedBatches = await getAvailableBatches(locationId, selectedMedicineId);
+      if ((selectedLocationId || locations.length > 0) && selectedMedicineId) {
+        const locationId = selectedLocationId || locations[0]?.id;
+        if (locationId) {
+          const updatedBatches = await getAvailableBatches(locationId, selectedMedicineId);
         
-        // Transform the updated response
-        const transformedBatches = updatedBatches.map(batch => {
-          const purchaseType = purchaseTypes.find(pt => pt.id === batch.purchaseTypeId);
+          // Transform the updated response
+          const transformedBatches = updatedBatches.map(batch => {
+            const purchaseType = purchaseTypes.find(pt => pt.id === batch.purchaseTypeId);
+            
+            return {
+              id: batch.id,
+              batchName: batch.batchName,
+              expiryDate: batch.expiryDate.split('T')[0],
+              initialQuantity: batch.initialQuantity,
+              currentQuantity: batch.currentQuantity,
+              totalPrice: batch.totalPrice,
+              unitPrice: batch.unitPrice,
+              purchaseType: purchaseType ? purchaseType.name : (batch.purchaseTypeId === 1 ? 'Purchase' : 'Donation'),
+              medicineId: batch.medicineId,
+              locationId: batch.locationId,
+              isActive: batch.isActive
+            };
+          });
           
-          return {
-            id: batch.id,
-            batchName: batch.batchName,
-            expiryDate: batch.expiryDate.split('T')[0],
-            initialQuantity: batch.initialQuantity,
-            currentQuantity: batch.currentQuantity,
-            totalPrice: batch.totalPrice,
-            unitPrice: batch.unitPrice,
-            purchaseType: purchaseType ? purchaseType.name : (batch.purchaseTypeId === 1 ? 'Purchase' : 'Donation'),
-            medicineId: batch.medicineId,
-            locationId: batch.locationId,
-            isActive: batch.isActive
-          };
-        });
-        
-        setTableData(transformedBatches);
+          setTableData(transformedBatches);
+        }
       } else {
         // Fallback: Remove from local state if API refresh fails
         const updatedData = tableData.filter((_, i) => i !== index);

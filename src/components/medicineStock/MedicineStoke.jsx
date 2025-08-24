@@ -685,6 +685,7 @@ const MedicineStock = () => {
                 setSelectedMedicineData(null);
               }} 
               selectedMedicineId={selectedMedicineId}
+              selectedLocationId={selectedLocationId}
               medicineData={selectedMedicineData}
               onBatchAdded={fetchMedicineData}
             />
