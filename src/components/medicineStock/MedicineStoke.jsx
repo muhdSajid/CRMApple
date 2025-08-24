@@ -16,6 +16,7 @@ import { HiViewList } from "react-icons/hi";
 import PaginationComponant from "../common/Pagination";
 import ViewStock from "./ViewStock";
 import { AddMedicineModal } from "./AddMedicineModal";
+import { EditMedicineModal } from "./EditMedicineModal";
 import { get } from "../../service/apiService";
 import { apiDomain } from "../../constants/constants";
 import PageWrapper from "../common/PageWrapper";
@@ -23,7 +24,9 @@ import PageWrapper from "../common/PageWrapper";
 const MedicineStock = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedMedicineId, setSelectedMedicineId] = useState(null);
+  const [editingMedicineId, setEditingMedicineId] = useState(null);
   const [locations, setLocations] = useState([]);
   const [selectedLocationId, setSelectedLocationId] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -33,6 +36,10 @@ const MedicineStock = () => {
   const [medicineError, setMedicineError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState({
+    title: "Medicine added successfully!",
+    description: "The medicine has been added to the inventory and the table has been updated."
+  });
   const [stockStatusFilter, setStockStatusFilter] = useState("");
   const [medicineTypeFilter, setMedicineTypeFilter] = useState("");
   const [tempStockStatusFilter, setTempStockStatusFilter] = useState("");
@@ -150,12 +157,27 @@ const MedicineStock = () => {
     setSelectedLocationId(locationId);
   };
 
-  const handleShowSuccess = () => {
+  const handleShowSuccess = (message) => {
+    if (message) {
+      setSuccessMessage(message);
+    } else {
+      setSuccessMessage({
+        title: "Medicine added successfully!",
+        description: "The medicine has been added to the inventory and the table has been updated."
+      });
+    }
     setShowSuccess(true);
     // Auto-hide success message after 5 seconds
     setTimeout(() => {
       setShowSuccess(false);
     }, 5000);
+  };
+
+  const handleShowEditSuccess = () => {
+    handleShowSuccess({
+      title: "Medicine updated successfully!",
+      description: "The medicine details have been updated and the table has been refreshed."
+    });
   };
 
   const handleApplyFilters = () => {
@@ -345,10 +367,10 @@ const MedicineStock = () => {
                 </div>
                 <div className="ml-3">
                   <p className="text-sm font-medium text-green-800">
-                    Medicine added successfully!
+                    {successMessage.title}
                   </p>
                   <p className="text-xs text-green-600 mt-1">
-                    The medicine has been added to the inventory and the table has been updated.
+                    {successMessage.description}
                   </p>
                 </div>
               </div>
@@ -602,6 +624,17 @@ const MedicineStock = () => {
                             </button>
                           </Tooltip>
                           */}
+                          <Tooltip content="Edit Medicine">
+                            <button 
+                              onClick={() => {
+                                setEditingMedicineId(item.medicineId);
+                                setIsEditModalOpen(true);
+                              }} 
+                              className="group relative flex items-center justify-center w-8 h-8 text-yellow-600 hover:text-white bg-yellow-50 hover:bg-yellow-600 border border-yellow-200 hover:border-yellow-600 rounded-lg transition-all duration-200"
+                            >
+                              <MdEdit className="text-lg" />
+                            </button>
+                          </Tooltip>
                           <Tooltip content="View All Batches">
                             <button 
                               onClick={() => {
@@ -651,6 +684,18 @@ const MedicineStock = () => {
             onClose={() => setIsModalOpen(false)}
             onMedicineAdded={fetchMedicineData}
             onShowSuccess={handleShowSuccess}
+          />
+        )}
+        {isEditModalOpen && (
+          <EditMedicineModal
+            open={isEditModalOpen}
+            onClose={() => {
+              setIsEditModalOpen(false);
+              setEditingMedicineId(null);
+            }}
+            medicineId={editingMedicineId}
+            onMedicineUpdated={fetchMedicineData}
+            onShowSuccess={handleShowEditSuccess}
           />
         )}
       </div>

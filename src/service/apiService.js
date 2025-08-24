@@ -60,6 +60,34 @@ export const addMedicine = async (medicineData) => {
   }
 };
 
+export const getMedicineDetails = async (medicineId) => {
+  try {
+    const response = await get(`${apiDomain}/api/v1/medicines/${medicineId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching medicine details:', error);
+    throw error;
+  }
+};
+
+export const updateMedicine = async (medicineId, medicineData) => {
+  try {
+    // Prepare the data with the medicine ID included as required by the API
+    const apiData = {
+      id: parseInt(medicineId),
+      medicineName: medicineData.medicineName,
+      typeId: medicineData.typeId,
+      stockThreshold: medicineData.stockThreshold
+    };
+    
+    const response = await _fetch(`${apiDomain}/api/v1/medicines/${medicineId}`, "PUT", apiData);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating medicine:', error);
+    throw error;
+  }
+};
+
 export const createBatch = async (batchData) => {
   try {
     const response = await post(`${apiDomain}/api/v1/batches`, batchData);
