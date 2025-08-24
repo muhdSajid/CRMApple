@@ -23,6 +23,11 @@ const Navbar = () => {
     setShowMenu(false);
   };
 
+  const handleChangePassword = () => {
+    navigate("/change-password");
+    setShowMenu(false);
+  };
+
   return (
     <nav className="fixed top-0 left-[220px] w-[calc(100%-220px)] z-50 bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
       <div className="px-3 py-2 lg:px-5 lg:pl-3">
@@ -62,9 +67,12 @@ const Navbar = () => {
                     </a>
                   </li>
                   <li>
-                    <a href="/" className="block px-4 py-2 hover:bg-gray-100">
-                      Settings
-                    </a>
+                    <button 
+                      onClick={handleChangePassword}
+                      className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                    >
+                      Change Password
+                    </button>
                   </li>
                   <li>
                     <button 

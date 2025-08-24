@@ -13,6 +13,7 @@ import FaqPage from "./components/faq/Faq";
 import UserGuide from "./components/common/userGuide/UserGuide";
 import LoginPage from "./components/auth/Login";
 import SignupPage from "./components/auth/Signup";
+import ChangePassword from "./components/auth/ChangePassword";
 import UserManagement from "./components/usermanagment/UserManagment";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import NetworkRequestTracker from "./components/common/NetworkRequestTracker";
@@ -46,6 +47,7 @@ function App() {
             <Route path="/faq" element={<FaqPage />} />
             <Route path="/userguide" element={<UserGuide />} />
             <Route path="/usermanagment" element={<UserManagement />} />
+            <Route path="/change-password" element={<ChangePassword />} />
           </Route>
         </Routes>
       </Router>

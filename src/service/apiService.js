@@ -148,6 +148,17 @@ export const softDeleteBatch = async (batchId) => {
   }
 };
 
+// Password change function
+export const changePassword = async (passwordData) => {
+  try {
+    const response = await post(`${apiDomain}/api/v1/auth/change-password`, passwordData);
+    return response.data;
+  } catch (error) {
+    console.error('Error changing password:', error);
+    throw error;
+  }
+};
+
 const _fetch = async (url, method, data = null, props, token = null) => {
   let userToken;
   if (token !== null) {
