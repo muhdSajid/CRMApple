@@ -686,6 +686,7 @@ const MedicineStock = () => {
               }} 
               selectedMedicineId={selectedMedicineId}
               medicineData={selectedMedicineData}
+              onBatchAdded={fetchMedicineData}
             />
           </>
         )}

@@ -18,7 +18,7 @@ import { FaEdit, FaTrash, FaPlus } from "react-icons/fa";
 import { getPurchaseTypes, createBatch, getLocations, getAvailableBatches, updateBatch, softDeleteBatch, getMedicineDetails } from "../../service/apiService";
 import { toast } from "react-toastify";
 
-const ViewStock = ({ isOpen, onClose, selectedMedicineId = null, medicineData = null }) => {
+const ViewStock = ({ isOpen, onClose, selectedMedicineId = null, medicineData = null, onBatchAdded = null }) => {
   console.log('ViewStock component rendered with selectedMedicineId:', selectedMedicineId);
   console.log('ViewStock component rendered with medicineData:', medicineData);
   
@@ -259,6 +259,12 @@ const ViewStock = ({ isOpen, onClose, selectedMedicineId = null, medicineData = 
       
       setEditingRow(null);
       toast.success('Batch updated successfully');
+      
+      // Notify parent component to refresh medicine data
+      if (onBatchAdded) {
+        console.log('Calling onBatchAdded callback to refresh parent data after batch update');
+        onBatchAdded();
+      }
     } catch (error) {
       console.error('Error updating batch:', error);
       toast.error(`Failed to update batch: ${error.message || 'Unknown error'}`);
@@ -391,6 +397,12 @@ const ViewStock = ({ isOpen, onClose, selectedMedicineId = null, medicineData = 
       });
       
       toast.success('New batch added successfully');
+      
+      // Notify parent component to refresh medicine data
+      if (onBatchAdded) {
+        console.log('Calling onBatchAdded callback to refresh parent data');
+        onBatchAdded();
+      }
     } catch (error) {
       console.error('Error saving batch:', error);
       toast.error(`Failed to save batch: ${error.message || 'Unknown error'}`);
@@ -508,6 +520,12 @@ const ViewStock = ({ isOpen, onClose, selectedMedicineId = null, medicineData = 
       
       setShowDeletePopover(null);
       toast.success('Batch deleted successfully');
+      
+      // Notify parent component to refresh medicine data
+      if (onBatchAdded) {
+        console.log('Calling onBatchAdded callback to refresh parent data after batch deletion');
+        onBatchAdded();
+      }
     } catch (error) {
       console.error('Error deleting batch:', error);
       toast.error(`Failed to delete batch: ${error.message || 'Unknown error'}`);
