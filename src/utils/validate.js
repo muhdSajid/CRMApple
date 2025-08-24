@@ -44,7 +44,9 @@ export const validateAddMedicine = (values) => {
     errors.medicineName = requiredVal;
   }
 
-  if (!values.stockThreshold || values.stockThreshold < 0) {
+  if (!values.stockThreshold.trim()) {
+    errors.stockThreshold = requiredVal;
+  } else if (isNaN(values.stockThreshold) || parseFloat(values.stockThreshold) < 0) {
     errors.stockThreshold = "Stock threshold must be a positive number";
   }
 

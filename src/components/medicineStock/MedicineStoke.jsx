@@ -595,15 +595,17 @@ const MedicineStock = () => {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-3">
+                          {/* Temporarily commented out - no functionality attached yet
                           <Tooltip content="Manage Batches">
                             <button className="group relative flex items-center justify-center w-8 h-8 text-blue-600 hover:text-white bg-blue-50 hover:bg-blue-600 border border-blue-200 hover:border-blue-600 rounded-lg transition-all duration-200">
                               <MdInventory className="text-lg" />
                             </button>
                           </Tooltip>
+                          */}
                           <Tooltip content="View All Batches">
                             <button 
                               onClick={() => {
-                                console.log('Setting selectedMedicineId to:', item.medicineId);
+                                console.log('Setting selectedMedicineId to:', item.medicineAId);
                                 console.log('Current item data:', item);
                                 // Set medicine ID and open modal directly
                                 setSelectedMedicineId(item.medicineId);

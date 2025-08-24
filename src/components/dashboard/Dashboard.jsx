@@ -125,10 +125,10 @@ const Dashboard = () => {
           )}
 
           <div className="flex items-center justify-end gap-2 mb-4">
-            <FilterPopover />
+            {/* <FilterPopover /> */}
             <select className="border border-gray-300 rounded-md px-3 py-1.5 text-sm">
-              <option>This Month</option>
-              <option>Last Month</option>
+              <option>This Year</option>
+              <option>Last Year</option>
             </select>
           </div>
 
@@ -152,7 +152,7 @@ const Dashboard = () => {
           />
 
           <div className="flex gap-2">
-            <FilterPopover />
+            {/* <FilterPopover /> */}
             <select className="border border-gray-300 rounded-md px-3 py-1.5 text-sm">
               <option>This Year</option>
               <option>Last Year</option>

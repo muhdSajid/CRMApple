@@ -14,7 +14,7 @@ export const AddMedicineModal = ({ open, onClose, onMedicineAdded, onShowSuccess
   const [medicineData, setMedicineData] = useState({
     medicineName: "",
     typeId: 1,
-    stockThreshold: 0,
+    stockThreshold: "",
   });
   const [errors, setErrors] = useState({
     medicineName: "",
@@ -59,11 +59,9 @@ export const AddMedicineModal = ({ open, onClose, onMedicineAdded, onShowSuccess
     const { id, value } = e.target;
     let processedValue = value;
 
-    // Convert typeId to number and stockThreshold to number
+    // Convert typeId to number, keep stockThreshold as string for validation
     if (id === 'typeId') {
       processedValue = parseInt(value, 10);
-    } else if (id === 'stockThreshold') {
-      processedValue = parseInt(value, 10) || 0;
     }
 
     setMedicineData({ ...medicineData, [id]: processedValue });
@@ -81,13 +79,20 @@ export const AddMedicineModal = ({ open, onClose, onMedicineAdded, onShowSuccess
     if (Object.keys(validationErrors).length === 0) {
       try {
         setIsSubmitting(true);
-        await addMedicine(medicineData);
+        
+        // Prepare data for API - convert stockThreshold to number
+        const apiData = {
+          ...medicineData,
+          stockThreshold: parseFloat(medicineData.stockThreshold)
+        };
+        
+        await addMedicine(apiData);
         
         // Reset form data
         setMedicineData({
           medicineName: "",
           typeId: medicineTypes.length > 0 ? medicineTypes[0].id : 1,
-          stockThreshold: 0,
+          stockThreshold: "",
         });
         setErrors({
           medicineName: "",
@@ -120,7 +125,7 @@ export const AddMedicineModal = ({ open, onClose, onMedicineAdded, onShowSuccess
       <ModalBody>
         <form className="grid grid-cols-2 gap-6 mx-5 mt-3">
           <div>
-            <Label>Medicine Name</Label>
+            <Label>Medicine Name <span className="text-red-500">*</span></Label>
             <input
               type="text"
               className="w-full border rounded-lg p-2.5 text-sm border-gray-300"
@@ -135,7 +140,7 @@ export const AddMedicineModal = ({ open, onClose, onMedicineAdded, onShowSuccess
           </div>
 
           <div>
-            <Label>Medicine Type</Label>
+            <Label>Medicine Type <span className="text-red-500">*</span></Label>
             <select
               className="w-full border rounded-lg p-2.5 text-sm border-gray-300"
               id="typeId"
@@ -159,10 +164,9 @@ export const AddMedicineModal = ({ open, onClose, onMedicineAdded, onShowSuccess
           </div>
 
           <div>
-            <Label>Stock Threshold</Label>
+            <Label>Stock Threshold <span className="text-red-500">*</span></Label>
             <input
-              type="number"
-              min="0"
+              type="text"
               className="w-full border rounded-lg p-2.5 text-sm border-gray-300"
               id="stockThreshold"
               onChange={handleChange}
