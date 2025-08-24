@@ -15,11 +15,12 @@ import {
   Spinner,
 } from "flowbite-react";
 import { FaEdit, FaTrash, FaPlus } from "react-icons/fa";
-import { getPurchaseTypes, createBatch, getLocations, getAvailableBatches, updateBatch, softDeleteBatch } from "../../service/apiService";
+import { getPurchaseTypes, createBatch, getLocations, getAvailableBatches, updateBatch, softDeleteBatch, getMedicineDetails } from "../../service/apiService";
 import { toast } from "react-toastify";
 
-const ViewStock = ({ isOpen, onClose, selectedMedicineId = null }) => {
+const ViewStock = ({ isOpen, onClose, selectedMedicineId = null, medicineData = null }) => {
   console.log('ViewStock component rendered with selectedMedicineId:', selectedMedicineId);
+  console.log('ViewStock component rendered with medicineData:', medicineData);
   
   const [editingRow, setEditingRow] = useState(null);
   const [purchaseTypes, setPurchaseTypes] = useState([]);
@@ -29,6 +30,7 @@ const ViewStock = ({ isOpen, onClose, selectedMedicineId = null }) => {
   const [saving, setSaving] = useState(false);
   const [tableData, setTableData] = useState([]);
   const [showDeletePopover, setShowDeletePopover] = useState(null); // null or index of item to delete
+  const [completeMedicineData, setCompleteMedicineData] = useState(null); // Store complete medicine data
   const [newBatch, setNewBatch] = useState({
     batchName: '',
     medicineId: '', // Will be set by useEffect when selectedMedicineId is available
@@ -91,6 +93,40 @@ const ViewStock = ({ isOpen, onClose, selectedMedicineId = null }) => {
 
     fetchData();
   }, [isOpen]);
+
+  // Fetch complete medicine details if stock threshold is missing
+  useEffect(() => {
+    const fetchCompleteMedicineData = async () => {
+      if (isOpen && selectedMedicineId && medicineData) {
+        // Check if stockThreshold is missing or undefined
+        if (medicineData.stockThreshold === undefined || medicineData.stockThreshold === null) {
+          try {
+            console.log('Stock threshold missing, fetching complete medicine details...');
+            const medicineDetails = await getMedicineDetails(selectedMedicineId);
+            console.log('Complete medicine details:', medicineDetails);
+            
+            // Update the complete medicine data with proper stock threshold
+            setCompleteMedicineData({
+              ...medicineData,
+              stockThreshold: medicineDetails.stockThreshold || 0
+            });
+          } catch (error) {
+            console.error('Error fetching complete medicine details:', error);
+            // Use the original data with 0 as fallback
+            setCompleteMedicineData({
+              ...medicineData,
+              stockThreshold: 0
+            });
+          }
+        } else {
+          // Use the passed medicine data if stock threshold is available
+          setCompleteMedicineData(medicineData);
+        }
+      }
+    };
+
+    fetchCompleteMedicineData();
+  }, [isOpen, selectedMedicineId, medicineData]);
 
   // Fetch available batches when modal opens and selectedMedicineId is available
   useEffect(() => {
@@ -387,11 +423,20 @@ const ViewStock = ({ isOpen, onClose, selectedMedicineId = null }) => {
       updatedBatch.currentQuantity = value;
     }
 
-    // Auto-calculate unit price when initial quantity or total price changes
+    // Auto-calculate unit price when initial quantity or total price changes (but not when unitPrice is manually changed)
     if (field === 'initialQuantity' || field === 'totalPrice') {
       const quantity = parseFloat(updatedBatch.initialQuantity) || 0;
       const totalPrice = parseFloat(updatedBatch.totalPrice) || 0;
       updatedBatch.unitPrice = quantity > 0 ? (totalPrice / quantity).toFixed(2) : 0;
+    }
+    
+    // If unit price is manually changed, also update total price accordingly
+    if (field === 'unitPrice') {
+      const quantity = parseFloat(updatedBatch.initialQuantity) || 0;
+      const unitPrice = parseFloat(value) || 0;
+      if (quantity > 0 && unitPrice > 0) {
+        updatedBatch.totalPrice = (quantity * unitPrice).toFixed(2);
+      }
     }
 
     setNewBatch(updatedBatch);
@@ -506,6 +551,36 @@ const ViewStock = ({ isOpen, onClose, selectedMedicineId = null }) => {
         </div>
       </ModalHeader>
       <ModalBody className="h-[75vh] overflow-y-auto pb-20">
+        {/* Medicine Information Section */}
+        {completeMedicineData && (
+          <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg shadow-sm">
+            <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+              <svg className="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Medicine Information
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-white p-3 rounded-lg border border-blue-100 shadow-sm">
+                <div className="text-sm font-medium text-gray-500 mb-1">Medicine Name</div>
+                <div className="text-lg font-semibold text-gray-800">{completeMedicineData.medicineName}</div>
+              </div>
+              <div className="bg-white p-3 rounded-lg border border-blue-100 shadow-sm">
+                <div className="text-sm font-medium text-gray-500 mb-1">Medicine Type</div>
+                <div className="text-lg font-semibold text-gray-800">
+                  {completeMedicineData.medicineTypeName || 'N/A'}
+                </div>
+              </div>
+              <div className="bg-white p-3 rounded-lg border border-blue-100 shadow-sm">
+                <div className="text-sm font-medium text-gray-500 mb-1">Stock Threshold</div>
+                <div className="text-lg font-semibold text-gray-800">
+                  {completeMedicineData.stockThreshold !== undefined ? completeMedicineData.stockThreshold : 0} units
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        
         <div className="overflow-x-auto">
           <Table
             hoverable
@@ -592,8 +667,8 @@ const ViewStock = ({ isOpen, onClose, selectedMedicineId = null }) => {
                       step="0.01"
                       placeholder="Unit price"
                       value={newBatch.unitPrice}
-                      readOnly
-                      className="w-full px-2 py-1 text-sm border border-gray-300 rounded bg-gray-100 cursor-not-allowed focus:outline-none"
+                      onChange={(e) => handleNewBatchChange('unitPrice', e.target.value)}
+                      className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-green-500"
                     />
                   </TableCell>
                   

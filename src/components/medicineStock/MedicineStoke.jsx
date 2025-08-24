@@ -26,6 +26,7 @@ const MedicineStock = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedMedicineId, setSelectedMedicineId] = useState(null);
+  const [selectedMedicineData, setSelectedMedicineData] = useState(null);
   const [editingMedicineId, setEditingMedicineId] = useState(null);
   const [locations, setLocations] = useState([]);
   const [selectedLocationId, setSelectedLocationId] = useState(null);
@@ -103,6 +104,7 @@ const MedicineStock = () => {
       setMedicineLoading(true);
       const url = `${apiDomain}/api/v1/medicine-list/location/${selectedLocationId}`;
       const response = await get(url);
+      console.log('Medicine list API response:', response.data);
       setMedicineData(response.data);
       setMedicineError(null);
     } catch (err) {
@@ -638,10 +640,17 @@ const MedicineStock = () => {
                           <Tooltip content="View All Batches">
                             <button 
                               onClick={() => {
-                                console.log('Setting selectedMedicineId to:', item.medicineAId);
+                                console.log('Setting selectedMedicineId to:', item.medicineId);
                                 console.log('Current item data:', item);
-                                // Set medicine ID and open modal directly
+                                console.log('Stock threshold from item:', item.stockThreshold);
+                                
+                                // Set medicine ID and medicine data, then open modal
                                 setSelectedMedicineId(item.medicineId);
+                                setSelectedMedicineData({
+                                  medicineName: item.medicineName,
+                                  medicineTypeName: item.medicineTypeName,
+                                  stockThreshold: item.stockThreshold
+                                });
                                 setIsOpen(true);
                               }} 
                               className="group relative flex items-center justify-center w-8 h-8 text-green-600 hover:text-white bg-green-50 hover:bg-green-600 border border-green-200 hover:border-green-600 rounded-lg transition-all duration-200"
@@ -673,8 +682,10 @@ const MedicineStock = () => {
                 console.log('Closing ViewStock modal');
                 setIsOpen(false);
                 setSelectedMedicineId(null);
+                setSelectedMedicineData(null);
               }} 
               selectedMedicineId={selectedMedicineId}
+              medicineData={selectedMedicineData}
             />
           </>
         )}
