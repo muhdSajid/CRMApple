@@ -189,6 +189,37 @@ export const createDeliveryCenter = async (centerData) => {
   }
 };
 
+// Patient-related API functions
+export const searchPatients = async (searchTerm) => {
+  try {
+    const response = await get(`${apiDomain}/api/v1/patients/search?searchTerm=${encodeURIComponent(searchTerm)}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error searching patients:', error);
+    throw error;
+  }
+};
+
+export const createPatient = async (patientData) => {
+  try {
+    const response = await _fetch(`${apiDomain}/api/v1/patients`, "POST", patientData);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating patient:', error);
+    throw error;
+  }
+};
+
+export const updatePatient = async (patientId, patientData) => {
+  try {
+    const response = await _fetch(`${apiDomain}/api/v1/patients/${patientId}`, "PUT", patientData);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating patient:', error);
+    throw error;
+  }
+};
+
 const _fetch = async (url, method, data = null, props, token = null) => {
   let userToken;
   if (token !== null) {

@@ -16,7 +16,7 @@ import {
 import DistributionListModal from "./DistributionListModal";
 import { useState, useEffect } from "react";
 import { FaCirclePlus } from "react-icons/fa6";
-import { getDeliveryCenterTypes, getLocations, getDeliveryCentersByLocationAndType, createDeliveryCenter } from "../../service/apiService";
+import { getDeliveryCenterTypes, getLocations, getDeliveryCentersByLocationAndType, createDeliveryCenter, searchPatients, createPatient } from "../../service/apiService";
 import { getDeliveryCenterTypeConfig, defaultDeliveryCenterTypes } from "../../utils/deliveryCenterConfig";
 
 const Distribution = () => {
@@ -41,6 +41,32 @@ const Distribution = () => {
   const [newCenterName, setNewCenterName] = useState("");
   const [newCenterContact, setNewCenterContact] = useState("");
   const [addingCenter, setAddingCenter] = useState(false);
+  
+  // Patient selection state
+  const [patients, setPatients] = useState([]);
+  const [selectedPatient, setSelectedPatient] = useState("");
+  const [patientSearchTerm, setPatientSearchTerm] = useState("");
+  const [showPatientDropdown, setShowPatientDropdown] = useState(false);
+  const [searchingPatients, setSearchingPatients] = useState(false);
+  const [showAddPatientModal, setShowAddPatientModal] = useState(false);
+  const [newPatientData, setNewPatientData] = useState({
+    patientId: "",
+    name: "",
+    address: "",
+    phone: "",
+    emergencyContact: "",
+    isActive: true
+  });
+  const [addingPatient, setAddingPatient] = useState(false);
+  
+  // Patient validation errors
+  const [patientErrors, setPatientErrors] = useState({
+    name: "",
+    phone: "",
+    patientId: "",
+    emergencyContact: "",
+    general: ""
+  });
   
   // Accordion state
   const [locationAccordionOpen, setLocationAccordionOpen] = useState(true);
@@ -229,6 +255,201 @@ const Distribution = () => {
     setShowAddCenterModal(false);
   };
 
+  // Patient search functionality
+  const handlePatientSearch = async (searchTerm) => {
+    if (!searchTerm || searchTerm.length < 2) {
+      setPatients([]);
+      return;
+    }
+
+    try {
+      setSearchingPatients(true);
+      const results = await searchPatients(searchTerm);
+      setPatients(results || []);
+    } catch (error) {
+      console.error('Error searching patients:', error);
+      setPatients([]);
+    } finally {
+      setSearchingPatients(false);
+    }
+  };
+
+  const handlePatientSearchChange = (e) => {
+    const value = e.target.value;
+    setPatientSearchTerm(value);
+    setShowPatientDropdown(true);
+    
+    if (!value) {
+      setSelectedPatient("");
+      setPatients([]);
+    } else {
+      handlePatientSearch(value);
+    }
+  };
+
+  const handlePatientSelect = (patient) => {
+    setSelectedPatient(patient.id);
+    setPatientSearchTerm(patient.name);
+    setShowPatientDropdown(false);
+  };
+
+  const handleAddPatient = async () => {
+    // Clear previous errors
+    setPatientErrors({
+      name: "",
+      phone: "",
+      patientId: "",
+      emergencyContact: "",
+      general: ""
+    });
+
+    // Validate form data
+    const validationErrors = validatePatientData(newPatientData);
+    const hasErrors = Object.values(validationErrors).some(error => error);
+
+    if (hasErrors) {
+      setPatientErrors(validationErrors);
+      return;
+    }
+
+    try {
+      setAddingPatient(true);
+      
+      const patientData = {
+        patientId: newPatientData.patientId.trim() || `P${Date.now()}`, // Generate ID if not provided
+        name: newPatientData.name.trim(),
+        address: newPatientData.address.trim(),
+        phone: newPatientData.phone.trim(),
+        emergencyContact: newPatientData.emergencyContact.trim(),
+        isActive: true
+      };
+
+      const newPatient = await createPatient(patientData);
+      
+      // Select the newly created patient
+      setSelectedPatient(newPatient.id);
+      setPatientSearchTerm(newPatient.name);
+      
+      // Reset form and close modal
+      resetAddPatientForm();
+      
+    } catch (error) {
+      console.error('Error adding patient:', error);
+      
+      // Handle different types of errors
+      if (error.response?.status === 400) {
+        // Bad request - likely validation error from server
+        const errorMessage = error.response.data?.message || "Invalid patient data. Please check your inputs.";
+        setPatientErrors(prev => ({ ...prev, general: errorMessage }));
+      } else if (error.response?.status === 409) {
+        // Conflict - handle specific duplicate error codes
+        const errorCode = error.response.data?.errorCode;
+        const errorMessage = error.response.data?.message || "A conflict occurred.";
+        
+        if (errorCode === "DUPLICATE_PHONE_NUMBER") {
+          setPatientErrors(prev => ({ 
+            ...prev, 
+            phone: `Phone number '${newPatientData.phone}' already exists. Please use a different phone number.`
+          }));
+        } else if (errorCode === "DUPLICATE_PATIENT_ID") {
+          setPatientErrors(prev => ({ 
+            ...prev, 
+            patientId: `Patient ID '${newPatientData.patientId}' already exists. Please use a different ID.`
+          }));
+        } else {
+          // Generic duplicate error
+          setPatientErrors(prev => ({ 
+            ...prev, 
+            general: errorMessage
+          }));
+        }
+      } else if (error.response?.status === 422) {
+        // Unprocessable entity - validation errors
+        const serverErrors = error.response.data?.errors || {};
+        setPatientErrors(prev => ({
+          ...prev,
+          name: serverErrors.name || prev.name,
+          phone: serverErrors.phone || prev.phone,
+          patientId: serverErrors.patientId || prev.patientId,
+          general: serverErrors.general || "Please fix the highlighted errors."
+        }));
+      } else {
+        // Network or other errors
+        setPatientErrors(prev => ({ 
+          ...prev, 
+          general: "Failed to add patient. Please check your connection and try again." 
+        }));
+      }
+    } finally {
+      setAddingPatient(false);
+    }
+  };
+
+  const resetAddPatientForm = () => {
+    setNewPatientData({
+      patientId: "",
+      name: "",
+      address: "",
+      phone: "",
+      emergencyContact: "",
+      isActive: true
+    });
+    setPatientErrors({
+      name: "",
+      phone: "",
+      patientId: "",
+      emergencyContact: "",
+      general: ""
+    });
+    setShowAddPatientModal(false);
+  };
+
+  // Validate patient data
+  const validatePatientData = (data) => {
+    const errors = {
+      name: "",
+      phone: "",
+      patientId: "",
+      emergencyContact: "",
+      general: ""
+    };
+
+    // Name validation
+    if (!data.name.trim()) {
+      errors.name = "Patient name is required";
+    } else if (data.name.trim().length < 2) {
+      errors.name = "Patient name must be at least 2 characters";
+    } else if (data.name.trim().length > 100) {
+      errors.name = "Patient name must be less than 100 characters";
+    }
+
+    // Phone validation
+    if (!data.phone.trim()) {
+      errors.phone = "Phone number is required";
+    } else if (!/^\d{10,15}$/.test(data.phone.replace(/\D/g, ''))) {
+      errors.phone = "Please enter a valid phone number (10-15 digits)";
+    }
+
+    // Patient ID validation (if provided)
+    if (data.patientId.trim() && data.patientId.trim().length > 50) {
+      errors.patientId = "Patient ID must be less than 50 characters";
+    }
+
+    // Emergency contact validation (if provided)
+    if (data.emergencyContact.trim() && !/^\d{10,15}$/.test(data.emergencyContact.replace(/\D/g, ''))) {
+      errors.emergencyContact = "Please enter a valid emergency contact number";
+    }
+
+    return errors;
+  };
+
+  // Clear individual field errors
+  const clearPatientFieldError = (fieldName) => {
+    if (patientErrors[fieldName]) {
+      setPatientErrors(prev => ({ ...prev, [fieldName]: "" }));
+    }
+  };
+
   // Filter centers based on search term
   const filteredCenters = deliveryCenters.filter(center =>
     center.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -256,6 +477,9 @@ const Distribution = () => {
   const handleClickOutside = (e) => {
     if (!e.target.closest('.search-dropdown-container')) {
       setShowDropdown(false);
+    }
+    if (!e.target.closest('.patient-search-dropdown-container')) {
+      setShowPatientDropdown(false);
     }
   };
 
@@ -591,26 +815,66 @@ const Distribution = () => {
         <div className="mt-6">
           {/* Medicine Distribution Table */}
 
-          <div className="overflow-x-auto mb-6">
+          <div className="overflow-x-auto mb-6 pb-32">
             <Table className="border border-gray-300">
               <TableHead className="[&>tr>th]:bg-[#E8EFF2] [&>tr>th]:text-black">
                 <TableRow>
                   <TableHeadCell>Patient Name</TableHeadCell>
                   <TableHeadCell>Medicine Name</TableHeadCell>
                   <TableHeadCell>Quantity</TableHeadCell>
-                  <TableHeadCell>Unit Type</TableHeadCell>
                   <TableHeadCell>Action</TableHeadCell>
                 </TableRow>
               </TableHead>
               <TableBody className="divide-y">
                 <TableRow className="bg-white hover:bg-gray-50">
                   <TableCell className="py-3">
-                    <select className="w-full border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-1 focus:ring-blue-500 focus:outline-none p-2.5">
-                      <option>Select patient</option>
-                      <option>Ranjan Dash</option>
-                      <option>Priya Sharma</option>
-                      <option>Rajesh Kumar</option>
-                    </select>
+                    <div className="relative patient-search-dropdown-container">
+                      <div className="flex gap-2">
+                        <div className="flex-1 relative">
+                          <input
+                            type="text"
+                            value={patientSearchTerm}
+                            onChange={handlePatientSearchChange}
+                            onFocus={() => setShowPatientDropdown(true)}
+                            placeholder="Search patients..."
+                            className="w-full border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 p-2.5 bg-white"
+                          />
+                          {searchingPatients && (
+                            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                              <div className="w-4 h-4 border-2 border-blue-200 border-t-blue-600 animate-spin rounded-full"></div>
+                            </div>
+                          )}
+                          {showPatientDropdown && patients.length > 0 && (
+                            <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                              {patients.map((patient) => (
+                                <div
+                                  key={patient.id}
+                                  onClick={() => handlePatientSelect(patient)}
+                                  className="px-3 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
+                                >
+                                  <div className="text-sm font-medium text-gray-900">{patient.name}</div>
+                                  <div className="text-xs text-gray-500">
+                                    {patient.patientId} • {patient.phone || 'No phone'}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          {showPatientDropdown && patientSearchTerm && patients.length === 0 && !searchingPatients && (
+                            <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-3 text-center text-gray-500 text-sm">
+                              No patients found
+                            </div>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => setShowAddPatientModal(true)}
+                          className="px-3 py-2.5 text-blue-600 border border-blue-300 rounded-lg hover:bg-blue-50 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors flex items-center gap-1 whitespace-nowrap"
+                        >
+                          <FaCirclePlus className="text-sm" />
+                          Add
+                        </button>
+                      </div>
+                    </div>
                   </TableCell>
                   <TableCell className="py-3">
                     <input
@@ -629,15 +893,6 @@ const Distribution = () => {
                       className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-blue-500 focus:outline-none"
                       min={1}
                     />
-                  </TableCell>
-                  <TableCell className="py-3">
-                    <select className="w-full border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-1 focus:ring-blue-500 focus:outline-none p-2.5">
-                      <option>Select unit</option>
-                      <option>Tablets</option>
-                      <option>Capsules</option>
-                      <option>ml</option>
-                      <option>mg</option>
-                    </select>
                   </TableCell>
                   <TableCell className="py-3 text-center">
                     <button className="text-[#2D506B] hover:text-blue-800 transition-colors">
@@ -764,6 +1019,173 @@ const Distribution = () => {
                   <>
                     <FaCirclePlus className="text-sm" />
                     Add Center
+                  </>
+                )}
+              </button>
+            </div>
+          </ModalBody>
+        </Modal>
+      )}
+      {/* Add New Patient Modal */}
+      {showAddPatientModal && (
+        <Modal show={showAddPatientModal} onClose={resetAddPatientForm}>
+          <ModalHeader>Add New Patient</ModalHeader>
+          <ModalBody>
+            <div className="space-y-4">
+              {/* General Error Message */}
+              {patientErrors.general && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                  <div className="flex items-center">
+                    <svg className="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                    <span className="text-red-700 text-sm font-medium">{patientErrors.general}</span>
+                  </div>
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="patientId" className="text-sm font-medium text-gray-700 mb-1 block">
+                    Patient ID
+                  </Label>
+                  <input
+                    type="text"
+                    id="patientId"
+                    value={newPatientData.patientId}
+                    onChange={(e) => {
+                      setNewPatientData(prev => ({ ...prev, patientId: e.target.value }));
+                      clearPatientFieldError('patientId');
+                    }}
+                    placeholder="Leave empty to auto-generate"
+                    className={`w-full border text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 p-2.5 ${
+                      patientErrors.patientId 
+                        ? 'border-red-300 focus:border-red-500 bg-red-50' 
+                        : 'border-gray-300 focus:border-blue-500 bg-white'
+                    }`}
+                    disabled={addingPatient}
+                  />
+                  {patientErrors.patientId && (
+                    <p className="mt-1 text-sm text-red-600">{patientErrors.patientId}</p>
+                  )}
+                </div>
+                
+                <div>
+                  <Label htmlFor="patientName" className="text-sm font-medium text-gray-700 mb-1 block">
+                    Patient Name <span className="text-red-500">*</span>
+                  </Label>
+                  <input
+                    type="text"
+                    id="patientName"
+                    value={newPatientData.name}
+                    onChange={(e) => {
+                      setNewPatientData(prev => ({ ...prev, name: e.target.value }));
+                      clearPatientFieldError('name');
+                    }}
+                    placeholder="Enter patient name"
+                    className={`w-full border text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 p-2.5 ${
+                      patientErrors.name 
+                        ? 'border-red-300 focus:border-red-500 bg-red-50' 
+                        : 'border-gray-300 focus:border-blue-500 bg-white'
+                    }`}
+                    disabled={addingPatient}
+                  />
+                  {patientErrors.name && (
+                    <p className="mt-1 text-sm text-red-600">{patientErrors.name}</p>
+                  )}
+                </div>
+              </div>
+              
+              <div>
+                <Label htmlFor="patientAddress" className="text-sm font-medium text-gray-700 mb-1 block">
+                  Address
+                </Label>
+                <textarea
+                  id="patientAddress"
+                  value={newPatientData.address}
+                  onChange={(e) => setNewPatientData(prev => ({ ...prev, address: e.target.value }))}
+                  placeholder="Enter patient address"
+                  rows={2}
+                  className="w-full border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 p-2.5"
+                  disabled={addingPatient}
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="patientPhone" className="text-sm font-medium text-gray-700 mb-1 block">
+                    Phone Number <span className="text-red-500">*</span>
+                  </Label>
+                  <input
+                    type="tel"
+                    id="patientPhone"
+                    value={newPatientData.phone}
+                    onChange={(e) => {
+                      setNewPatientData(prev => ({ ...prev, phone: e.target.value }));
+                      clearPatientFieldError('phone');
+                    }}
+                    placeholder="Enter phone number"
+                    className={`w-full border text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 p-2.5 ${
+                      patientErrors.phone 
+                        ? 'border-red-300 focus:border-red-500 bg-red-50' 
+                        : 'border-gray-300 focus:border-blue-500 bg-white'
+                    }`}
+                    disabled={addingPatient}
+                  />
+                  {patientErrors.phone && (
+                    <p className="mt-1 text-sm text-red-600">{patientErrors.phone}</p>
+                  )}
+                </div>
+                
+                <div>
+                  <Label htmlFor="emergencyContact" className="text-sm font-medium text-gray-700 mb-1 block">
+                    Emergency Contact
+                  </Label>
+                  <input
+                    type="tel"
+                    id="emergencyContact"
+                    value={newPatientData.emergencyContact}
+                    onChange={(e) => {
+                      setNewPatientData(prev => ({ ...prev, emergencyContact: e.target.value }));
+                      clearPatientFieldError('emergencyContact');
+                    }}
+                    placeholder="Enter emergency contact"
+                    className={`w-full border text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 p-2.5 ${
+                      patientErrors.emergencyContact 
+                        ? 'border-red-300 focus:border-red-500 bg-red-50' 
+                        : 'border-gray-300 focus:border-blue-500 bg-white'
+                    }`}
+                    disabled={addingPatient}
+                  />
+                  {patientErrors.emergencyContact && (
+                    <p className="mt-1 text-sm text-red-600">{patientErrors.emergencyContact}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex gap-3 justify-end mt-6">
+              <button
+                onClick={resetAddPatientForm}
+                disabled={addingPatient}
+                className="bg-white text-gray-600 hover:bg-gray-50 border border-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAddPatient}
+                disabled={addingPatient}
+                className="text-white bg-[#2D506B] hover:bg-sky-900 font-medium rounded-lg text-sm px-5 py-2.5 disabled:opacity-50 flex items-center gap-2"
+              >
+                {addingPatient ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent animate-spin rounded-full"></div>
+                    Adding...
+                  </>
+                ) : (
+                  <>
+                    <FaCirclePlus className="text-sm" />
+                    Add Patient
                   </>
                 )}
               </button>
