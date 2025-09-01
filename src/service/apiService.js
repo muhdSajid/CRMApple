@@ -148,13 +148,22 @@ export const softDeleteBatch = async (batchId) => {
   }
 };
 
-// Password change function
 export const changePassword = async (passwordData) => {
   try {
     const response = await post(`${apiDomain}/api/v1/auth/change-password`, passwordData);
     return response.data;
   } catch (error) {
     console.error('Error changing password:', error);
+    throw error;
+  }
+};
+
+export const getDeliveryCenterTypes = async () => {
+  try {
+    const response = await get(`${apiDomain}/api/delivery-center-types`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching delivery center types:', error);
     throw error;
   }
 };
