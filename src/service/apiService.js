@@ -168,6 +168,27 @@ export const getDeliveryCenterTypes = async () => {
   }
 };
 
+export const getDeliveryCentersByLocationAndType = async (locationId, typeId) => {
+  try {
+    const response = await get(`${apiDomain}/api/v1/delivery-centers/by-location-and-type?locationId=${locationId}&typeId=${typeId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching delivery centers:', error);
+    throw error;
+  }
+};
+
+// Create a new delivery center
+export const createDeliveryCenter = async (centerData) => {
+  try {
+    const response = await _fetch(`${apiDomain}/api/v1/delivery-centers`, "POST", centerData);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating delivery center:', error);
+    throw error;
+  }
+};
+
 const _fetch = async (url, method, data = null, props, token = null) => {
   let userToken;
   if (token !== null) {

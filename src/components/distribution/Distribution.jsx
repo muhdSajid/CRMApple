@@ -16,7 +16,7 @@ import {
 import DistributionListModal from "./DistributionListModal";
 import { useState, useEffect } from "react";
 import { FaCirclePlus } from "react-icons/fa6";
-import { getDeliveryCenterTypes, getLocations } from "../../service/apiService";
+import { getDeliveryCenterTypes, getLocations, getDeliveryCentersByLocationAndType, createDeliveryCenter } from "../../service/apiService";
 import { getDeliveryCenterTypeConfig, defaultDeliveryCenterTypes } from "../../utils/deliveryCenterConfig";
 
 const Distribution = () => {
@@ -27,11 +27,25 @@ const Distribution = () => {
   const [deliveryCenterTypes, setDeliveryCenterTypes] = useState([]);
   const [locations, setLocations] = useState([]);
   const [selectedLocation, setSelectedLocation] = useState("");
+  const [deliveryCenters, setDeliveryCenters] = useState([]);
+  const [selectedDeliveryCenter, setSelectedDeliveryCenter] = useState("");
   const [loading, setLoading] = useState(true);
+  const [loadingCenters, setLoadingCenters] = useState(false);
+  
+  // Search functionality
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
+  
+  // Add new center state
+  const [showAddCenterModal, setShowAddCenterModal] = useState(false);
+  const [newCenterName, setNewCenterName] = useState("");
+  const [newCenterContact, setNewCenterContact] = useState("");
+  const [addingCenter, setAddingCenter] = useState(false);
   
   // Accordion state
   const [locationAccordionOpen, setLocationAccordionOpen] = useState(true);
   const [typeAccordionOpen, setTypeAccordionOpen] = useState(false);
+  const [deliveryCenterAccordionOpen, setDeliveryCenterAccordionOpen] = useState(false);
 
   // Fetch delivery center types and locations from API
   useEffect(() => {
@@ -78,6 +92,10 @@ const Distribution = () => {
   const handleRadioClick = (mode) => {
     if (!selectedMode) {
       setSelectedMode(mode);
+      fetchDeliveryCenters(selectedLocation, mode);
+      // Auto-open delivery center accordion and close type accordion
+      setTypeAccordionOpen(false);
+      setDeliveryCenterAccordionOpen(true);
       return;
     }
     if (mode !== selectedMode) {
@@ -90,7 +108,12 @@ const Distribution = () => {
     // Reset distribution mode when location changes
     if (selectedMode && locationId !== selectedLocation) {
       setSelectedMode("");
+      setDeliveryCenters([]);
+      setSelectedDeliveryCenter("");
+      setSearchTerm(""); // Reset search term
+      setShowDropdown(false); // Close dropdown
       setTypeAccordionOpen(false);
+      setDeliveryCenterAccordionOpen(false);
     }
     setSelectedLocation(locationId);
     
@@ -98,7 +121,44 @@ const Distribution = () => {
     if (locationId) {
       setLocationAccordionOpen(false); // Collapse location accordion
       setTypeAccordionOpen(true); // Open distribution type accordion
+      setDeliveryCenterAccordionOpen(false); // Close delivery center accordion
     }
+  };
+
+  // Fetch delivery centers based on location and type
+  const fetchDeliveryCenters = async (locationId, distributionType) => {
+    if (!locationId || !distributionType) return;
+    
+    try {
+      setLoadingCenters(true);
+      setDeliveryCenters([]);
+      setSelectedDeliveryCenter("");
+      
+      // Get the type ID from the distribution type
+      const selectedType = deliveryCenterTypes.find(type => 
+        getDeliveryCenterTypeConfig(type.typeName).value === distributionType
+      );
+      
+      if (selectedType) {
+        const centers = await getDeliveryCentersByLocationAndType(locationId, selectedType.id);
+        setDeliveryCenters(centers || []);
+      }
+    } catch (error) {
+      console.error('Error fetching delivery centers:', error);
+      setDeliveryCenters([]);
+    } finally {
+      setLoadingCenters(false);
+    }
+  };
+
+  const confirmSwitch = () => {
+    setSelectedMode(pendingMode);
+    fetchDeliveryCenters(selectedLocation, pendingMode);
+    setPendingMode("");
+    setShowModal(false);
+    // Auto-open delivery center accordion and close type accordion
+    setTypeAccordionOpen(false);
+    setDeliveryCenterAccordionOpen(true);
   };
 
   const toggleLocationAccordion = () => {
@@ -109,16 +169,101 @@ const Distribution = () => {
     setTypeAccordionOpen(!typeAccordionOpen);
   };
 
-  const confirmSwitch = () => {
-    setSelectedMode(pendingMode);
-    setPendingMode("");
-    setShowModal(false);
-  };
-
   const cancelSwitch = () => {
     setPendingMode("");
     setShowModal(false);
   };
+
+  const handleAddCenter = async () => {
+    if (!newCenterName.trim() || !newCenterContact.trim()) {
+      alert("Please fill in both name and phone number");
+      return;
+    }
+
+    if (!selectedLocation || !selectedMode) {
+      alert("Please select location and distribution type first");
+      return;
+    }
+
+    try {
+      setAddingCenter(true);
+      
+      // Map distribution modes to type IDs
+      const typeMap = {
+        'hospitals': 1,
+        'medical-camps': 2,
+        'home-care': 3
+      };
+
+      const centerData = {
+        name: newCenterName.trim(),
+        contactPhone: newCenterContact.trim(),
+        locationId: selectedLocation,
+        typeId: typeMap[selectedMode] || selectedMode
+      };
+
+      const newCenter = await createDeliveryCenter(centerData);
+      
+      // Add the new center to the list and select it
+      setDeliveryCenters(prev => [...prev, newCenter]);
+      setSelectedDeliveryCenter(String(newCenter.id)); // Convert to string for dropdown compatibility
+      setSearchTerm(newCenter.name); // Set search term to new center name
+      
+      // Reset form and close modal
+      setNewCenterName("");
+      setNewCenterContact("");
+      setShowAddCenterModal(false);
+      setDeliveryCenterAccordionOpen(false); // Close accordion after adding
+      
+    } catch (error) {
+      console.error('Error adding delivery center:', error);
+      alert("Failed to add delivery center. Please try again.");
+    } finally {
+      setAddingCenter(false);
+    }
+  };
+
+  const resetAddCenterForm = () => {
+    setNewCenterName("");
+    setNewCenterContact("");
+    setShowAddCenterModal(false);
+  };
+
+  // Filter centers based on search term
+  const filteredCenters = deliveryCenters.filter(center =>
+    center.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (center.contactPhone && center.contactPhone.includes(searchTerm))
+  );
+
+  const handleCenterSelect = (centerId) => {
+    setSelectedDeliveryCenter(centerId);
+    const selectedCenter = deliveryCenters.find(center => String(center.id) === centerId);
+    setSearchTerm(selectedCenter ? selectedCenter.name : "");
+    setShowDropdown(false);
+    // Auto-close accordion after selection
+    setDeliveryCenterAccordionOpen(false);
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+    setShowDropdown(true);
+    if (!e.target.value) {
+      setSelectedDeliveryCenter("");
+    }
+  };
+
+  // Close dropdown when clicking outside
+  const handleClickOutside = (e) => {
+    if (!e.target.closest('.search-dropdown-container')) {
+      setShowDropdown(false);
+    }
+  };
+
+  // Add event listener for clicking outside
+  useEffect(() => {
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
 
   return (
     <div className="m-6 p-6 bg-white rounded-lg shadow-md space-y-6">
@@ -329,55 +474,122 @@ const Distribution = () => {
         </div>
       </div>
 
-      {/* Show form fields only when both location and distribution type are selected */}
+      {/* Delivery Centers Selection Accordion */}
       {selectedLocation && selectedMode && (
+        <div className="bg-gray-50 border border-gray-200 rounded-lg mb-4">
+          <button 
+            onClick={() => setDeliveryCenterAccordionOpen(!deliveryCenterAccordionOpen)}
+            className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-100 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+              <div>
+                <h3 className="text-sm font-semibold text-gray-800">
+                  Distribution Center & Date
+                </h3>
+                <div className="text-xs text-gray-600 mt-1 space-y-1">
+                  {selectedDeliveryCenter ? (
+                    <p className="text-green-600">Center: {deliveryCenters.find(center => String(center.id) === selectedDeliveryCenter)?.name}</p>
+                  ) : (
+                    <p className="text-gray-500">Choose distribution center and date</p>
+                  )}
+                </div>
+              </div>
+            </div>
+            <svg 
+              className={`w-5 h-5 text-gray-500 transform transition-transform ${
+                deliveryCenterAccordionOpen ? 'rotate-180' : 'rotate-0'
+              }`} 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          
+          {deliveryCenterAccordionOpen && (
+            <div className="p-4 bg-white border-t border-gray-200">
+              {loadingCenters ? (
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <div className="w-5 h-5 rounded-full border-2 border-blue-200"></div>
+                    <div className="absolute top-0 left-0 w-5 h-5 rounded-full border-2 border-blue-600 border-t-transparent animate-spin"></div>
+                  </div>
+                  <span className="text-gray-500">Loading distribution centers...</span>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Distribution Center Search & Select */}
+                  <div className="space-y-3">
+                    <Label className="text-sm font-medium text-gray-700">
+                      Distribution Center <span className="text-red-500">*</span>
+                    </Label>
+                    <div className="relative search-dropdown-container">
+                      <div className="flex gap-2">
+                        <div className="flex-1 relative">
+                          <input
+                            type="text"
+                            value={searchTerm}
+                            onChange={handleSearchChange}
+                            onFocus={() => setShowDropdown(true)}
+                            placeholder="Search distribution centers..."
+                            className="w-full border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 p-2.5 bg-white"
+                          />
+                          {showDropdown && filteredCenters.length > 0 && (
+                            <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                              {filteredCenters.map((center) => (
+                                <div
+                                  key={center.id}
+                                  onClick={() => handleCenterSelect(String(center.id))}
+                                  className="px-3 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
+                                >
+                                  <div className="text-sm font-medium text-gray-900">{center.name}</div>
+                                  <div className="text-xs text-gray-500">{center.contactPhone || 'No contact'}</div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => setShowAddCenterModal(true)}
+                          className="px-3 py-2.5 text-blue-600 border border-blue-300 rounded-lg hover:bg-blue-50 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors flex items-center gap-1 whitespace-nowrap"
+                        >
+                          <FaCirclePlus className="text-sm" />
+                          Add
+                        </button>
+                      </div>
+                    </div>
+                    
+                    {deliveryCenters.length === 0 && (
+                      <div className="text-center py-4 text-gray-500 bg-gray-50 rounded-lg">
+                        <p className="text-sm">No distribution centers available.</p>
+                        <p className="text-xs mt-1">Click "Add" to create one.</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Date Selection */}
+                  <div className="space-y-3">
+                    <Label className="text-sm font-medium text-gray-700">
+                      Distribution Date <span className="text-red-500">*</span>
+                    </Label>
+                    <Datepicker
+                      className="w-full"
+                      defaultDate={new Date()}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Show form fields only when location, distribution type, and center are selected */}
+      {selectedLocation && selectedMode && selectedDeliveryCenter && (
         <div className="mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <div>
-              <Label htmlFor="centerName" className="text-sm font-medium text-gray-700">
-                {selectedMode === 'hospitals' ? 'Hospital Name' : 
-                 selectedMode === 'medical-camps' ? 'Medical Camp Name' : 
-                 selectedMode === 'home-care' ? 'Home Care Center' : 'Center Name'}
-              </Label>
-              <select
-                id="centerName"
-                className="mt-1 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 bg-white"
-              >
-                <option>Select {selectedMode === 'hospitals' ? 'hospital' : selectedMode === 'medical-camps' ? 'medical camp' : selectedMode === 'home-care' ? 'home care center' : 'center'}</option>
-                {selectedMode === 'hospitals' && (
-                  <>
-                    <option>Motherhood Hospital</option>
-                    <option>Apollo Hospital</option>
-                    <option>Manipal Hospital</option>
-                  </>
-                )}
-                {selectedMode === 'medical-camps' && (
-                  <>
-                    <option>Rural Health Camp - Village A</option>
-                    <option>Eye Care Camp - School B</option>
-                    <option>General Health Camp - Community Center</option>
-                  </>
-                )}
-                {selectedMode === 'home-care' && (
-                  <>
-                    <option>Home Care Service - Area 1</option>
-                    <option>Elderly Care - Residential Complex</option>
-                    <option>Chronic Care - Home Service</option>
-                  </>
-                )}
-              </select>
-            </div>
-            <div>
-              <Label htmlFor="distributionDate" className="text-sm font-medium text-gray-700">
-                Date of Distribution
-              </Label>
-              <Datepicker
-                id="distributionDate"
-                className="mt-1"
-                defaultDate={new Date()}
-              />
-            </div>
-          </div>
+          {/* Medicine Distribution Table */}
 
           <div className="overflow-x-auto mb-6">
             <Table className="border border-gray-300">
@@ -482,6 +694,78 @@ const Distribution = () => {
                 className="text-white bg-[#2D506B] border hover:bg-sky-900 font-medium rounded-lg text-sm px-5 py-2.5"
               >
                 Switch
+              </button>
+            </div>
+          </ModalBody>
+        </Modal>
+      )}
+      
+      {/* Add New Center Modal */}
+      {showAddCenterModal && (
+        <Modal show={showAddCenterModal} onClose={resetAddCenterForm}>
+          <ModalHeader>Add New Distribution Center</ModalHeader>
+          <ModalBody>
+            <div className="space-y-4">
+              <div className="text-sm text-gray-600 bg-blue-50 p-3 rounded-lg">
+                <p><strong>Location:</strong> {locations.find(loc => loc.id === selectedLocation)?.name}</p>
+                <p><strong>Type:</strong> {deliveryCenterTypes.find(type => getDeliveryCenterTypeConfig(type.typeName).value === selectedMode)?.typeName}</p>
+              </div>
+              
+              <div>
+                <Label htmlFor="centerName" className="text-sm font-medium text-gray-700 mb-1 block">
+                  Distribution Center Name <span className="text-red-500">*</span>
+                </Label>
+                <input
+                  type="text"
+                  id="centerName"
+                  value={newCenterName}
+                  onChange={(e) => setNewCenterName(e.target.value)}
+                  placeholder="Enter center name"
+                  className="w-full border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 p-2.5"
+                  disabled={addingCenter}
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="centerContact" className="text-sm font-medium text-gray-700 mb-1 block">
+                  Phone Number <span className="text-red-500">*</span>
+                </Label>
+                <input
+                  type="tel"
+                  id="centerContact"
+                  value={newCenterContact}
+                  onChange={(e) => setNewCenterContact(e.target.value)}
+                  placeholder="Enter phone number"
+                  className="w-full border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 p-2.5"
+                  disabled={addingCenter}
+                />
+              </div>
+            </div>
+            
+            <div className="flex gap-3 justify-end mt-6">
+              <button
+                onClick={resetAddCenterForm}
+                disabled={addingCenter}
+                className="bg-white text-gray-600 hover:bg-gray-50 border border-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAddCenter}
+                disabled={addingCenter || !newCenterName.trim() || !newCenterContact.trim()}
+                className="text-white bg-[#2D506B] hover:bg-sky-900 font-medium rounded-lg text-sm px-5 py-2.5 disabled:opacity-50 flex items-center gap-2"
+              >
+                {addingCenter ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent animate-spin rounded-full"></div>
+                    Adding...
+                  </>
+                ) : (
+                  <>
+                    <FaCirclePlus className="text-sm" />
+                    Add Center
+                  </>
+                )}
               </button>
             </div>
           </ModalBody>
