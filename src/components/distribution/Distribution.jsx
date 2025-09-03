@@ -17,7 +17,7 @@ import {
 import DistributionListModal from "./DistributionListModal";
 import { useState, useEffect } from "react";
 import { FaCirclePlus } from "react-icons/fa6";
-import { getDeliveryCenterTypes, getLocations, getDeliveryCentersByLocationAndType, createDeliveryCenter, searchPatients, createPatient, searchMedicinesByLocation, submitDistribution } from "../../service/apiService";
+import { getDeliveryCenterTypes, getLocations, getDeliveryCentersByLocationAndType, createDeliveryCenter, searchPatients, createPatient, searchMedicinesByLocation, submitDistribution, fetchAvailableBatches } from "../../service/apiService";
 import { getDeliveryCenterTypeConfig, defaultDeliveryCenterTypes } from "../../utils/deliveryCenterConfig";
 
 const Distribution = () => {
@@ -72,7 +72,6 @@ const Distribution = () => {
   // Medicine distribution list state
   const [distributionList, setDistributionList] = useState([]);
   const [currentMedicineName, setCurrentMedicineName] = useState("");
-  const [currentQuantity, setCurrentQuantity] = useState("");
   
   // Medicine search state
   const [medicines, setMedicines] = useState([]);
@@ -91,6 +90,13 @@ const Distribution = () => {
   // Edit quantity state
   const [editingQuantity, setEditingQuantity] = useState(null);
   const [editQuantityValue, setEditQuantityValue] = useState("");
+  
+  // Batch selection state
+  const [showBatchModal, setShowBatchModal] = useState(false);
+  const [availableBatches, setAvailableBatches] = useState([]);
+  const [selectedBatches, setSelectedBatches] = useState([]);
+  const [loadingBatches, setLoadingBatches] = useState(false);
+  const [currentMedicineForBatch, setCurrentMedicineForBatch] = useState(null);
   
   // Accordion state
   const [locationAccordionOpen, setLocationAccordionOpen] = useState(true);
@@ -347,7 +353,6 @@ const Distribution = () => {
         setSelectedPatient("");
         setPatients([]);
         setCurrentMedicineName("");
-        setCurrentQuantity("");
       } else {
         // Clear selected patient when typing new name
         if (selectedPatient) {
@@ -383,7 +388,6 @@ const Distribution = () => {
     setShowPatientDropdown(false);
     // Clear medicine fields when switching patients
     setCurrentMedicineName("");
-    setCurrentQuantity("");
     setMedicineSearchTerm("");
     setSelectedMedicine(null);
   };
@@ -563,48 +567,13 @@ const Distribution = () => {
       alert("Please enter medicine name");
       return;
     }
-    if (!currentQuantity || currentQuantity <= 0) {
-      alert("Please enter a valid quantity");
-      return;
-    }
-    
-    // Check stock availability
-    if (selectedMedicine && parseInt(currentQuantity) > selectedMedicine.totalNumberOfMedicines) {
-      alert(`Quantity exceeds available stock. Available: ${selectedMedicine.totalNumberOfMedicines}`);
+    if (!selectedMedicine) {
+      alert("Please select a valid medicine from the dropdown");
       return;
     }
 
-    const patientName = patients.find(p => p.id === selectedPatient)?.name || patientSearchTerm.trim();
-    const patientId = selectedPatient || `TEMP_${patientName.replace(/\s+/g, '_')}_${Date.now()}`;
-    const isNewPatient = !selectedPatient;
-    
-    const newDistribution = {
-      id: Date.now(),
-      patientId: patientId,
-      patientName: patientName,
-      medicineName: currentMedicineName.trim(),
-      medicineId: selectedMedicine?.medicineId || null,
-      quantity: parseInt(currentQuantity),
-      availableStock: selectedMedicine?.totalNumberOfMedicines || null,
-      isNewPatient: isNewPatient
-    };
-
-    setDistributionList(prev => [...prev, newDistribution]);
-    
-    // For first medicine, set the patient search term to the selected patient name
-    if (distributionList.length === 0) {
-      setPatientSearchTerm(patientName);
-    }
-    
-    // Clear only medicine fields, keep patient info for adding more medicines to same patient
-    setCurrentMedicineName("");
-    setCurrentQuantity("");
-    setMedicineSearchTerm("");
-    setSelectedMedicine(null);
-    setShowMedicineDropdown(false);
-    
-    // Hide the add row since we want to complete this patient first
-    setShowAddRow(false);
+    // Open batch selection modal instead of adding directly
+    handleSelectBatches(selectedMedicine);
   };
 
   // Remove item from distribution list
@@ -613,10 +582,6 @@ const Distribution = () => {
   };
 
   // Edit quantity functions
-  const handleEditQuantity = (item) => {
-    setEditingQuantity(item.id);
-    setEditQuantityValue(item.quantity.toString());
-  };
 
   const handleSaveQuantity = (itemId) => {
     const newQuantity = parseInt(editQuantityValue);
@@ -649,6 +614,109 @@ const Distribution = () => {
   const handleCancelEditQuantity = () => {
     setEditingQuantity(null);
     setEditQuantityValue("");
+  };
+
+  // Batch selection functions
+  const handleSelectBatches = async (medicine) => {
+    if (!selectedLocation || !medicine.medicineId) {
+      alert('Location and medicine must be selected');
+      return;
+    }
+
+    setCurrentMedicineForBatch(medicine);
+    setLoadingBatches(true);
+    setShowBatchModal(true);
+    
+    try {
+      const batches = await fetchAvailableBatches(selectedLocation, medicine.medicineId);
+      setAvailableBatches(batches);
+      setSelectedBatches([]);
+    } catch (error) {
+      console.error('Error fetching batches:', error);
+      alert('Error fetching available batches. Please try again.');
+      setShowBatchModal(false);
+    } finally {
+      setLoadingBatches(false);
+    }
+  };
+
+  const handleBatchQuantityChange = (batchId, quantity) => {
+    setSelectedBatches(prev => {
+      const existing = prev.find(b => b.id === batchId);
+      if (existing) {
+        if (quantity <= 0) {
+          return prev.filter(b => b.id !== batchId);
+        }
+        return prev.map(b => b.id === batchId ? { ...b, selectedQuantity: parseInt(quantity) } : b);
+      } else if (quantity > 0) {
+        const batch = availableBatches.find(b => b.id === batchId);
+        return [...prev, { ...batch, selectedQuantity: parseInt(quantity) }];
+      }
+      return prev;
+    });
+  };
+
+  const handleConfirmBatchSelection = () => {
+    if (selectedBatches.length === 0) {
+      alert('Please select at least one batch with quantity');
+      return;
+    }
+
+    const totalQuantity = selectedBatches.reduce((sum, batch) => sum + batch.selectedQuantity, 0);
+    const totalPrice = selectedBatches.reduce((sum, batch) => sum + (batch.selectedQuantity * batch.unitPrice), 0);
+
+    const patientName = patients.find(p => p.id === selectedPatient)?.name || patientSearchTerm.trim();
+    const patientId = selectedPatient || `TEMP_${patientName.replace(/\s+/g, '_')}_${Date.now()}`;
+    const isNewPatient = !selectedPatient;
+
+    // Add the batch-based distribution entry
+    const newDistribution = {
+      id: Date.now(),
+      patientId: patientId,
+      patientName: patientName,
+      medicineName: currentMedicineForBatch.medicineName,
+      medicineId: currentMedicineForBatch.medicineId,
+      quantity: totalQuantity,
+      totalPrice: totalPrice,
+      availableStock: currentMedicineForBatch.totalNumberOfMedicines,
+      isNewPatient: isNewPatient,
+      batches: selectedBatches.map(batch => ({
+        batchId: batch.id,
+        batchName: batch.batchName,
+        quantity: batch.selectedQuantity,
+        unitPrice: batch.unitPrice,
+        expiryDate: batch.expiryDate,
+        totalPrice: batch.selectedQuantity * batch.unitPrice
+      }))
+    };
+
+    setDistributionList(prev => [...prev, newDistribution]);
+    
+    // For first medicine, set the patient search term to the selected patient name
+    if (distributionList.length === 0) {
+      setPatientSearchTerm(patientName);
+      setSelectedPatient(patientId);
+    }
+    
+    // Clear medicine fields
+    setCurrentMedicineName("");
+    setMedicineSearchTerm("");
+    setSelectedMedicine(null);
+    setShowMedicineDropdown(false);
+    setShowAddRow(false);
+    
+    // Close modal and reset state
+    setShowBatchModal(false);
+    setSelectedBatches([]);
+    setAvailableBatches([]);
+    setCurrentMedicineForBatch(null);
+  };
+
+  const handleCancelBatchSelection = () => {
+    setShowBatchModal(false);
+    setSelectedBatches([]);
+    setAvailableBatches([]);
+    setCurrentMedicineForBatch(null);
   };
 
   // Submit distribution for current patient and clear for new patient
@@ -716,7 +784,6 @@ const Distribution = () => {
       setPatientSearchTerm("");
       setSelectedPatient("");
       setCurrentMedicineName("");
-      setCurrentQuantity("");
       setMedicineSearchTerm("");
       setSelectedMedicine(null);
       setShowPatientDropdown(false);
@@ -740,7 +807,6 @@ const Distribution = () => {
     setPatientSearchTerm("");
     setSelectedPatient("");
     setCurrentMedicineName("");
-    setCurrentQuantity("");
     setMedicineSearchTerm("");
     setSelectedMedicine(null);
     setShowPatientDropdown(false);
@@ -1149,7 +1215,7 @@ const Distribution = () => {
                 <TableRow>
                   <TableHeadCell>Patient Name</TableHeadCell>
                   <TableHeadCell>Medicine Name</TableHeadCell>
-                  <TableHeadCell>Quantity</TableHeadCell>
+                  <TableHeadCell>Quantity & Batches</TableHeadCell>
                   <TableHeadCell>Action</TableHeadCell>
                 </TableRow>
               </TableHead>
@@ -1251,17 +1317,17 @@ const Distribution = () => {
                               </button>
                             </div>
                           ) : (
-                            <div className="flex items-center gap-2">
-                              <span className="text-gray-900">{item.quantity}</span>
-                              <button
-                                onClick={() => handleEditQuantity(item)}
-                                className="text-blue-600 hover:text-blue-800 transition-colors"
-                                title="Edit quantity"
-                              >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                </svg>
-                              </button>
+                            <div className="flex items-center gap-3">
+                              <div className="text-center">
+                                <div className="text-lg font-semibold text-gray-900">{item.quantity}</div>
+                                <div className="text-xs text-gray-500">units</div>
+                              </div>
+                              {item.totalPrice && (
+                                <div className="text-center">
+                                  <div className="text-lg font-semibold text-green-600">₹{item.totalPrice.toFixed(2)}</div>
+                                  <div className="text-xs text-gray-500">total</div>
+                                </div>
+                              )}
                             </div>
                           )}
                         </TableCell>
@@ -1395,25 +1461,10 @@ const Distribution = () => {
                       </div>
                     </TableCell>
                     <TableCell className="py-3">
-                      <div className="relative">
-                        <input
-                          type="number"
-                          value={currentQuantity}
-                          onChange={(e) => setCurrentQuantity(e.target.value)}
-                          placeholder="0"
-                          className={`w-full border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:outline-none ${
-                            selectedMedicine && currentQuantity && parseInt(currentQuantity) > selectedMedicine.totalNumberOfMedicines
-                              ? 'border-red-300 focus:ring-red-500 focus:border-red-500 bg-red-50'
-                              : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
-                          }`}
-                          min={1}
-                          max={selectedMedicine?.totalNumberOfMedicines}
-                        />
-                        {selectedMedicine && currentQuantity && parseInt(currentQuantity) > selectedMedicine.totalNumberOfMedicines && (
-                          <div className="absolute -bottom-5 left-0 text-xs text-red-600">
-                            Exceeds available stock ({selectedMedicine.totalNumberOfMedicines})
-                          </div>
-                        )}
+                      <div className="text-center">
+                        <span className="text-gray-500 text-sm">
+                          Quantity will be set from batch selection
+                        </span>
                       </div>
                     </TableCell>
                     <TableCell className="py-3 text-center">
@@ -1421,15 +1472,15 @@ const Distribution = () => {
                         {/* Add Medicine button */}
                         <button
                           onClick={handleAddMedicine}
-                          disabled={!patientSearchTerm.trim() || !currentMedicineName.trim() || !currentQuantity}
+                          disabled={!patientSearchTerm.trim() || !currentMedicineName.trim()}
                           className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                            patientSearchTerm.trim() && currentMedicineName.trim() && currentQuantity
+                            patientSearchTerm.trim() && currentMedicineName.trim()
                               ? 'bg-green-600 text-white hover:bg-green-700' 
                               : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                           }`}
-                          title="Add medicine to current patient"
+                          title="Select batches for medicine"
                         >
-                          Add Medicine
+                          Select Batches
                         </button>
 
                         {/* Cancel/Close add row button - only show when there are existing items */}
@@ -1441,7 +1492,6 @@ const Distribution = () => {
                               setPatientSearchTerm("");
                               setSelectedPatient("");
                               setCurrentMedicineName("");
-                              setCurrentQuantity("");
                               setMedicineSearchTerm("");
                               setSelectedMedicine(null);
                               setShowPatientDropdown(false);
@@ -1460,17 +1510,53 @@ const Distribution = () => {
                   </TableRow>
                 )}
                 
-                {/* Add More button row - show when there are items and add row is not shown */}
+                {/* Add More button row and Complete Patient - show when there are items and add row is not shown */}
                 {distributionList.length > 0 && !showAddRow && (
                   <TableRow className="bg-blue-50 hover:bg-blue-100">
-                    <TableCell colSpan={4} className="py-4 text-center">
-                      <button
-                        onClick={() => setShowAddRow(true)}
-                        className="inline-flex items-center gap-2 px-4 py-2 text-blue-600 hover:text-blue-800 font-medium transition-colors"
-                      >
-                        <FaCirclePlus className="text-lg" />
-                        <span>Add More Medicine for Current Patient</span>
-                      </button>
+                    <TableCell colSpan={4} className="py-4">
+                      <div className="flex items-center justify-between">
+                        <button
+                          onClick={() => setShowAddRow(true)}
+                          className="inline-flex items-center gap-2 px-4 py-2 text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                        >
+                          <FaCirclePlus className="text-lg" />
+                          <span>Add More Medicine for Current Patient</span>
+                        </button>
+                        
+                        <div className="flex gap-3">
+                          <button
+                            onClick={handleStartNewDistribution}
+                            disabled={submittingDistribution}
+                            className="bg-white text-[#2D506B] hover:bg-blue-50 border border-[#2D506B] font-medium rounded-lg text-sm px-5 py-2.5 disabled:opacity-50"
+                          >
+                            Clear All
+                          </button>
+                          
+                          <button
+                            onClick={handleCompletePatientDistribution}
+                            disabled={distributionList.length === 0 || submittingDistribution}
+                            className={`text-white font-medium rounded-lg text-sm px-5 py-2.5 flex items-center gap-2 ${
+                              distributionList.length === 0 || submittingDistribution
+                                ? 'bg-gray-400 cursor-not-allowed'
+                                : 'bg-green-600 hover:bg-green-700'
+                            }`}
+                          >
+                            {submittingDistribution ? (
+                              <>
+                                <div className="w-4 h-4 border-2 border-white border-t-transparent animate-spin rounded-full"></div>
+                                Saving...
+                              </>
+                            ) : (
+                              <>
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                                Complete Patient ({distributionList.length} {distributionList.length === 1 ? 'medicine' : 'medicines'})
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      </div>
                     </TableCell>
                   </TableRow>
                 )}
@@ -1491,42 +1577,6 @@ const Distribution = () => {
                 )}
               </TableBody>
             </Table>
-          </div>
-
-          <div className="flex justify-end gap-3">
-            <Button
-              type="button"
-              className="bg-white text-[#2D506B] hover:bg-blue-50 border border-[#2D506B] font-medium rounded-lg text-sm px-5 py-2.5"
-              onClick={handleStartNewDistribution}
-              disabled={submittingDistribution}
-            >
-              Clear All
-            </Button>
-            
-            <Button
-              type="button"
-              disabled={distributionList.length === 0 || submittingDistribution}
-              onClick={handleCompletePatientDistribution}
-              className={`text-white font-medium rounded-lg text-sm px-5 py-2.5 flex items-center gap-2 ${
-                distributionList.length === 0 || submittingDistribution
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-green-600 hover:bg-green-700 border'
-              }`}
-            >
-              {submittingDistribution ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent animate-spin rounded-full"></div>
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  Complete Patient ({distributionList.length} {distributionList.length === 1 ? 'medicine' : 'medicines'})
-                </>
-              )}
-            </Button>
           </div>
         </div>
       )}
@@ -1798,6 +1848,136 @@ const Distribution = () => {
                     Add Patient
                   </>
                 )}
+              </button>
+            </div>
+          </ModalBody>
+        </Modal>
+      )}
+      
+      {/* Batch Selection Modal */}
+      {showBatchModal && (
+        <Modal show={showBatchModal} onClose={handleCancelBatchSelection} size="4xl">
+          <ModalHeader>
+            Select Batches for {currentMedicineForBatch?.medicineName}
+          </ModalHeader>
+          <ModalBody>
+            {loadingBatches ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <div className="w-6 h-6 rounded-full border-2 border-blue-200"></div>
+                    <div className="absolute top-0 left-0 w-6 h-6 rounded-full border-2 border-blue-600 border-t-transparent animate-spin"></div>
+                  </div>
+                  <span className="text-gray-500">Loading available batches...</span>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {availableBatches.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <p>No batches available for this medicine at the selected location.</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <h4 className="font-medium text-blue-900 mb-2">Available Batches</h4>
+                      <p className="text-sm text-blue-700">
+                        Select quantities from one or more batches. You can distribute from multiple batches in a single transaction.
+                      </p>
+                    </div>
+                    
+                    <div className="overflow-x-auto">
+                      <table className="w-full border border-gray-300 rounded-lg">
+                        <thead className="bg-gray-100">
+                          <tr>
+                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Batch Name</th>
+                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Expiry Date</th>
+                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Available Qty</th>
+                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Unit Price</th>
+                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Quantity to Dispense</th>
+                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Total Price</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200">
+                          {availableBatches.map((batch) => {
+                            const selectedBatch = selectedBatches.find(b => b.id === batch.id);
+                            const selectedQty = selectedBatch?.selectedQuantity || 0;
+                            const totalPrice = selectedQty * batch.unitPrice;
+                            
+                            return (
+                              <tr key={batch.id} className="hover:bg-gray-50">
+                                <td className="px-4 py-3 text-sm text-gray-900">{batch.batchName}</td>
+                                <td className="px-4 py-3 text-sm text-gray-900">
+                                  {new Date(batch.expiryDate).toLocaleDateString()}
+                                </td>
+                                <td className="px-4 py-3 text-sm text-gray-900">{batch.currentQuantity}</td>
+                                <td className="px-4 py-3 text-sm text-gray-900">₹{batch.unitPrice.toFixed(2)}</td>
+                                <td className="px-4 py-3">
+                                  <input
+                                    type="number"
+                                    value={selectedQty}
+                                    onChange={(e) => handleBatchQuantityChange(batch.id, e.target.value)}
+                                    className="w-20 border border-gray-300 rounded px-2 py-1 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                                    min={0}
+                                    max={batch.currentQuantity}
+                                    placeholder="0"
+                                  />
+                                </td>
+                                <td className="px-4 py-3 text-sm font-medium text-green-600">
+                                  ₹{totalPrice.toFixed(2)}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                    
+                    {selectedBatches.length > 0 && (
+                      <div className="bg-green-50 p-4 rounded-lg">
+                        <h4 className="font-medium text-green-900 mb-2">Selection Summary</h4>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                          <div>
+                            <span className="text-green-700">Total Quantity:</span>
+                            <span className="font-medium ml-2">
+                              {selectedBatches.reduce((sum, batch) => sum + batch.selectedQuantity, 0)}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-green-700">Total Price:</span>
+                            <span className="font-medium ml-2">
+                              ₹{selectedBatches.reduce((sum, batch) => sum + (batch.selectedQuantity * batch.unitPrice), 0).toFixed(2)}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-green-700">Batches:</span>
+                            <span className="font-medium ml-2">{selectedBatches.length}</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+            
+            <div className="flex gap-3 justify-end mt-6">
+              <button
+                onClick={handleCancelBatchSelection}
+                className="bg-white text-gray-600 hover:bg-gray-50 border border-gray-300 font-medium rounded-lg text-sm px-5 py-2.5"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmBatchSelection}
+                disabled={selectedBatches.length === 0}
+                className={`font-medium rounded-lg text-sm px-5 py-2.5 ${
+                  selectedBatches.length > 0
+                    ? 'text-white bg-green-600 hover:bg-green-700'
+                    : 'text-gray-500 bg-gray-300 cursor-not-allowed'
+                }`}
+              >
+                Add Medicine ({selectedBatches.reduce((sum, batch) => sum + batch.selectedQuantity, 0)} units)
               </button>
             </div>
           </ModalBody>

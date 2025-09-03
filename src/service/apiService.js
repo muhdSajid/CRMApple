@@ -242,6 +242,19 @@ export const submitDistribution = async (distributionData) => {
   }
 };
 
+// Fetch available batches for medicine at location
+export const fetchAvailableBatches = async (locationId, medicineId) => {
+  try {
+    console.log(`Fetching batches for medicine ${medicineId} at location ${locationId}...`);
+    const response = await get(`${apiDomain}/api/v1/batches/available?locationId=${locationId}&medicineId=${medicineId}`);
+    console.log('Available batches response:', response);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching available batches:', error);
+    throw error;
+  }
+};
+
 const _fetch = async (url, method, data = null, props, token = null) => {
   let userToken;
   if (token !== null) {
