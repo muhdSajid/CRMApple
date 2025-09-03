@@ -14,14 +14,12 @@ import {
   ModalBody,
   ModalHeader,
 } from "flowbite-react";
-import DistributionListModal from "./DistributionListModal";
 import { useState, useEffect } from "react";
 import { FaCirclePlus } from "react-icons/fa6";
 import { getDeliveryCenterTypes, getLocations, getDeliveryCentersByLocationAndType, createDeliveryCenter, searchPatients, createPatient, searchMedicinesByLocation, submitDistribution, fetchAvailableBatches } from "../../service/apiService";
 import { getDeliveryCenterTypeConfig, defaultDeliveryCenterTypes } from "../../utils/deliveryCenterConfig";
 
 const Distribution = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedMode, setSelectedMode] = useState("");
   const [pendingMode, setPendingMode] = useState("");
   const [showModal, setShowModal] = useState(false);
@@ -939,9 +937,6 @@ const Distribution = () => {
     <div className="m-6 p-6 bg-white rounded-lg shadow-md space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-semibold">Medicine Distribution</h1>
-        <Button size="sm" color="light" onClick={() => setIsModalOpen(true)}>
-          Distribution List
-        </Button>
       </div>
       <HR />
 
@@ -1765,12 +1760,6 @@ const Distribution = () => {
             </Table>
           </div>
         </div>
-      )}
-      {isModalOpen && (
-        <DistributionListModal
-          open={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-        />
       )}
       {/* Confirmation Modal */}
       {showModal && (
