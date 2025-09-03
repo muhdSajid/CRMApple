@@ -231,6 +231,17 @@ export const searchMedicinesByLocation = async (locationId, searchTerm) => {
   }
 };
 
+// Submit distribution for a patient
+export const submitDistribution = async (distributionData) => {
+  try {
+    const response = await post(`${apiDomain}/api/v1/distributions`, distributionData);
+    return response.data;
+  } catch (error) {
+    console.error('Error submitting distribution:', error);
+    throw error;
+  }
+};
+
 const _fetch = async (url, method, data = null, props, token = null) => {
   let userToken;
   if (token !== null) {

@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   Button,
   Label,
@@ -16,7 +17,7 @@ import {
 import DistributionListModal from "./DistributionListModal";
 import { useState, useEffect } from "react";
 import { FaCirclePlus } from "react-icons/fa6";
-import { getDeliveryCenterTypes, getLocations, getDeliveryCentersByLocationAndType, createDeliveryCenter, searchPatients, createPatient, searchMedicinesByLocation } from "../../service/apiService";
+import { getDeliveryCenterTypes, getLocations, getDeliveryCentersByLocationAndType, createDeliveryCenter, searchPatients, createPatient, searchMedicinesByLocation, submitDistribution } from "../../service/apiService";
 import { getDeliveryCenterTypeConfig, defaultDeliveryCenterTypes } from "../../utils/deliveryCenterConfig";
 
 const Distribution = () => {
@@ -70,8 +71,6 @@ const Distribution = () => {
   
   // Medicine distribution list state
   const [distributionList, setDistributionList] = useState([]);
-  const [currentPatientId, setCurrentPatientId] = useState("");
-  const [currentPatientName, setCurrentPatientName] = useState("");
   const [currentMedicineName, setCurrentMedicineName] = useState("");
   const [currentQuantity, setCurrentQuantity] = useState("");
   
@@ -84,6 +83,14 @@ const Distribution = () => {
   
   // Add row state
   const [showAddRow, setShowAddRow] = useState(false);
+  
+  // Distribution submission state
+  const [submittingDistribution, setSubmittingDistribution] = useState(false);
+  const [completedPatients, setCompletedPatients] = useState([]);
+  
+  // Edit quantity state
+  const [editingQuantity, setEditingQuantity] = useState(null);
+  const [editQuantityValue, setEditQuantityValue] = useState("");
   
   // Accordion state
   const [locationAccordionOpen, setLocationAccordionOpen] = useState(true);
@@ -330,20 +337,24 @@ const Distribution = () => {
 
   const handlePatientSearchChange = (e) => {
     const value = e.target.value;
-    setPatientSearchTerm(value);
-    setShowPatientDropdown(true);
     
-    if (!value) {
-      setSelectedPatient("");
-      setPatients([]);
-      setCurrentMedicineName("");
-      setCurrentQuantity("");
-    } else {
-      // Clear selected patient when typing new name
-      if (selectedPatient) {
+    // Only allow patient search if no distribution items exist
+    if (distributionList.length === 0) {
+      setPatientSearchTerm(value);
+      setShowPatientDropdown(true);
+      
+      if (!value) {
         setSelectedPatient("");
+        setPatients([]);
+        setCurrentMedicineName("");
+        setCurrentQuantity("");
+      } else {
+        // Clear selected patient when typing new name
+        if (selectedPatient) {
+          setSelectedPatient("");
+        }
+        handlePatientSearch(value);
       }
-      handlePatientSearch(value);
     }
   };
 
@@ -544,51 +555,6 @@ const Distribution = () => {
   // Add medicine for selected patient
   const handleAddMedicine = () => {
     // Validation
-    if (!selectedPatient) {
-      alert("Please select a patient first");
-      return;
-    }
-    if (!currentMedicineName.trim()) {
-      alert("Please enter medicine name");
-      return;
-    }
-    if (!currentQuantity || currentQuantity <= 0) {
-      alert("Please enter a valid quantity");
-      return;
-    }
-    
-    // Check stock availability
-    if (selectedMedicine && parseInt(currentQuantity) > selectedMedicine.totalNumberOfMedicines) {
-      alert(`Quantity exceeds available stock. Available: ${selectedMedicine.totalNumberOfMedicines}`);
-      return;
-    }
-
-    const patientName = patients.find(p => p.id === selectedPatient)?.name || patientSearchTerm;
-    
-    const newDistribution = {
-      id: Date.now(),
-      patientId: selectedPatient,
-      patientName: patientName,
-      medicineName: currentMedicineName.trim(),
-      medicineId: selectedMedicine?.medicineId || null,
-      quantity: parseInt(currentQuantity),
-      availableStock: selectedMedicine?.totalNumberOfMedicines || null
-    };
-
-    setDistributionList(prev => [...prev, newDistribution]);
-    
-    // Clear medicine fields but keep patient selected
-    setCurrentMedicineName("");
-    setCurrentQuantity("");
-    setMedicineSearchTerm("");
-    setSelectedMedicine(null);
-    
-    // Hide add row after adding
-    setShowAddRow(false);
-  };
-
-  // Add new patient with medicines
-  const handleAddPatientWithMedicine = () => {
     if (!patientSearchTerm.trim()) {
       alert("Please enter patient name");
       return;
@@ -608,21 +574,169 @@ const Distribution = () => {
       return;
     }
 
-    const newPatientId = `TEMP_${Date.now()}`;
+    const patientName = patients.find(p => p.id === selectedPatient)?.name || patientSearchTerm.trim();
+    const patientId = selectedPatient || `TEMP_${patientName.replace(/\s+/g, '_')}_${Date.now()}`;
+    const isNewPatient = !selectedPatient;
+    
     const newDistribution = {
       id: Date.now(),
-      patientId: newPatientId,
-      patientName: patientSearchTerm.trim(),
+      patientId: patientId,
+      patientName: patientName,
       medicineName: currentMedicineName.trim(),
       medicineId: selectedMedicine?.medicineId || null,
       quantity: parseInt(currentQuantity),
       availableStock: selectedMedicine?.totalNumberOfMedicines || null,
-      isNewPatient: true
+      isNewPatient: isNewPatient
     };
 
     setDistributionList(prev => [...prev, newDistribution]);
     
-    // Clear all fields
+    // For first medicine, set the patient search term to the selected patient name
+    if (distributionList.length === 0) {
+      setPatientSearchTerm(patientName);
+    }
+    
+    // Clear only medicine fields, keep patient info for adding more medicines to same patient
+    setCurrentMedicineName("");
+    setCurrentQuantity("");
+    setMedicineSearchTerm("");
+    setSelectedMedicine(null);
+    setShowMedicineDropdown(false);
+    
+    // Hide the add row since we want to complete this patient first
+    setShowAddRow(false);
+  };
+
+  // Remove item from distribution list
+  const handleRemoveDistribution = (id) => {
+    setDistributionList(prev => prev.filter(item => item.id !== id));
+  };
+
+  // Edit quantity functions
+  const handleEditQuantity = (item) => {
+    setEditingQuantity(item.id);
+    setEditQuantityValue(item.quantity.toString());
+  };
+
+  const handleSaveQuantity = (itemId) => {
+    const newQuantity = parseInt(editQuantityValue);
+    const item = distributionList.find(item => item.id === itemId);
+    
+    // Validation
+    if (!newQuantity || newQuantity <= 0) {
+      alert("Please enter a valid quantity");
+      return;
+    }
+    
+    // Check stock availability
+    if (item.availableStock !== null && newQuantity > item.availableStock) {
+      alert(`Quantity cannot exceed available stock (${item.availableStock})`);
+      return;
+    }
+    
+    // Update the distribution list
+    setDistributionList(prev => prev.map(item => 
+      item.id === itemId 
+        ? { ...item, quantity: newQuantity }
+        : item
+    ));
+    
+    // Clear editing state
+    setEditingQuantity(null);
+    setEditQuantityValue("");
+  };
+
+  const handleCancelEditQuantity = () => {
+    setEditingQuantity(null);
+    setEditQuantityValue("");
+  };
+
+  // Submit distribution for current patient and clear for new patient
+  const handleCompletePatientDistribution = async () => {
+    if (distributionList.length === 0) {
+      alert("No medicines to distribute");
+      return;
+    }
+
+    // Count medicines for the patient
+    const totalMedicines = distributionList.length;
+    const patientName = distributionList[0]?.patientName || 'Unknown Patient';
+    
+    if (!window.confirm(`Are you sure you want to complete distribution for ${patientName} with ${totalMedicines} medicine(s)?`)) {
+      return;
+    }
+
+    // Group medicines by patient
+    const patientGroups = distributionList.reduce((groups, item) => {
+      const key = item.patientId;
+      if (!groups[key]) {
+        groups[key] = {
+          patient: { id: item.patientId, name: item.patientName, isNewPatient: item.isNewPatient },
+          medicines: []
+        };
+      }
+      groups[key].medicines.push({
+        medicineId: item.medicineId,
+        medicineName: item.medicineName,
+        quantity: item.quantity,
+        availableStock: item.availableStock
+      });
+      return groups;
+    }, {});
+
+    try {
+      setSubmittingDistribution(true);
+      
+      // Submit distribution for each patient
+      for (const [, group] of Object.entries(patientGroups)) {
+        const distributionData = {
+          patientId: group.patient.id,
+          patientName: group.patient.name,
+          locationId: parseInt(selectedLocation),
+          deliveryCenterId: parseInt(selectedDeliveryCenter),
+          distributionType: selectedMode,
+          medicines: group.medicines,
+          isNewPatient: group.patient.isNewPatient,
+          distributionDate: new Date().toISOString()
+        };
+
+        await submitDistribution(distributionData);
+        
+        // Add to completed patients list
+        setCompletedPatients(prev => [...prev, {
+          id: group.patient.id,
+          name: group.patient.name,
+          medicineCount: group.medicines.length,
+          completedAt: new Date().toISOString()
+        }]);
+      }
+
+      // Clear current distribution and reset for new patient
+      setDistributionList([]);
+      setPatientSearchTerm("");
+      setSelectedPatient("");
+      setCurrentMedicineName("");
+      setCurrentQuantity("");
+      setMedicineSearchTerm("");
+      setSelectedMedicine(null);
+      setShowPatientDropdown(false);
+      setShowMedicineDropdown(false);
+      setShowAddRow(true); // Keep the add row open for next patient
+
+      alert(`✅ Distribution completed successfully!\n\nPatient: ${patientName}\n${totalMedicines} medicine(s) distributed\n\nYou can now add medicines for a new patient.`);
+
+    } catch (error) {
+      console.error('Error submitting distribution:', error);
+      alert('❌ Error submitting distribution. Please try again.');
+    } finally {
+      setSubmittingDistribution(false);
+    }
+  };
+
+  // Start fresh distribution session
+  const handleStartNewDistribution = () => {
+    setDistributionList([]);
+    setCompletedPatients([]);
     setPatientSearchTerm("");
     setSelectedPatient("");
     setCurrentMedicineName("");
@@ -630,14 +744,8 @@ const Distribution = () => {
     setMedicineSearchTerm("");
     setSelectedMedicine(null);
     setShowPatientDropdown(false);
-    
-    // Hide add row after adding
-    setShowAddRow(false);
-  };
-
-  // Remove item from distribution list
-  const handleRemoveDistribution = (id) => {
-    setDistributionList(prev => prev.filter(item => item.id !== id));
+    setShowMedicineDropdown(false);
+    setShowAddRow(true);
   };
 
   // Filter centers based on search term
@@ -1006,9 +1114,36 @@ const Distribution = () => {
       {/* Show form fields only when location, distribution type, and center are selected */}
       {selectedLocation && selectedMode && selectedDeliveryCenter && (
         <div className="mt-6">
+          {/* Completed Patients in Current Session */}
+          {completedPatients.length > 0 && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+              <h3 className="text-sm font-semibold text-green-800 mb-3 flex items-center gap-2">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+                Completed Distributions This Session ({completedPatients.length})
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {completedPatients.map((patient) => (
+                  <div key={patient.id} className="bg-white border border-green-200 rounded-md p-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{patient.name}</p>
+                        <p className="text-xs text-gray-500">{patient.medicineCount} medicine{patient.medicineCount !== 1 ? 's' : ''}</p>
+                      </div>
+                      <div className="text-xs text-green-600">
+                        ✓ Saved
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Medicine Distribution Table */}
 
-          <div className="overflow-x-auto mb-6 pb-32">
+          <div className="overflow-x-auto mb-4 pb-48">
             <Table className="border border-gray-300">
               <TableHead className="[&>tr>th]:bg-[#E8EFF2] [&>tr>th]:text-black">
                 <TableRow>
@@ -1019,46 +1154,131 @@ const Distribution = () => {
                 </TableRow>
               </TableHead>
               <TableBody className="divide-y">
-                {/* Display existing distribution list */}
-                {distributionList.map((item) => (
-                  <TableRow key={item.id} className="bg-white hover:bg-gray-50">
-                    <TableCell className="py-3">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-gray-900">{item.patientName}</span>
-                        {item.isNewPatient && (
-                          <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
-                            New Patient
-                          </span>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="py-3">
-                      <div className="flex flex-col">
-                        <span className="text-gray-900 font-medium">{item.medicineName}</span>
-                        {item.availableStock !== null && (
-                          <span className={`text-xs ${
-                            item.availableStock > item.quantity ? 'text-green-600' : 'text-amber-600'
-                          }`}>
-                            Available: {item.availableStock}
-                          </span>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="py-3">
-                      <span className="text-gray-900">{item.quantity}</span>
-                    </TableCell>
-                    <TableCell className="py-3 text-center">
-                      <button
-                        onClick={() => handleRemoveDistribution(item.id)}
-                        className="text-red-600 hover:text-red-800 transition-colors"
-                        title="Remove"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
-                    </TableCell>
-                  </TableRow>
+                {/* Display existing distribution list - grouped by patient */}
+                {Object.entries(
+                  distributionList.reduce((groups, item) => {
+                    const key = item.patientId;
+                    if (!groups[key]) {
+                      groups[key] = {
+                        patient: { id: item.patientId, name: item.patientName, isNewPatient: item.isNewPatient },
+                        medicines: []
+                      };
+                    }
+                    groups[key].medicines.push(item);
+                    return groups;
+                  }, {})
+                ).map(([patientId, group]) => (
+                  <React.Fragment key={patientId}>
+                    {/* Patient header row */}
+                    <TableRow className="bg-blue-50">
+                      <TableCell className="py-2 font-semibold text-blue-900" colSpan={4}>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span>Patient: {group.patient.name}</span>
+                            {group.patient.isNewPatient && (
+                              <span className="px-2 py-1 text-xs bg-blue-200 text-blue-800 rounded-full">
+                                New Patient
+                              </span>
+                            )}
+                            <span className="text-sm text-blue-700">({group.medicines.length} medicine{group.medicines.length !== 1 ? 's' : ''})</span>
+                          </div>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                    {/* Medicine rows for this patient */}
+                    {group.medicines.map((item) => (
+                      <TableRow key={item.id} className="bg-white hover:bg-gray-50">
+                        <TableCell className="py-3 pl-8">
+                          <span className="text-gray-600">↳ Medicine</span>
+                        </TableCell>
+                        <TableCell className="py-3">
+                          <div className="flex flex-col">
+                            <span className="text-gray-900 font-medium">{item.medicineName}</span>
+                            {item.availableStock !== null && (
+                              <span className={`text-xs ${
+                                item.availableStock > item.quantity ? 'text-green-600' : 'text-amber-600'
+                              }`}>
+                                Available: {item.availableStock}
+                              </span>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="py-3">
+                          {editingQuantity === item.id ? (
+                            <div className="flex items-center gap-2">
+                              <div className="relative">
+                                <input
+                                  type="number"
+                                  value={editQuantityValue}
+                                  onChange={(e) => setEditQuantityValue(e.target.value)}
+                                  className={`w-20 border rounded px-2 py-1 text-sm focus:ring-1 focus:outline-none ${
+                                    item.availableStock !== null && parseInt(editQuantityValue) > item.availableStock
+                                      ? 'border-red-300 focus:ring-red-500 focus:border-red-500 bg-red-50'
+                                      : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                                  }`}
+                                  min={1}
+                                  max={item.availableStock}
+                                  autoFocus
+                                />
+                                {item.availableStock !== null && parseInt(editQuantityValue) > item.availableStock && (
+                                  <div className="absolute -bottom-5 left-0 text-xs text-red-600 whitespace-nowrap">
+                                    Exceeds stock ({item.availableStock})
+                                  </div>
+                                )}
+                              </div>
+                              <button
+                                onClick={() => handleSaveQuantity(item.id)}
+                                disabled={item.availableStock !== null && parseInt(editQuantityValue) > item.availableStock}
+                                className={`transition-colors ${
+                                  item.availableStock !== null && parseInt(editQuantityValue) > item.availableStock
+                                    ? 'text-gray-400 cursor-not-allowed'
+                                    : 'text-green-600 hover:text-green-800'
+                                }`}
+                                title="Save"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                              </button>
+                              <button
+                                onClick={handleCancelEditQuantity}
+                                className="text-gray-600 hover:text-red-600 transition-colors"
+                                title="Cancel"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <span className="text-gray-900">{item.quantity}</span>
+                              <button
+                                onClick={() => handleEditQuantity(item)}
+                                className="text-blue-600 hover:text-blue-800 transition-colors"
+                                title="Edit quantity"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                              </button>
+                            </div>
+                          )}
+                        </TableCell>
+                        <TableCell className="py-3 text-center">
+                          <button
+                            onClick={() => handleRemoveDistribution(item.id)}
+                            className="text-red-600 hover:text-red-800 transition-colors"
+                            title="Remove"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </React.Fragment>
                 ))}
                 
                 {/* Input row for adding new entries - only show when no items or user clicks "Add More" */}
@@ -1068,49 +1288,65 @@ const Distribution = () => {
                       <div className="relative patient-search-dropdown-container">
                         <div className="flex gap-2">
                           <div className="flex-1 relative">
-                            <input
-                              type="text"
-                              value={patientSearchTerm}
-                              onChange={handlePatientSearchChange}
-                              onFocus={() => setShowPatientDropdown(true)}
-                              placeholder="Search or enter new patient name..."
-                              className="w-full border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 p-2.5 bg-white"
-                            />
-                            {searchingPatients && (
-                              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                                <div className="w-4 h-4 border-2 border-blue-200 border-t-blue-600 animate-spin rounded-full"></div>
-                              </div>
-                            )}
-                            {showPatientDropdown && patients.length > 0 && (
-                              <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                                {patients.map((patient) => (
-                                  <div
-                                    key={patient.id}
-                                    onClick={() => handlePatientSelect(patient)}
-                                    className="px-3 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
-                                  >
-                                    <div className="text-sm font-medium text-gray-900">{patient.name}</div>
-                                    <div className="text-xs text-gray-500">
-                                      {patient.patientId} • {patient.phone || 'No phone'}
-                                    </div>
+                            {distributionList.length > 0 ? (
+                              // Show readonly patient name when there are already items
+                              <input
+                                type="text"
+                                value={distributionList[0]?.patientName || ''}
+                                readOnly
+                                className="w-full border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 bg-gray-100 cursor-not-allowed"
+                                title="Patient already selected. Complete distribution to add medicines for a different patient."
+                              />
+                            ) : (
+                              // Show searchable input only when no items exist
+                              <>
+                                <input
+                                  type="text"
+                                  value={patientSearchTerm}
+                                  onChange={handlePatientSearchChange}
+                                  onFocus={() => setShowPatientDropdown(true)}
+                                  placeholder="Search or enter new patient name..."
+                                  className="w-full border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 p-2.5 bg-white"
+                                />
+                                {searchingPatients && (
+                                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                                    <div className="w-4 h-4 border-2 border-blue-200 border-t-blue-600 animate-spin rounded-full"></div>
                                   </div>
-                                ))}
-                              </div>
-                            )}
-                            {showPatientDropdown && patientSearchTerm && patients.length === 0 && !searchingPatients && (
-                              <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-3 text-center text-gray-500 text-sm">
-                                No patients found
-                              </div>
+                                )}
+                                {showPatientDropdown && patients.length > 0 && (
+                                  <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                                    {patients.map((patient) => (
+                                      <div
+                                        key={patient.id}
+                                        onClick={() => handlePatientSelect(patient)}
+                                        className="px-3 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
+                                      >
+                                        <div className="text-sm font-medium text-gray-900">{patient.name}</div>
+                                        <div className="text-xs text-gray-500">
+                                          {patient.patientId} • {patient.phone || 'No phone'}
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                                {showPatientDropdown && patientSearchTerm && patients.length === 0 && !searchingPatients && (
+                                  <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-3 text-center text-gray-500 text-sm">
+                                    No patients found
+                                  </div>
+                                )}
+                              </>
                             )}
                           </div>
-                          <button
-                            onClick={() => setShowAddPatientModal(true)}
-                            className="px-3 py-2.5 text-blue-600 border border-blue-300 rounded-lg hover:bg-blue-50 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors flex items-center gap-1 whitespace-nowrap"
-                            title="Add New Patient"
-                          >
-                            <FaCirclePlus className="text-sm" />
-                            Patient
-                          </button>
+                          {distributionList.length === 0 && (
+                            <button
+                              onClick={() => setShowAddPatientModal(true)}
+                              className="px-3 py-2.5 text-blue-600 border border-blue-300 rounded-lg hover:bg-blue-50 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors flex items-center gap-1 whitespace-nowrap"
+                              title="Add New Patient"
+                            >
+                              <FaCirclePlus className="text-sm" />
+                              Patient
+                            </button>
+                          )}
                         </div>
                       </div>
                     </TableCell>
@@ -1130,7 +1366,7 @@ const Distribution = () => {
                           </div>
                         )}
                         {showMedicineDropdown && medicines.length > 0 && (
-                          <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                          <div className="absolute z-[9999] w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
                             {console.log('Rendering medicines dropdown with:', medicines)}
                             {medicines.map((medicine) => (
                               <div
@@ -1152,7 +1388,7 @@ const Distribution = () => {
                           </div>
                         )}
                         {showMedicineDropdown && medicineSearchTerm && medicines.length === 0 && !searchingMedicines && (
-                          <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-3 text-center text-gray-500 text-sm">
+                          <div className="absolute z-[9999] w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-3 text-center text-gray-500 text-sm">
                             No medicines found
                           </div>
                         )}
@@ -1182,40 +1418,18 @@ const Distribution = () => {
                     </TableCell>
                     <TableCell className="py-3 text-center">
                       <div className="flex gap-1 justify-center">
-                        {/* Add medicine for selected patient */}
+                        {/* Add Medicine button */}
                         <button
                           onClick={handleAddMedicine}
-                          disabled={!selectedPatient}
-                          className={`p-2 rounded transition-colors ${
-                            selectedPatient 
-                              ? 'text-green-600 hover:text-green-800 hover:bg-green-50' 
-                              : 'text-gray-400 cursor-not-allowed'
+                          disabled={!patientSearchTerm.trim() || !currentMedicineName.trim() || !currentQuantity}
+                          className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                            patientSearchTerm.trim() && currentMedicineName.trim() && currentQuantity
+                              ? 'bg-green-600 text-white hover:bg-green-700' 
+                              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                           }`}
-                          title={selectedPatient ? "Add medicine for selected patient" : "Select a patient first"}
+                          title="Add medicine to current patient"
                         >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                          </svg>
-                        </button>
-                        
-                        {/* Add new patient with medicine */}
-                        <button
-                          onClick={handleAddPatientWithMedicine}
-                          disabled={!patientSearchTerm.trim() || selectedPatient}
-                          className={`p-2 rounded transition-colors ${
-                            patientSearchTerm.trim() && !selectedPatient
-                              ? 'text-blue-600 hover:text-blue-800 hover:bg-blue-50' 
-                              : 'text-gray-400 cursor-not-allowed'
-                          }`}
-                          title={
-                            selectedPatient 
-                              ? "Clear patient selection to add new patient" 
-                              : patientSearchTerm.trim() 
-                              ? "Add as new patient with medicine" 
-                              : "Enter patient name first"
-                          }
-                        >
-                          <FaCirclePlus className="text-lg" />
+                          Add Medicine
                         </button>
 
                         {/* Cancel/Close add row button - only show when there are existing items */}
@@ -1255,7 +1469,7 @@ const Distribution = () => {
                         className="inline-flex items-center gap-2 px-4 py-2 text-blue-600 hover:text-blue-800 font-medium transition-colors"
                       >
                         <FaCirclePlus className="text-lg" />
-                        <span>Add More Items</span>
+                        <span>Add More Medicine for Current Patient</span>
                       </button>
                     </TableCell>
                   </TableRow>
@@ -1279,33 +1493,39 @@ const Distribution = () => {
             </Table>
           </div>
 
-          <div className="flex justify-end gap-4">
+          <div className="flex justify-end gap-3">
             <Button
               type="button"
               className="bg-white text-[#2D506B] hover:bg-blue-50 border border-[#2D506B] font-medium rounded-lg text-sm px-5 py-2.5"
-              onClick={() => {
-                setDistributionList([]);
-                setPatientSearchTerm("");
-                setSelectedPatient("");
-                setCurrentMedicineName("");
-                setCurrentQuantity("");
-                setMedicineSearchTerm("");
-                setSelectedMedicine(null);
-                setShowAddRow(false);
-              }}
+              onClick={handleStartNewDistribution}
+              disabled={submittingDistribution}
             >
               Clear All
             </Button>
+            
             <Button
-              type="submit"
-              disabled={distributionList.length === 0}
-              className={`text-white font-medium rounded-lg text-sm px-5 py-2.5 ${
-                distributionList.length === 0
+              type="button"
+              disabled={distributionList.length === 0 || submittingDistribution}
+              onClick={handleCompletePatientDistribution}
+              className={`text-white font-medium rounded-lg text-sm px-5 py-2.5 flex items-center gap-2 ${
+                distributionList.length === 0 || submittingDistribution
                   ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-[#2D506B] hover:bg-sky-900 border'
+                  : 'bg-green-600 hover:bg-green-700 border'
               }`}
             >
-              Distribute ({distributionList.length} {distributionList.length === 1 ? 'item' : 'items'})
+              {submittingDistribution ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent animate-spin rounded-full"></div>
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Complete Patient ({distributionList.length} {distributionList.length === 1 ? 'medicine' : 'medicines'})
+                </>
+              )}
             </Button>
           </div>
         </div>
