@@ -16,7 +16,7 @@ import {
 import DistributionListModal from "./DistributionListModal";
 import { useState, useEffect } from "react";
 import { FaCirclePlus } from "react-icons/fa6";
-import { getDeliveryCenterTypes, getLocations, getDeliveryCentersByLocationAndType, createDeliveryCenter, searchPatients, createPatient } from "../../service/apiService";
+import { getDeliveryCenterTypes, getLocations, getDeliveryCentersByLocationAndType, createDeliveryCenter, searchPatients, createPatient, searchMedicinesByLocation } from "../../service/apiService";
 import { getDeliveryCenterTypeConfig, defaultDeliveryCenterTypes } from "../../utils/deliveryCenterConfig";
 
 const Distribution = () => {
@@ -67,6 +67,23 @@ const Distribution = () => {
     emergencyContact: "",
     general: ""
   });
+  
+  // Medicine distribution list state
+  const [distributionList, setDistributionList] = useState([]);
+  const [currentPatientId, setCurrentPatientId] = useState("");
+  const [currentPatientName, setCurrentPatientName] = useState("");
+  const [currentMedicineName, setCurrentMedicineName] = useState("");
+  const [currentQuantity, setCurrentQuantity] = useState("");
+  
+  // Medicine search state
+  const [medicines, setMedicines] = useState([]);
+  const [selectedMedicine, setSelectedMedicine] = useState(null);
+  const [medicineSearchTerm, setMedicineSearchTerm] = useState("");
+  const [showMedicineDropdown, setShowMedicineDropdown] = useState(false);
+  const [searchingMedicines, setSearchingMedicines] = useState(false);
+  
+  // Add row state
+  const [showAddRow, setShowAddRow] = useState(false);
   
   // Accordion state
   const [locationAccordionOpen, setLocationAccordionOpen] = useState(true);
@@ -274,6 +291,43 @@ const Distribution = () => {
     }
   };
 
+  // Medicine search functionality
+  const handleMedicineSearch = async (searchTerm) => {
+    if (!searchTerm || searchTerm.length < 2) {
+      setMedicines([]);
+      setShowMedicineDropdown(false);
+      return;
+    }
+
+    if (!selectedLocation) {
+      setMedicines([]);
+      setShowMedicineDropdown(false);
+      return;
+    }
+
+    try {
+      setSearchingMedicines(true);
+      console.log('Searching medicines with term:', searchTerm, 'location:', selectedLocation);
+      
+      // Correct parameter order: location first, then searchTerm
+      const response = await searchMedicinesByLocation(selectedLocation, searchTerm);
+      console.log('Full API response:', response);
+      
+      // Extract data array from API response structure
+      const medicineData = response?.data || response || [];
+      console.log('Extracted medicine data:', medicineData);
+      
+      setMedicines(medicineData);
+      setShowMedicineDropdown(true); // Explicitly show dropdown after successful search
+    } catch (error) {
+      console.error('Error searching medicines:', error);
+      setMedicines([]);
+      setShowMedicineDropdown(false);
+    } finally {
+      setSearchingMedicines(false);
+    }
+  };
+
   const handlePatientSearchChange = (e) => {
     const value = e.target.value;
     setPatientSearchTerm(value);
@@ -282,8 +336,33 @@ const Distribution = () => {
     if (!value) {
       setSelectedPatient("");
       setPatients([]);
+      setCurrentMedicineName("");
+      setCurrentQuantity("");
     } else {
+      // Clear selected patient when typing new name
+      if (selectedPatient) {
+        setSelectedPatient("");
+      }
       handlePatientSearch(value);
+    }
+  };
+
+  const handleMedicineSearchChange = (e) => {
+    const value = e.target.value;
+    console.log('Medicine search term changed:', value);
+    setMedicineSearchTerm(value);
+    setCurrentMedicineName(value);
+    setShowMedicineDropdown(true);
+    
+    if (!value) {
+      setSelectedMedicine(null);
+      setMedicines([]);
+    } else {
+      // Clear selected medicine when typing new name
+      if (selectedMedicine) {
+        setSelectedMedicine(null);
+      }
+      handleMedicineSearch(value);
     }
   };
 
@@ -291,6 +370,18 @@ const Distribution = () => {
     setSelectedPatient(patient.id);
     setPatientSearchTerm(patient.name);
     setShowPatientDropdown(false);
+    // Clear medicine fields when switching patients
+    setCurrentMedicineName("");
+    setCurrentQuantity("");
+    setMedicineSearchTerm("");
+    setSelectedMedicine(null);
+  };
+
+  const handleMedicineSelect = (medicine) => {
+    setSelectedMedicine(medicine);
+    setMedicineSearchTerm(medicine.medicineName);
+    setCurrentMedicineName(medicine.medicineName);
+    setShowMedicineDropdown(false);
   };
 
   const handleAddPatient = async () => {
@@ -450,6 +541,105 @@ const Distribution = () => {
     }
   };
 
+  // Add medicine for selected patient
+  const handleAddMedicine = () => {
+    // Validation
+    if (!selectedPatient) {
+      alert("Please select a patient first");
+      return;
+    }
+    if (!currentMedicineName.trim()) {
+      alert("Please enter medicine name");
+      return;
+    }
+    if (!currentQuantity || currentQuantity <= 0) {
+      alert("Please enter a valid quantity");
+      return;
+    }
+    
+    // Check stock availability
+    if (selectedMedicine && parseInt(currentQuantity) > selectedMedicine.totalNumberOfMedicines) {
+      alert(`Quantity exceeds available stock. Available: ${selectedMedicine.totalNumberOfMedicines}`);
+      return;
+    }
+
+    const patientName = patients.find(p => p.id === selectedPatient)?.name || patientSearchTerm;
+    
+    const newDistribution = {
+      id: Date.now(),
+      patientId: selectedPatient,
+      patientName: patientName,
+      medicineName: currentMedicineName.trim(),
+      medicineId: selectedMedicine?.medicineId || null,
+      quantity: parseInt(currentQuantity),
+      availableStock: selectedMedicine?.totalNumberOfMedicines || null
+    };
+
+    setDistributionList(prev => [...prev, newDistribution]);
+    
+    // Clear medicine fields but keep patient selected
+    setCurrentMedicineName("");
+    setCurrentQuantity("");
+    setMedicineSearchTerm("");
+    setSelectedMedicine(null);
+    
+    // Hide add row after adding
+    setShowAddRow(false);
+  };
+
+  // Add new patient with medicines
+  const handleAddPatientWithMedicine = () => {
+    if (!patientSearchTerm.trim()) {
+      alert("Please enter patient name");
+      return;
+    }
+    if (!currentMedicineName.trim()) {
+      alert("Please enter medicine name");
+      return;
+    }
+    if (!currentQuantity || currentQuantity <= 0) {
+      alert("Please enter a valid quantity");
+      return;
+    }
+    
+    // Check stock availability
+    if (selectedMedicine && parseInt(currentQuantity) > selectedMedicine.totalNumberOfMedicines) {
+      alert(`Quantity exceeds available stock. Available: ${selectedMedicine.totalNumberOfMedicines}`);
+      return;
+    }
+
+    const newPatientId = `TEMP_${Date.now()}`;
+    const newDistribution = {
+      id: Date.now(),
+      patientId: newPatientId,
+      patientName: patientSearchTerm.trim(),
+      medicineName: currentMedicineName.trim(),
+      medicineId: selectedMedicine?.medicineId || null,
+      quantity: parseInt(currentQuantity),
+      availableStock: selectedMedicine?.totalNumberOfMedicines || null,
+      isNewPatient: true
+    };
+
+    setDistributionList(prev => [...prev, newDistribution]);
+    
+    // Clear all fields
+    setPatientSearchTerm("");
+    setSelectedPatient("");
+    setCurrentMedicineName("");
+    setCurrentQuantity("");
+    setMedicineSearchTerm("");
+    setSelectedMedicine(null);
+    setShowPatientDropdown(false);
+    
+    // Hide add row after adding
+    setShowAddRow(false);
+  };
+
+  // Remove item from distribution list
+  const handleRemoveDistribution = (id) => {
+    setDistributionList(prev => prev.filter(item => item.id !== id));
+  };
+
   // Filter centers based on search term
   const filteredCenters = deliveryCenters.filter(center =>
     center.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -480,6 +670,9 @@ const Distribution = () => {
     }
     if (!e.target.closest('.patient-search-dropdown-container')) {
       setShowPatientDropdown(false);
+    }
+    if (!e.target.closest('.medicine-search-dropdown-container')) {
+      setShowMedicineDropdown(false);
     }
   };
 
@@ -826,80 +1019,262 @@ const Distribution = () => {
                 </TableRow>
               </TableHead>
               <TableBody className="divide-y">
-                <TableRow className="bg-white hover:bg-gray-50">
-                  <TableCell className="py-3">
-                    <div className="relative patient-search-dropdown-container">
-                      <div className="flex gap-2">
-                        <div className="flex-1 relative">
-                          <input
-                            type="text"
-                            value={patientSearchTerm}
-                            onChange={handlePatientSearchChange}
-                            onFocus={() => setShowPatientDropdown(true)}
-                            placeholder="Search patients..."
-                            className="w-full border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 p-2.5 bg-white"
-                          />
-                          {searchingPatients && (
-                            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                              <div className="w-4 h-4 border-2 border-blue-200 border-t-blue-600 animate-spin rounded-full"></div>
-                            </div>
-                          )}
-                          {showPatientDropdown && patients.length > 0 && (
-                            <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                              {patients.map((patient) => (
-                                <div
-                                  key={patient.id}
-                                  onClick={() => handlePatientSelect(patient)}
-                                  className="px-3 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
-                                >
-                                  <div className="text-sm font-medium text-gray-900">{patient.name}</div>
-                                  <div className="text-xs text-gray-500">
-                                    {patient.patientId} • {patient.phone || 'No phone'}
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                          {showPatientDropdown && patientSearchTerm && patients.length === 0 && !searchingPatients && (
-                            <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-3 text-center text-gray-500 text-sm">
-                              No patients found
-                            </div>
-                          )}
-                        </div>
-                        <button
-                          onClick={() => setShowAddPatientModal(true)}
-                          className="px-3 py-2.5 text-blue-600 border border-blue-300 rounded-lg hover:bg-blue-50 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors flex items-center gap-1 whitespace-nowrap"
-                        >
-                          <FaCirclePlus className="text-sm" />
-                          Add
-                        </button>
+                {/* Display existing distribution list */}
+                {distributionList.map((item) => (
+                  <TableRow key={item.id} className="bg-white hover:bg-gray-50">
+                    <TableCell className="py-3">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-gray-900">{item.patientName}</span>
+                        {item.isNewPatient && (
+                          <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
+                            New Patient
+                          </span>
+                        )}
                       </div>
-                    </div>
-                  </TableCell>
-                  <TableCell className="py-3">
-                    <input
-                      type="text"
-                      name="medicineName"
-                      placeholder="Enter medicine name"
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                      defaultValue="Paracetamol"
-                    />
-                  </TableCell>
-                  <TableCell className="py-3">
-                    <input
-                      type="number"
-                      name="quantity"
-                      placeholder="0"
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                      min={1}
-                    />
-                  </TableCell>
-                  <TableCell className="py-3 text-center">
-                    <button className="text-[#2D506B] hover:text-blue-800 transition-colors">
-                      <FaCirclePlus className="text-xl" />
-                    </button>
-                  </TableCell>
-                </TableRow>
+                    </TableCell>
+                    <TableCell className="py-3">
+                      <div className="flex flex-col">
+                        <span className="text-gray-900 font-medium">{item.medicineName}</span>
+                        {item.availableStock !== null && (
+                          <span className={`text-xs ${
+                            item.availableStock > item.quantity ? 'text-green-600' : 'text-amber-600'
+                          }`}>
+                            Available: {item.availableStock}
+                          </span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="py-3">
+                      <span className="text-gray-900">{item.quantity}</span>
+                    </TableCell>
+                    <TableCell className="py-3 text-center">
+                      <button
+                        onClick={() => handleRemoveDistribution(item.id)}
+                        className="text-red-600 hover:text-red-800 transition-colors"
+                        title="Remove"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                
+                {/* Input row for adding new entries - only show when no items or user clicks "Add More" */}
+                {(distributionList.length === 0 || showAddRow) && (
+                  <TableRow className="bg-gray-50 hover:bg-gray-100">
+                    <TableCell className="py-3">
+                      <div className="relative patient-search-dropdown-container">
+                        <div className="flex gap-2">
+                          <div className="flex-1 relative">
+                            <input
+                              type="text"
+                              value={patientSearchTerm}
+                              onChange={handlePatientSearchChange}
+                              onFocus={() => setShowPatientDropdown(true)}
+                              placeholder="Search or enter new patient name..."
+                              className="w-full border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 p-2.5 bg-white"
+                            />
+                            {searchingPatients && (
+                              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                                <div className="w-4 h-4 border-2 border-blue-200 border-t-blue-600 animate-spin rounded-full"></div>
+                              </div>
+                            )}
+                            {showPatientDropdown && patients.length > 0 && (
+                              <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                                {patients.map((patient) => (
+                                  <div
+                                    key={patient.id}
+                                    onClick={() => handlePatientSelect(patient)}
+                                    className="px-3 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
+                                  >
+                                    <div className="text-sm font-medium text-gray-900">{patient.name}</div>
+                                    <div className="text-xs text-gray-500">
+                                      {patient.patientId} • {patient.phone || 'No phone'}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            {showPatientDropdown && patientSearchTerm && patients.length === 0 && !searchingPatients && (
+                              <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-3 text-center text-gray-500 text-sm">
+                                No patients found
+                              </div>
+                            )}
+                          </div>
+                          <button
+                            onClick={() => setShowAddPatientModal(true)}
+                            className="px-3 py-2.5 text-blue-600 border border-blue-300 rounded-lg hover:bg-blue-50 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors flex items-center gap-1 whitespace-nowrap"
+                            title="Add New Patient"
+                          >
+                            <FaCirclePlus className="text-sm" />
+                            Patient
+                          </button>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="py-3">
+                      <div className="relative medicine-search-dropdown-container">
+                        <input
+                          type="text"
+                          value={medicineSearchTerm}
+                          onChange={handleMedicineSearchChange}
+                          onFocus={() => setShowMedicineDropdown(true)}
+                          placeholder="Search medicine name..."
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                        />
+                        {searchingMedicines && (
+                          <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                            <div className="w-4 h-4 border-2 border-blue-200 border-t-blue-600 animate-spin rounded-full"></div>
+                          </div>
+                        )}
+                        {showMedicineDropdown && medicines.length > 0 && (
+                          <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                            {console.log('Rendering medicines dropdown with:', medicines)}
+                            {medicines.map((medicine) => (
+                              <div
+                                key={medicine.medicineId}
+                                onClick={() => handleMedicineSelect(medicine)}
+                                className="px-3 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
+                              >
+                                <div className="text-sm font-medium text-gray-900">{medicine.medicineName}</div>
+                                <div className="text-xs text-gray-500 flex justify-between">
+                                  <span>Batches: {medicine.numberOfBatches}</span>
+                                  <span className={`font-medium ${
+                                    medicine.totalNumberOfMedicines > 0 ? 'text-green-600' : 'text-red-600'
+                                  }`}>
+                                    Stock: {medicine.totalNumberOfMedicines}
+                                  </span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        {showMedicineDropdown && medicineSearchTerm && medicines.length === 0 && !searchingMedicines && (
+                          <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-3 text-center text-gray-500 text-sm">
+                            No medicines found
+                          </div>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="py-3">
+                      <div className="relative">
+                        <input
+                          type="number"
+                          value={currentQuantity}
+                          onChange={(e) => setCurrentQuantity(e.target.value)}
+                          placeholder="0"
+                          className={`w-full border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:outline-none ${
+                            selectedMedicine && currentQuantity && parseInt(currentQuantity) > selectedMedicine.totalNumberOfMedicines
+                              ? 'border-red-300 focus:ring-red-500 focus:border-red-500 bg-red-50'
+                              : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                          }`}
+                          min={1}
+                          max={selectedMedicine?.totalNumberOfMedicines}
+                        />
+                        {selectedMedicine && currentQuantity && parseInt(currentQuantity) > selectedMedicine.totalNumberOfMedicines && (
+                          <div className="absolute -bottom-5 left-0 text-xs text-red-600">
+                            Exceeds available stock ({selectedMedicine.totalNumberOfMedicines})
+                          </div>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="py-3 text-center">
+                      <div className="flex gap-1 justify-center">
+                        {/* Add medicine for selected patient */}
+                        <button
+                          onClick={handleAddMedicine}
+                          disabled={!selectedPatient}
+                          className={`p-2 rounded transition-colors ${
+                            selectedPatient 
+                              ? 'text-green-600 hover:text-green-800 hover:bg-green-50' 
+                              : 'text-gray-400 cursor-not-allowed'
+                          }`}
+                          title={selectedPatient ? "Add medicine for selected patient" : "Select a patient first"}
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                          </svg>
+                        </button>
+                        
+                        {/* Add new patient with medicine */}
+                        <button
+                          onClick={handleAddPatientWithMedicine}
+                          disabled={!patientSearchTerm.trim() || selectedPatient}
+                          className={`p-2 rounded transition-colors ${
+                            patientSearchTerm.trim() && !selectedPatient
+                              ? 'text-blue-600 hover:text-blue-800 hover:bg-blue-50' 
+                              : 'text-gray-400 cursor-not-allowed'
+                          }`}
+                          title={
+                            selectedPatient 
+                              ? "Clear patient selection to add new patient" 
+                              : patientSearchTerm.trim() 
+                              ? "Add as new patient with medicine" 
+                              : "Enter patient name first"
+                          }
+                        >
+                          <FaCirclePlus className="text-lg" />
+                        </button>
+
+                        {/* Cancel/Close add row button - only show when there are existing items */}
+                        {distributionList.length > 0 && (
+                          <button
+                            onClick={() => {
+                              setShowAddRow(false);
+                              // Clear all input fields
+                              setPatientSearchTerm("");
+                              setSelectedPatient("");
+                              setCurrentMedicineName("");
+                              setCurrentQuantity("");
+                              setMedicineSearchTerm("");
+                              setSelectedMedicine(null);
+                              setShowPatientDropdown(false);
+                              setShowMedicineDropdown(false);
+                            }}
+                            className="p-2 rounded transition-colors text-gray-400 hover:text-red-600 hover:bg-red-50"
+                            title="Cancel adding new item"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+                
+                {/* Add More button row - show when there are items and add row is not shown */}
+                {distributionList.length > 0 && !showAddRow && (
+                  <TableRow className="bg-blue-50 hover:bg-blue-100">
+                    <TableCell colSpan={4} className="py-4 text-center">
+                      <button
+                        onClick={() => setShowAddRow(true)}
+                        className="inline-flex items-center gap-2 px-4 py-2 text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                      >
+                        <FaCirclePlus className="text-lg" />
+                        <span>Add More Items</span>
+                      </button>
+                    </TableCell>
+                  </TableRow>
+                )}
+                
+                {/* Empty state when no items */}
+                {distributionList.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={4} className="py-8 text-center text-gray-500">
+                      <div className="flex flex-col items-center gap-2">
+                        <svg className="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                        <p>No medicines added yet</p>
+                        <p className="text-sm">Start by searching for a patient or entering a new patient name above</p>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           </div>
@@ -908,14 +1283,29 @@ const Distribution = () => {
             <Button
               type="button"
               className="bg-white text-[#2D506B] hover:bg-blue-50 border border-[#2D506B] font-medium rounded-lg text-sm px-5 py-2.5"
+              onClick={() => {
+                setDistributionList([]);
+                setPatientSearchTerm("");
+                setSelectedPatient("");
+                setCurrentMedicineName("");
+                setCurrentQuantity("");
+                setMedicineSearchTerm("");
+                setSelectedMedicine(null);
+                setShowAddRow(false);
+              }}
             >
-              Cancel
+              Clear All
             </Button>
             <Button
               type="submit"
-              className="text-white bg-[#2D506B] border hover:bg-sky-900 font-medium rounded-lg text-sm px-5 py-2.5"
+              disabled={distributionList.length === 0}
+              className={`text-white font-medium rounded-lg text-sm px-5 py-2.5 ${
+                distributionList.length === 0
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-[#2D506B] hover:bg-sky-900 border'
+              }`}
             >
-              Distribute
+              Distribute ({distributionList.length} {distributionList.length === 1 ? 'item' : 'items'})
             </Button>
           </div>
         </div>

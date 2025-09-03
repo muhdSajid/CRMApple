@@ -220,6 +220,17 @@ export const updatePatient = async (patientId, patientData) => {
   }
 };
 
+// Medicine search for distribution
+export const searchMedicinesByLocation = async (locationId, searchTerm) => {
+  try {
+    const response = await get(`${apiDomain}/api/medicine-locations/location/${locationId}/available?search=${encodeURIComponent(searchTerm)}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error searching medicines:', error);
+    throw error;
+  }
+};
+
 const _fetch = async (url, method, data = null, props, token = null) => {
   let userToken;
   if (token !== null) {
