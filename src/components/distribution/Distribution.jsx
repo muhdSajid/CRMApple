@@ -30,6 +30,7 @@ const Distribution = () => {
   const [deliveryCenters, setDeliveryCenters] = useState([]);
   const [selectedDeliveryCenter, setSelectedDeliveryCenter] = useState("");
   const [selectedDistributionDate, setSelectedDistributionDate] = useState(new Date());
+  const [activeTab, setActiveTab] = useState("new-distribution"); // "new-distribution" or "daily-list"
   const [loading, setLoading] = useState(true);
   const [loadingCenters, setLoadingCenters] = useState(false);
   
@@ -1255,16 +1256,115 @@ const Distribution = () => {
         </div>
       )}
 
-      {/* Daily Distribution List - Show when center and date are selected */}
-      <DailyDistributionList 
-        selectedDeliveryCenter={selectedDeliveryCenter}
-        selectedDate={selectedDistributionDate}
-        deliveryCenters={deliveryCenters}
-      />
+      {/* Welcome message when no center is selected */}
+      {(!selectedLocation || !selectedMode || !selectedDeliveryCenter) && (
+        <div className="mt-6 text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+          <div className="max-w-md mx-auto">
+            <div className="mb-4">
+              <svg className="w-16 h-16 text-gray-400 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Get Started with Medicine Distribution</h3>
+            <p className="text-gray-600 text-sm leading-relaxed">
+              Please complete the steps above to access distribution management:
+            </p>
+            <ul className="text-left text-sm text-gray-600 mt-4 space-y-2">
+              <li className="flex items-center">
+                <div className={`w-4 h-4 rounded-full mr-3 flex items-center justify-center ${
+                  selectedLocation ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'
+                }`}>
+                  {selectedLocation ? '✓' : '1'}
+                </div>
+                Select Location
+              </li>
+              <li className="flex items-center">
+                <div className={`w-4 h-4 rounded-full mr-3 flex items-center justify-center ${
+                  selectedMode ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'
+                }`}>
+                  {selectedMode ? '✓' : '2'}
+                </div>
+                Choose Distribution Type
+              </li>
+              <li className="flex items-center">
+                <div className={`w-4 h-4 rounded-full mr-3 flex items-center justify-center ${
+                  selectedDeliveryCenter ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'
+                }`}>
+                  {selectedDeliveryCenter ? '✓' : '3'}
+                </div>
+                Select Distribution Center & Date
+              </li>
+            </ul>
+          </div>
+        </div>
+      )}
 
-      {/* Show form fields only when location, distribution type, and center are selected */}
+      {/* Tab Navigation - Show when center and date are selected */}
       {selectedLocation && selectedMode && selectedDeliveryCenter && (
         <div className="mt-6">
+          <div className="border-b border-gray-200">
+            <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+              <button
+                onClick={() => setActiveTab("new-distribution")}
+                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === "new-distribution"
+                    ? "border-blue-500 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                  New Distribution
+                </div>
+              </button>
+              <button
+                onClick={() => setActiveTab("daily-list")}
+                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === "daily-list"
+                    ? "border-blue-500 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  Daily Distributions
+                </div>
+              </button>
+            </nav>
+          </div>
+
+          {/* Tab Content */}
+          <div className="mt-6">
+            {/* Daily Distribution List Tab */}
+            {activeTab === "daily-list" && (
+              <div>
+                <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <h4 className="font-medium text-blue-900 mb-1">Daily Distribution Report</h4>
+                  <p className="text-sm text-blue-700">
+                    View all medicine distributions for the selected center and date. This shows completed distributions and their details.
+                  </p>
+                </div>
+                <DailyDistributionList 
+                  selectedDeliveryCenter={selectedDeliveryCenter}
+                  selectedDate={selectedDistributionDate}
+                  deliveryCenters={deliveryCenters}
+                />
+              </div>
+            )}
+
+            {/* New Distribution Tab */}
+            {activeTab === "new-distribution" && (
+              <div className="space-y-6">
+                <div className="mb-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                  <h4 className="font-medium text-green-900 mb-1">Create New Distribution</h4>
+                  <p className="text-sm text-green-700">
+                    Add new medicine distributions for patients. Search for existing patients or add new ones, then select medicines and quantities.
+                  </p>
+                </div>
           {/* Completed Patients in Current Session */}
           {completedPatients.length > 0 && (
             <div className={`bg-green-50 border border-green-200 rounded-lg p-4 mb-4 transition-all duration-500 ${
@@ -1769,6 +1869,9 @@ const Distribution = () => {
                 )}
               </TableBody>
             </Table>
+          </div>
+              </div>
+            )}
           </div>
         </div>
       )}
