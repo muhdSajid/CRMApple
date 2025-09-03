@@ -343,3 +343,15 @@ const _fetch = async (url, method, data = null, props, token = null) => {
   
   return response;
 };
+
+// Fetch medicine distributions by patient for a specific delivery center and date
+export const getMedicineDistributionsByPatient = async (deliveryCenterId, distributionDate) => {
+  try {
+    const url = `${apiDomain}/api/v1/medicine-distributions/by-patient?deliveryCenterId=${deliveryCenterId}&distributionDate=${distributionDate}`;
+    const response = await get(url);
+    return response.data || [];
+  } catch (error) {
+    console.error('Error fetching medicine distributions by patient:', error);
+    throw error;
+  }
+};

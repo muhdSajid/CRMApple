@@ -15,6 +15,7 @@ import {
   ModalHeader,
 } from "flowbite-react";
 import { useState, useEffect } from "react";
+import DailyDistributionList from "./DailyDistributionList";
 import { FaCirclePlus } from "react-icons/fa6";
 import { getDeliveryCenterTypes, getLocations, getDeliveryCentersByLocationAndType, createDeliveryCenter, searchPatients, createPatient, searchMedicinesByLocation, submitDistribution, fetchAvailableBatches } from "../../service/apiService";
 import { getDeliveryCenterTypeConfig, defaultDeliveryCenterTypes } from "../../utils/deliveryCenterConfig";
@@ -28,6 +29,7 @@ const Distribution = () => {
   const [selectedLocation, setSelectedLocation] = useState("");
   const [deliveryCenters, setDeliveryCenters] = useState([]);
   const [selectedDeliveryCenter, setSelectedDeliveryCenter] = useState("");
+  const [selectedDistributionDate, setSelectedDistributionDate] = useState(new Date());
   const [loading, setLoading] = useState(true);
   const [loadingCenters, setLoadingCenters] = useState(false);
   
@@ -1241,7 +1243,9 @@ const Distribution = () => {
                     </Label>
                     <Datepicker
                       className="w-full"
-                      defaultDate={new Date()}
+                      value={selectedDistributionDate}
+                      defaultDate={selectedDistributionDate}
+                      onSelectedDateChanged={(date) => setSelectedDistributionDate(date)}
                     />
                   </div>
                 </div>
@@ -1250,6 +1254,13 @@ const Distribution = () => {
           )}
         </div>
       )}
+
+      {/* Daily Distribution List - Show when center and date are selected */}
+      <DailyDistributionList 
+        selectedDeliveryCenter={selectedDeliveryCenter}
+        selectedDate={selectedDistributionDate}
+        deliveryCenters={deliveryCenters}
+      />
 
       {/* Show form fields only when location, distribution type, and center are selected */}
       {selectedLocation && selectedMode && selectedDeliveryCenter && (
