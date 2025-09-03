@@ -86,6 +86,8 @@ const Distribution = () => {
   // Distribution submission state
   const [submittingDistribution, setSubmittingDistribution] = useState(false);
   const [completedPatients, setCompletedPatients] = useState([]);
+  const [savedDistributions, setSavedDistributions] = useState([]);
+  const [distributionError, setDistributionError] = useState(null);
   
   // Edit quantity state
   const [editingQuantity, setEditingQuantity] = useState(null);
@@ -97,6 +99,9 @@ const Distribution = () => {
   const [selectedBatches, setSelectedBatches] = useState([]);
   const [loadingBatches, setLoadingBatches] = useState(false);
   const [currentMedicineForBatch, setCurrentMedicineForBatch] = useState(null);
+  
+  // Auto-fade state for completed patients
+  const [fadingCompletedPatients, setFadingCompletedPatients] = useState([]);
   
   // Accordion state
   const [locationAccordionOpen, setLocationAccordionOpen] = useState(true);
@@ -144,6 +149,25 @@ const Distribution = () => {
 
     fetchData();
   }, []);
+
+  // Auto-fade completed patients after 4 seconds
+  useEffect(() => {
+    if (completedPatients.length > 0) {
+      const timer = setTimeout(() => {
+        // Start fade animation
+        setFadingCompletedPatients(completedPatients.map(p => p.id));
+        
+        // Remove after fade animation completes
+        setTimeout(() => {
+          setCompletedPatients([]);
+          setFadingCompletedPatients([]);
+        }, 500); // 500ms for fade animation
+        
+      }, 4000); // 4 seconds before starting fade
+
+      return () => clearTimeout(timer);
+    }
+  }, [completedPatients]);
 
   const handleRadioClick = (mode) => {
     if (!selectedMode) {
@@ -641,16 +665,35 @@ const Distribution = () => {
   };
 
   const handleBatchQuantityChange = (batchId, quantity) => {
+    // Handle empty string or invalid input
+    if (quantity === '' || quantity === null || quantity === undefined) {
+      setSelectedBatches(prev => prev.filter(b => b.id !== batchId));
+      return;
+    }
+    
+    // Convert to number and validate
+    const numQuantity = parseInt(quantity, 10);
+    
+    // Check if it's a valid number
+    if (isNaN(numQuantity) || numQuantity < 0) {
+      return; // Don't update state for invalid numbers
+    }
+    
+    // Find the batch to check max quantity
+    const batch = availableBatches.find(b => b.id === batchId);
+    if (batch && numQuantity > batch.currentQuantity) {
+      return; // Don't allow quantity greater than available
+    }
+    
     setSelectedBatches(prev => {
       const existing = prev.find(b => b.id === batchId);
       if (existing) {
-        if (quantity <= 0) {
+        if (numQuantity <= 0) {
           return prev.filter(b => b.id !== batchId);
         }
-        return prev.map(b => b.id === batchId ? { ...b, selectedQuantity: parseInt(quantity) } : b);
-      } else if (quantity > 0) {
-        const batch = availableBatches.find(b => b.id === batchId);
-        return [...prev, { ...batch, selectedQuantity: parseInt(quantity) }];
+        return prev.map(b => b.id === batchId ? { ...b, selectedQuantity: numQuantity } : b);
+      } else if (numQuantity > 0) {
+        return [...prev, { ...batch, selectedQuantity: numQuantity }];
       }
       return prev;
     });
@@ -726,6 +769,9 @@ const Distribution = () => {
       return;
     }
 
+    // Clear any previous errors
+    setDistributionError(null);
+
     // Count medicines for the patient
     const totalMedicines = distributionList.length;
     const patientName = distributionList[0]?.patientName || 'Unknown Patient';
@@ -734,50 +780,67 @@ const Distribution = () => {
       return;
     }
 
-    // Group medicines by patient
-    const patientGroups = distributionList.reduce((groups, item) => {
-      const key = item.patientId;
-      if (!groups[key]) {
-        groups[key] = {
-          patient: { id: item.patientId, name: item.patientName, isNewPatient: item.isNewPatient },
-          medicines: []
-        };
-      }
-      groups[key].medicines.push({
-        medicineId: item.medicineId,
-        medicineName: item.medicineName,
-        quantity: item.quantity,
-        availableStock: item.availableStock
-      });
-      return groups;
-    }, {});
-
     try {
       setSubmittingDistribution(true);
       
-      // Submit distribution for each patient
-      for (const [, group] of Object.entries(patientGroups)) {
-        const distributionData = {
-          patientId: group.patient.id,
-          patientName: group.patient.name,
-          locationId: parseInt(selectedLocation),
-          deliveryCenterId: parseInt(selectedDeliveryCenter),
-          distributionType: selectedMode,
-          medicines: group.medicines,
-          isNewPatient: group.patient.isNewPatient,
-          distributionDate: new Date().toISOString()
-        };
+      // Get the current patient info
+      const currentPatient = distributionList[0];
+      
+      // Transform distribution items to match the new API format
+      const distributionItems = [];
+      distributionList.forEach(item => {
+        if (item.batches && item.batches.length > 0) {
+          item.batches.forEach(batch => {
+            distributionItems.push({
+              medicineId: item.medicineId,
+              medicineName: item.medicineName,
+              batchId: batch.batchId, // Use batchId instead of id
+              batchName: batch.batchName,
+              quantity: batch.quantity,
+              unitPrice: batch.unitPrice,
+              totalPrice: batch.totalPrice,
+              expiryDate: batch.expiryDate
+            });
+          });
+        }
+      });
 
-        await submitDistribution(distributionData);
-        
-        // Add to completed patients list
-        setCompletedPatients(prev => [...prev, {
-          id: group.patient.id,
-          name: group.patient.name,
-          medicineCount: group.medicines.length,
-          completedAt: new Date().toISOString()
-        }]);
-      }
+      // Prepare API payload
+      const distributionData = {
+        patientId: currentPatient.patientId,
+        patientName: currentPatient.patientName,
+        deliveryCenterId: parseInt(selectedDeliveryCenter),
+        distributionDate: new Date().toISOString(),
+        distributionItems: distributionItems
+      };
+
+      console.log('Submitting distribution data:', distributionData);
+
+      const result = await submitDistribution(distributionData);
+      
+      // Add to saved distributions list
+      const savedDistribution = {
+        id: result.id || Date.now(), // Use API response ID or timestamp as fallback
+        patientName: currentPatient.patientName,
+        patientId: currentPatient.patientId,
+        deliveryCenter: deliveryCenters.find(center => String(center.id) === selectedDeliveryCenter)?.name || 'Unknown Center',
+        distributionDate: new Date().toLocaleDateString(),
+        medicineCount: totalMedicines,
+        totalQuantity: distributionItems.reduce((sum, item) => sum + item.quantity, 0),
+        totalPrice: distributionItems.reduce((sum, item) => sum + item.totalPrice, 0),
+        distributionItems: distributionItems,
+        createdAt: new Date().toISOString()
+      };
+      
+      setSavedDistributions(prev => [...prev, savedDistribution]);
+      
+      // Add to completed patients list (for session tracking)
+      setCompletedPatients(prev => [...prev, {
+        id: currentPatient.patientId,
+        name: currentPatient.patientName,
+        medicineCount: totalMedicines,
+        completedAt: new Date().toISOString()
+      }]);
 
       // Clear current distribution and reset for new patient
       setDistributionList([]);
@@ -794,7 +857,20 @@ const Distribution = () => {
 
     } catch (error) {
       console.error('Error submitting distribution:', error);
-      alert('❌ Error submitting distribution. Please try again.');
+      
+      // Extract error message for user display
+      let errorMessage = 'An unexpected error occurred. Please try again.';
+      
+      if (error.message) {
+        if (error.message.includes('API Error')) {
+          errorMessage = `Server Error: ${error.message}`;
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      setDistributionError(errorMessage);
+      alert(`❌ Error submitting distribution:\n\n${errorMessage}`);
     } finally {
       setSubmittingDistribution(false);
     }
@@ -804,6 +880,9 @@ const Distribution = () => {
   const handleStartNewDistribution = () => {
     setDistributionList([]);
     setCompletedPatients([]);
+    setFadingCompletedPatients([]);
+    setSavedDistributions([]);
+    setDistributionError(null);
     setPatientSearchTerm("");
     setSelectedPatient("");
     setCurrentMedicineName("");
@@ -1182,16 +1261,40 @@ const Distribution = () => {
         <div className="mt-6">
           {/* Completed Patients in Current Session */}
           {completedPatients.length > 0 && (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-              <h3 className="text-sm font-semibold text-green-800 mb-3 flex items-center gap-2">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-                Completed Distributions This Session ({completedPatients.length})
+            <div className={`bg-green-50 border border-green-200 rounded-lg p-4 mb-4 transition-all duration-500 ${
+              fadingCompletedPatients.length > 0 ? 'opacity-0 transform -translate-y-2' : 'opacity-100'
+            }`}>
+              <h3 className="text-sm font-semibold text-green-800 mb-3 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                  Completed Distributions This Session ({completedPatients.length})
+                </div>
+                <button 
+                  onClick={() => {
+                    setFadingCompletedPatients(completedPatients.map(p => p.id));
+                    setTimeout(() => {
+                      setCompletedPatients([]);
+                      setFadingCompletedPatients([]);
+                    }, 300);
+                  }}
+                  className="text-green-600 hover:text-green-800 transition-colors"
+                  title="Dismiss"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {completedPatients.map((patient) => (
-                  <div key={patient.id} className="bg-white border border-green-200 rounded-md p-3">
+                  <div 
+                    key={patient.id} 
+                    className={`bg-white border border-green-200 rounded-md p-3 transition-all duration-300 ${
+                      fadingCompletedPatients.includes(patient.id) ? 'opacity-0 transform scale-95' : 'opacity-100'
+                    }`}
+                  >
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm font-medium text-gray-900">{patient.name}</p>
@@ -1203,6 +1306,89 @@ const Distribution = () => {
                     </div>
                   </div>
                 ))}
+              </div>
+              
+              {/* Auto-fade notice */}
+              <div className="mt-3 text-xs text-green-700 opacity-75 flex items-center gap-1">
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                This message will disappear automatically in a few seconds
+              </div>
+            </div>
+          )}
+
+          {/* Saved Distributions Table */}
+          {savedDistributions.length > 0 && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <h3 className="text-sm font-semibold text-blue-800 mb-3 flex items-center gap-2">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" clipRule="evenodd" />
+                </svg>
+                Saved Distributions ({savedDistributions.length})
+              </h3>
+              
+              {/* Error Display */}
+              {distributionError && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+                  <div className="flex items-start">
+                    <svg className="w-5 h-5 text-red-400 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                    <div>
+                      <h4 className="text-red-800 font-medium text-sm">Distribution Error</h4>
+                      <p className="text-red-700 text-sm mt-1">{distributionError}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200 bg-white rounded-lg shadow-sm">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Center</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Medicines</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Qty</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Price</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {savedDistributions.map((distribution) => (
+                      <tr key={distribution.id} className="hover:bg-gray-50">
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <div>
+                            <div className="text-sm font-medium text-gray-900">{distribution.patientName}</div>
+                            <div className="text-xs text-gray-500">ID: {distribution.patientId}</div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                          {distribution.deliveryCenter}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                          {distribution.distributionDate}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                          {distribution.medicineCount}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                          {distribution.totalQuantity}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                          ₹{distribution.totalPrice.toFixed(2)}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                            Saved
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           )}
@@ -1913,15 +2099,40 @@ const Distribution = () => {
                                 <td className="px-4 py-3 text-sm text-gray-900">{batch.currentQuantity}</td>
                                 <td className="px-4 py-3 text-sm text-gray-900">₹{batch.unitPrice.toFixed(2)}</td>
                                 <td className="px-4 py-3">
-                                  <input
-                                    type="number"
-                                    value={selectedQty}
-                                    onChange={(e) => handleBatchQuantityChange(batch.id, e.target.value)}
-                                    className="w-20 border border-gray-300 rounded px-2 py-1 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                                    min={0}
-                                    max={batch.currentQuantity}
-                                    placeholder="0"
-                                  />
+                                  <div className="relative">
+                                    <input
+                                      type="text"
+                                      value={selectedQty}
+                                      onChange={(e) => handleBatchQuantityChange(batch.id, e.target.value)}
+                                      onKeyDown={(e) => {
+                                        // Allow: backspace, delete, tab, escape, enter, home, end, left, right, down, up
+                                        if ([46, 8, 9, 27, 13, 35, 36, 37, 39, 40, 38].indexOf(e.keyCode) !== -1 ||
+                                          // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, Ctrl+Z
+                                          (e.keyCode === 65 && e.ctrlKey === true) ||
+                                          (e.keyCode === 67 && e.ctrlKey === true) ||
+                                          (e.keyCode === 86 && e.ctrlKey === true) ||
+                                          (e.keyCode === 88 && e.ctrlKey === true) ||
+                                          (e.keyCode === 90 && e.ctrlKey === true)) {
+                                          return;
+                                        }
+                                        // Ensure that it is a number and stop the keypress
+                                        if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                                          e.preventDefault();
+                                        }
+                                      }}
+                                      className={`w-20 border rounded px-2 py-1 text-sm focus:ring-1 focus:outline-none text-center ${
+                                        selectedQty > batch.currentQuantity 
+                                          ? 'border-red-300 focus:ring-red-500 focus:border-red-500 bg-red-50' 
+                                          : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500 bg-white'
+                                      }`}
+                                      placeholder="0"
+                                    />
+                                    {selectedQty > batch.currentQuantity && (
+                                      <div className="absolute -bottom-5 left-0 text-xs text-red-600 whitespace-nowrap">
+                                        Max: {batch.currentQuantity}
+                                      </div>
+                                    )}
+                                  </div>
                                 </td>
                                 <td className="px-4 py-3 text-sm font-medium text-green-600">
                                   ₹{totalPrice.toFixed(2)}

@@ -234,11 +234,50 @@ export const searchMedicinesByLocation = async (locationId, searchTerm) => {
 // Submit distribution for a patient
 export const submitDistribution = async (distributionData) => {
   try {
-    const response = await post(`${apiDomain}/api/v1/distributions`, distributionData);
+    // Transform the data to match the new API format
+    const apiPayload = {
+      patientId: distributionData.patientId,
+      deliveryCenterId: distributionData.deliveryCenterId,
+      distributionDate: distributionData.distributionDate.split('T')[0], // Format as YYYY-MM-DD
+      distributionItems: distributionData.distributionItems.map(item => ({
+        medicine: {
+          id: item.medicineId
+        },
+        batch: {
+          id: item.batchId
+        },
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        totalPrice: item.totalPrice
+      }))
+    };
+
+    console.log('Submitting distribution with payload:', apiPayload);
+    
+    // Use the authenticated API instance instead of raw fetch
+    const response = await api.post('/v1/medicine-distributions', apiPayload, {
+      headers: {
+        'X-Created-By': 'admin_user'
+      }
+    });
+
+    console.log('Distribution submitted successfully:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error submitting distribution:', error);
-    throw error;
+    
+    // Enhanced error handling
+    if (error.response) {
+      // Server responded with error status
+      const errorMessage = error.response.data?.message || error.response.statusText || 'Unknown server error';
+      throw new Error(`API Error (${error.response.status}): ${errorMessage}`);
+    } else if (error.request) {
+      // Network error
+      throw new Error('Network error: Unable to reach the server');
+    } else {
+      // Other error
+      throw new Error(`Error: ${error.message}`);
+    }
   }
 };
 
