@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from "react";
+import React, { useEffect } from "react";
 import { Datepicker, Label } from "flowbite-react";
 
 const GenerateReportRadio = ({ costingData, setCostingData }) => {
@@ -10,51 +10,41 @@ const GenerateReportRadio = ({ costingData, setCostingData }) => {
     { id: "customDate", label: "Select from date range" },
   ];
 
-  // Helper function to calculate date ranges
-  const getDateRange = useCallback((reportFor) => {
-    const today = new Date();
-    let startDate, endDate;
-
-    switch (reportFor) {
-      case "thisMonth":
-        startDate = new Date(today.getFullYear(), today.getMonth(), 1);
-        endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-        break;
-      case "lastMonth":
-        startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-        endDate = new Date(today.getFullYear(), today.getMonth(), 0);
-        break;
-      case "last3Months":
-        startDate = new Date(today.getFullYear(), today.getMonth() - 2, 1);
-        endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-        break;
-      case "thisYear":
-        startDate = new Date(today.getFullYear(), 0, 1);
-        endDate = new Date(today.getFullYear(), 11, 31);
-        break;
-      case "customDate":
-        startDate = costingData.fromDate;
-        endDate = costingData.toDate;
-        break;
-      default:
-        startDate = new Date(today.getFullYear(), today.getMonth(), 1);
-        endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-    }
-
-    return { startDate, endDate };
-  }, [costingData.fromDate, costingData.toDate]);
-
   // Update dates when reportFor changes (except for customDate)
   useEffect(() => {
     if (costingData.reportFor !== 'customDate') {
-      const { startDate, endDate } = getDateRange(costingData.reportFor);
+      const today = new Date();
+      let startDate, endDate;
+
+      switch (costingData.reportFor) {
+        case "thisMonth":
+          startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+          endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+          break;
+        case "lastMonth":
+          startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+          endDate = new Date(today.getFullYear(), today.getMonth(), 0);
+          break;
+        case "last3Months":
+          startDate = new Date(today.getFullYear(), today.getMonth() - 2, 1);
+          endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+          break;
+        case "thisYear":
+          startDate = new Date(today.getFullYear(), 0, 1);
+          endDate = new Date(today.getFullYear(), 11, 31);
+          break;
+        default:
+          startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+          endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+      }
+
       setCostingData(prev => ({
         ...prev,
         fromDate: startDate,
         toDate: endDate,
       }));
     }
-  }, [costingData.reportFor, getDateRange, setCostingData]);
+  }, [costingData.reportFor, setCostingData]); // Only necessary dependencies
 
   const handleChange = (e) => {
     setCostingData({

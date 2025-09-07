@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { toast } from "react-toastify";
 import { Button, Datepicker, Label, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow } from "flowbite-react";
 import GenerateReportRadio from "./GenerateReportRadio";
@@ -7,7 +7,7 @@ import SelectMedicineCategoryDropdown from "./SelectMedicineCategoryDropdown";
 import { getMedicineDailyCostSummary } from "../../service/apiService";
 
 export const Costing = () => {
-  const [costingData, setCostingData] = useState({
+  const [costingData, setCostingDataState] = useState({
     reportFor: "thisMonth",
     location: [],
     category: [],
@@ -15,6 +15,15 @@ export const Costing = () => {
     toDate: new Date(),
     fromDate: new Date(),
   });
+
+  // Create a stable setCostingData function
+  const setCostingData = useCallback((newData) => {
+    if (typeof newData === 'function') {
+      setCostingDataState(prev => newData(prev));
+    } else {
+      setCostingDataState(newData);
+    }
+  }, []);
 
   // Initialize dates for "thisMonth" on component mount
   useEffect(() => {
@@ -27,11 +36,42 @@ export const Costing = () => {
       fromDate: startDate,
       toDate: endDate,
     }));
-  }, []);
+  }, [setCostingData]); // Now using stable setCostingData
 
   const [reportResults, setReportResults] = useState([]);
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
   const [showResults, setShowResults] = useState(false);
+
+  // Function to group and merge data by Location, Delivery Center, and Date
+  const groupDataByLocationDeliveryDate = (data) => {
+    const grouped = {};
+    
+    data.forEach(item => {
+      const key = `${item.locationName}-${item.deliveryCenterName || 'N/A'}-${item.distDate}`;
+      
+      if (!grouped[key]) {
+        grouped[key] = {
+          locationName: item.locationName,
+          deliveryCenterName: item.deliveryCenterName || 'N/A',
+          distDate: item.distDate,
+          medicines: [],
+          totalUnits: 0,
+          totalPrice: 0
+        };
+      }
+      
+      grouped[key].medicines.push({
+        medicineName: item.medicineName,
+        numberOfUnit: item.numberOfUnit,
+        totalPrice: item.totalPrice
+      });
+      
+      grouped[key].totalUnits += item.numberOfUnit;
+      grouped[key].totalPrice += item.totalPrice;
+    });
+    
+    return Object.values(grouped);
+  };
 
   const handleExport = async (e) => {
     e.preventDefault();
@@ -164,10 +204,10 @@ export const Costing = () => {
               <Table className="border border-gray-300">
                 <TableHead className="[&>tr>th]:bg-[#E8EFF2] [&>tr>th]:text-black">
                   <TableRow>
-                    <TableHeadCell>Medicine Name</TableHeadCell>
                     <TableHeadCell>Location</TableHeadCell>
                     <TableHeadCell>Delivery Center</TableHeadCell>
                     <TableHeadCell>Date</TableHeadCell>
+                    <TableHeadCell>Medicine Name</TableHeadCell>
                     <TableHeadCell>Units</TableHeadCell>
                     <TableHeadCell>Total Price</TableHeadCell>
                   </TableRow>
@@ -180,28 +220,46 @@ export const Costing = () => {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    reportResults.map((item) => (
-                      <TableRow key={item.id} className="hover:bg-gray-50">
-                        <TableCell className="font-medium text-gray-900">
-                          {item.medicineName}
-                        </TableCell>
-                        <TableCell className="text-gray-700">
-                          {item.locationName}
-                        </TableCell>
-                        <TableCell className="text-gray-700">
-                          {item.deliveryCenterName || 'N/A'}
-                        </TableCell>
-                        <TableCell className="text-gray-700">
-                          {new Date(item.distDate).toLocaleDateString('en-IN')}
-                        </TableCell>
-                        <TableCell className="text-gray-700">
-                          {item.numberOfUnit}
-                        </TableCell>
-                        <TableCell className="font-medium text-green-600">
-                          ₹{item.totalPrice.toLocaleString()}
-                        </TableCell>
-                      </TableRow>
-                    ))
+                    (() => {
+                      const groupedData = groupDataByLocationDeliveryDate(reportResults);
+                      return groupedData.map((group, groupIndex) => (
+                        group.medicines.map((medicine, medicineIndex) => (
+                          <TableRow key={`${groupIndex}-${medicineIndex}`} className="hover:bg-gray-50">
+                            {medicineIndex === 0 && (
+                              <>
+                                <TableCell 
+                                  rowSpan={group.medicines.length} 
+                                  className="font-medium text-gray-900 border-r border-gray-200 bg-gray-50"
+                                >
+                                  {group.locationName}
+                                </TableCell>
+                                <TableCell 
+                                  rowSpan={group.medicines.length} 
+                                  className="text-gray-700 border-r border-gray-200 bg-gray-50"
+                                >
+                                  {group.deliveryCenterName}
+                                </TableCell>
+                                <TableCell 
+                                  rowSpan={group.medicines.length} 
+                                  className="text-gray-700 border-r border-gray-200 bg-gray-50"
+                                >
+                                  {new Date(group.distDate).toLocaleDateString('en-IN')}
+                                </TableCell>
+                              </>
+                            )}
+                            <TableCell className="text-gray-900">
+                              {medicine.medicineName}
+                            </TableCell>
+                            <TableCell className="text-gray-700">
+                              {medicine.numberOfUnit}
+                            </TableCell>
+                            <TableCell className="font-medium text-green-600">
+                              ₹{medicine.totalPrice.toLocaleString()}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )).flat();
+                    })()
                   )}
                 </TableBody>
               </Table>
