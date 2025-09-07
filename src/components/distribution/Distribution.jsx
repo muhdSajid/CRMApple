@@ -90,7 +90,6 @@ const Distribution = () => {
   // Distribution submission state
   const [submittingDistribution, setSubmittingDistribution] = useState(false);
   const [completedPatients, setCompletedPatients] = useState([]);
-  const [savedDistributions, setSavedDistributions] = useState([]);
   const [distributionError, setDistributionError] = useState(null);
   
   // Edit quantity state
@@ -833,23 +832,7 @@ const Distribution = () => {
 
       console.log('Submitting distribution data:', distributionData);
 
-      const result = await submitDistribution(distributionData);
-      
-      // Add to saved distributions list
-      const savedDistribution = {
-        id: result.id || Date.now(), // Use API response ID or timestamp as fallback
-        patientName: currentPatient.patientName,
-        patientId: currentPatient.patientId,
-        deliveryCenter: deliveryCenters.find(center => String(center.id) === selectedDeliveryCenter)?.name || 'Unknown Center',
-        distributionDate: new Date().toLocaleDateString(),
-        medicineCount: pendingDistributionData.totalMedicines,
-        totalQuantity: distributionItems.reduce((sum, item) => sum + item.quantity, 0),
-        totalPrice: distributionItems.reduce((sum, item) => sum + item.totalPrice, 0),
-        distributionItems: distributionItems,
-        createdAt: new Date().toISOString()
-      };
-      
-      setSavedDistributions(prev => [...prev, savedDistribution]);
+      await submitDistribution(distributionData);
       
       // Add to completed patients list (for session tracking)
       setCompletedPatients(prev => [...prev, {
@@ -873,9 +856,6 @@ const Distribution = () => {
       // Close modal and clear pending data
       setShowCompleteDistributionModal(false);
       setPendingDistributionData(null);
-
-      alert(`✅ Distribution completed successfully!\n\nPatient: ${pendingDistributionData.patientName}\n${pendingDistributionData.totalMedicines} medicine(s) distributed\n\nYou can now add medicines for a new patient.`);
-
     } catch (error) {
       console.error('Error submitting distribution:', error);
       
@@ -907,7 +887,6 @@ const Distribution = () => {
     setDistributionList([]);
     setCompletedPatients([]);
     setFadingCompletedPatients([]);
-    setSavedDistributions([]);
     setDistributionError(null);
     setPatientSearchTerm("");
     setSelectedPatient("");
@@ -1406,77 +1385,17 @@ const Distribution = () => {
             </div>
           )}
 
-          {/* Saved Distributions Table */}
-          {savedDistributions.length > 0 && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-              <h3 className="text-sm font-semibold text-blue-800 mb-3 flex items-center gap-2">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" clipRule="evenodd" />
+          {/* Error Display */}
+          {distributionError && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+              <div className="flex items-start">
+                <svg className="w-5 h-5 text-red-400 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                 </svg>
-                Saved Distributions ({savedDistributions.length})
-              </h3>
-              
-              {/* Error Display */}
-              {distributionError && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
-                  <div className="flex items-start">
-                    <svg className="w-5 h-5 text-red-400 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                    </svg>
-                    <div>
-                      <h4 className="text-red-800 font-medium text-sm">Distribution Error</h4>
-                      <p className="text-red-700 text-sm mt-1">{distributionError}</p>
-                    </div>
-                  </div>
+                <div>
+                  <h4 className="text-red-800 font-medium text-sm">Distribution Error</h4>
+                  <p className="text-red-700 text-sm mt-1">{distributionError}</p>
                 </div>
-              )}
-              
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 bg-white rounded-lg shadow-sm">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Center</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Medicines</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Qty</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Price</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {savedDistributions.map((distribution) => (
-                      <tr key={distribution.id} className="hover:bg-gray-50">
-                        <td className="px-4 py-3 whitespace-nowrap">
-                          <div>
-                            <div className="text-sm font-medium text-gray-900">{distribution.patientName}</div>
-                            <div className="text-xs text-gray-500">ID: {distribution.patientId}</div>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                          {distribution.deliveryCenter}
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                          {distribution.distributionDate}
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                          {distribution.medicineCount}
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                          {distribution.totalQuantity}
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                          ₹{distribution.totalPrice.toFixed(2)}
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap">
-                          <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                            Saved
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
               </div>
             </div>
           )}

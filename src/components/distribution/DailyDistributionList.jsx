@@ -53,10 +53,12 @@ const DailyDistributionList = ({ selectedDeliveryCenter, selectedDate, deliveryC
   return (
     <div className="bg-white border border-gray-200 rounded-lg shadow-sm mt-6">
       <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-        <h3 className="text-lg font-semibold text-gray-800">
+        <h3 className="text-lg font-semibold text-gray-800 mb-3">
           Daily Medicine Distributions
         </h3>
-        <div className="text-sm text-gray-600 mt-1 space-y-1">
+        
+        {/* Distribution Center and Date */}
+        <div className="text-sm text-gray-600 space-y-1">
           <p><strong>Distribution Center:</strong> {selectedCenter?.name || 'Unknown Center'}</p>
           <p><strong>Date:</strong> {selectedDate ? new Date(selectedDate).toLocaleDateString() : 'No date selected'}</p>
         </div>
@@ -99,30 +101,6 @@ const DailyDistributionList = ({ selectedDeliveryCenter, selectedDate, deliveryC
           </div>
         ) : (
           <div className="space-y-6">
-            {/* Summary */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-900">{distributions.length}</div>
-                  <div className="text-sm text-blue-700">Total Patients</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-900">
-                    {distributions.reduce((sum, patient) => sum + patient.medicines.length, 0)}
-                  </div>
-                  <div className="text-sm text-blue-700">Total Medicines</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-900">
-                    ₹{distributions.reduce((sum, patient) => 
-                      sum + patient.medicines.reduce((medSum, med) => medSum + med.totalPrice, 0), 0
-                    ).toFixed(2)}
-                  </div>
-                  <div className="text-sm text-blue-700">Total Value</div>
-                </div>
-              </div>
-            </div>
-
             {/* Distribution Table */}
             <div className="overflow-x-auto">
               <Table className="border border-gray-300">
