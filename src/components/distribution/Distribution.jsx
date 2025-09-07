@@ -24,6 +24,10 @@ const Distribution = () => {
   const [selectedMode, setSelectedMode] = useState("");
   const [pendingMode, setPendingMode] = useState("");
   const [showModal, setShowModal] = useState(false);
+  
+  // Distribution completion modal state
+  const [showCompleteDistributionModal, setShowCompleteDistributionModal] = useState(false);
+  const [pendingDistributionData, setPendingDistributionData] = useState(null);
   const [deliveryCenterTypes, setDeliveryCenterTypes] = useState([]);
   const [locations, setLocations] = useState([]);
   const [selectedLocation, setSelectedLocation] = useState("");
@@ -766,22 +770,32 @@ const Distribution = () => {
   };
 
   // Submit distribution for current patient and clear for new patient
-  const handleCompletePatientDistribution = async () => {
+  const handleCompletePatientDistribution = () => {
     if (distributionList.length === 0) {
       alert("No medicines to distribute");
       return;
     }
 
-    // Clear any previous errors
-    setDistributionError(null);
-
-    // Count medicines for the patient
+    // Store the distribution data for later confirmation
     const totalMedicines = distributionList.length;
     const patientName = distributionList[0]?.patientName || 'Unknown Patient';
     
-    if (!window.confirm(`Are you sure you want to complete distribution for ${patientName} with ${totalMedicines} medicine(s)?`)) {
+    setPendingDistributionData({
+      totalMedicines,
+      patientName
+    });
+    setShowCompleteDistributionModal(true);
+  };
+
+  const confirmCompleteDistribution = async () => {
+    if (distributionList.length === 0) {
+      setShowCompleteDistributionModal(false);
+      setPendingDistributionData(null);
       return;
     }
+
+    // Clear any previous errors
+    setDistributionError(null);
 
     try {
       setSubmittingDistribution(true);
@@ -828,7 +842,7 @@ const Distribution = () => {
         patientId: currentPatient.patientId,
         deliveryCenter: deliveryCenters.find(center => String(center.id) === selectedDeliveryCenter)?.name || 'Unknown Center',
         distributionDate: new Date().toLocaleDateString(),
-        medicineCount: totalMedicines,
+        medicineCount: pendingDistributionData.totalMedicines,
         totalQuantity: distributionItems.reduce((sum, item) => sum + item.quantity, 0),
         totalPrice: distributionItems.reduce((sum, item) => sum + item.totalPrice, 0),
         distributionItems: distributionItems,
@@ -841,7 +855,7 @@ const Distribution = () => {
       setCompletedPatients(prev => [...prev, {
         id: currentPatient.patientId,
         name: currentPatient.patientName,
-        medicineCount: totalMedicines,
+        medicineCount: pendingDistributionData.totalMedicines,
         completedAt: new Date().toISOString()
       }]);
 
@@ -856,7 +870,11 @@ const Distribution = () => {
       setShowMedicineDropdown(false);
       setShowAddRow(true); // Keep the add row open for next patient
 
-      alert(`✅ Distribution completed successfully!\n\nPatient: ${patientName}\n${totalMedicines} medicine(s) distributed\n\nYou can now add medicines for a new patient.`);
+      // Close modal and clear pending data
+      setShowCompleteDistributionModal(false);
+      setPendingDistributionData(null);
+
+      alert(`✅ Distribution completed successfully!\n\nPatient: ${pendingDistributionData.patientName}\n${pendingDistributionData.totalMedicines} medicine(s) distributed\n\nYou can now add medicines for a new patient.`);
 
     } catch (error) {
       console.error('Error submitting distribution:', error);
@@ -877,6 +895,11 @@ const Distribution = () => {
     } finally {
       setSubmittingDistribution(false);
     }
+  };
+
+  const cancelCompleteDistribution = () => {
+    setShowCompleteDistributionModal(false);
+    setPendingDistributionData(null);
   };
 
   // Start fresh distribution session
@@ -2251,6 +2274,81 @@ const Distribution = () => {
                 }`}
               >
                 Add Medicine ({selectedBatches.reduce((sum, batch) => sum + batch.selectedQuantity, 0)} units)
+              </button>
+            </div>
+          </ModalBody>
+        </Modal>
+      )}
+      
+      {/* Complete Distribution Confirmation Modal */}
+      {showCompleteDistributionModal && (
+        <Modal show={showCompleteDistributionModal} onClose={cancelCompleteDistribution}>
+          <ModalHeader>Complete Distribution</ModalHeader>
+          <ModalBody>
+            <div className="space-y-4">
+              <div className="flex items-center justify-center mb-4">
+                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                  <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+              </div>
+              
+              <div className="text-center">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Confirm Distribution Completion
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  Are you sure you want to complete the distribution for the following patient?
+                </p>
+                
+                {pendingDistributionData && (
+                  <div className="bg-gray-50 rounded-lg p-4 text-left">
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="font-medium text-gray-700">Patient:</span>
+                        <div className="text-gray-900">{pendingDistributionData.patientName}</div>
+                      </div>
+                      <div>
+                        <span className="font-medium text-gray-700">Medicines:</span>
+                        <div className="text-gray-900">{pendingDistributionData.totalMedicines} medicine{pendingDistributionData.totalMedicines !== 1 ? 's' : ''}</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                <p className="text-sm text-gray-500 mt-4">
+                  This action cannot be undone. The distribution will be saved and you can start a new distribution for another patient.
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex gap-3 justify-end mt-6">
+              <button
+                onClick={cancelCompleteDistribution}
+                disabled={submittingDistribution}
+                className="bg-white text-gray-600 hover:bg-gray-50 border border-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmCompleteDistribution}
+                disabled={submittingDistribution}
+                className="text-white bg-green-600 hover:bg-green-700 font-medium rounded-lg text-sm px-5 py-2.5 disabled:opacity-50 flex items-center gap-2"
+              >
+                {submittingDistribution ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent animate-spin rounded-full"></div>
+                    Completing...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Complete Distribution
+                  </>
+                )}
               </button>
             </div>
           </ModalBody>
