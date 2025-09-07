@@ -2,15 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Table, TableHead, TableHeadCell, TableRow, TableBody, TableCell } from 'flowbite-react';
 import { getMedicineDistributionsByPatient } from '../../service/apiService';
 
-const DailyDistributionList = ({ selectedDeliveryCenter, selectedDate, deliveryCenters }) => {
+const DailyDistributionList = ({ selectedDeliveryCenter, selectedDate }) => {
   const [distributions, setDistributions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
-  // Get the selected center details
-  const selectedCenter = deliveryCenters.find(center => 
-    String(center.id) === selectedDeliveryCenter
-  );
 
   // Format date for API call
   const formatDateForAPI = (date) => {
@@ -52,18 +47,6 @@ const DailyDistributionList = ({ selectedDeliveryCenter, selectedDate, deliveryC
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg shadow-sm mt-6">
-      <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-        <h3 className="text-lg font-semibold text-gray-800 mb-3">
-          Daily Medicine Distributions
-        </h3>
-        
-        {/* Distribution Center and Date */}
-        <div className="text-sm text-gray-600 space-y-1">
-          <p><strong>Distribution Center:</strong> {selectedCenter?.name || 'Unknown Center'}</p>
-          <p><strong>Date:</strong> {selectedDate ? new Date(selectedDate).toLocaleDateString() : 'No date selected'}</p>
-        </div>
-      </div>
-
       <div className="p-6">
         {loading ? (
           <div className="flex items-center justify-center py-8">
@@ -121,64 +104,44 @@ const DailyDistributionList = ({ selectedDeliveryCenter, selectedDate, deliveryC
                         <TableRow key={`${patient.patientId}-${medicine.distributionId}`} className="hover:bg-gray-50">
                           {index === 0 && (
                             <TableCell 
-                              className="py-3 font-medium bg-blue-50 border-r border-blue-200" 
+                              className="py-2 px-3 font-medium bg-blue-50 border-r border-blue-200" 
                               rowSpan={patient.medicines.length}
                             >
-                              <div className="space-y-1">
-                                <div className="font-semibold text-gray-900">{patient.patientName}</div>
-                                <div className="text-xs text-gray-500">ID: {patient.patientExternalId}</div>
-                                <div className="text-xs text-blue-600">
-                                  {patient.medicines.length} medicine{patient.medicines.length !== 1 ? 's' : ''}
+                              <div className="space-y-0.5">
+                                <div className="font-semibold text-gray-900 text-sm">
+                                  {patient.patientName} <span className="text-xs text-gray-500 font-normal">(ID: {patient.patientExternalId})</span>
+                                </div>
+                                <div className="text-xs font-semibold text-green-600">
+                                  Total: ₹{patient.medicines.reduce((sum, med) => sum + med.totalPrice, 0).toFixed(2)}
                                 </div>
                               </div>
                             </TableCell>
                           )}
-                          <TableCell className="py-3">
-                            <div className="space-y-1">
-                              <div className="font-medium text-gray-900">{medicine.medicineName}</div>
-                              <div className="text-xs text-gray-500">Medicine ID: {medicine.medicineId}</div>
-                            </div>
+                          <TableCell className="py-2 px-3">
+                            <div className="font-medium text-gray-900 text-sm">{medicine.medicineName}</div>
                           </TableCell>
-                          <TableCell className="py-3">
-                            <div className="space-y-1">
-                              <div className="text-sm font-medium text-gray-900">{medicine.batchName}</div>
-                              <div className="text-xs text-gray-500">Batch ID: {medicine.batchId}</div>
-                              <div className="text-xs text-gray-500">Location: {medicine.locationId}</div>
-                            </div>
+                          <TableCell className="py-2 px-3">
+                            <div className="text-sm font-medium text-gray-900">{medicine.batchName}</div>
                           </TableCell>
-                          <TableCell className="py-3">
+                          <TableCell className="py-2 px-3">
                             <div className="text-center">
-                              <div className="text-lg font-semibold text-gray-900">{medicine.quantity}</div>
+                              <div className="text-base font-semibold text-gray-900">{medicine.quantity}</div>
                               <div className="text-xs text-gray-500">units</div>
                             </div>
                           </TableCell>
-                          <TableCell className="py-3">
+                          <TableCell className="py-2 px-3">
                             <div className="text-center">
-                              <div className="font-medium text-gray-900">₹{medicine.unitPrice.toFixed(2)}</div>
-                              <div className="text-xs text-gray-500">per unit</div>
+                              <div className="font-medium text-gray-900 text-sm">₹{medicine.unitPrice.toFixed(2)}</div>
                             </div>
                           </TableCell>
-                          <TableCell className="py-3">
+                          <TableCell className="py-2 px-3">
                             <div className="text-center">
-                              <div className="text-lg font-semibold text-green-600">₹{medicine.totalPrice.toFixed(2)}</div>
+                              <div className="text-base font-semibold text-green-600">₹{medicine.totalPrice.toFixed(2)}</div>
                               <div className="text-xs text-gray-500">total</div>
                             </div>
                           </TableCell>
                         </TableRow>
                       ))}
-                      {/* Patient total row */}
-                      <TableRow className="bg-gray-50 border-t-2 border-gray-300">
-                        <TableCell className="py-2 font-semibold text-right" colSpan={5}>
-                          Total for {patient.patientName}:
-                        </TableCell>
-                        <TableCell className="py-2">
-                          <div className="text-center">
-                            <div className="text-lg font-bold text-green-600">
-                              ₹{patient.medicines.reduce((sum, med) => sum + med.totalPrice, 0).toFixed(2)}
-                            </div>
-                          </div>
-                        </TableCell>
-                      </TableRow>
                     </React.Fragment>
                   ))}
                 </TableBody>

@@ -1286,7 +1286,6 @@ const Distribution = () => {
                 <DailyDistributionList 
                   selectedDeliveryCenter={selectedDeliveryCenter}
                   selectedDate={selectedDistributionDate}
-                  deliveryCenters={deliveryCenters}
                 />
               </div>
             )}
