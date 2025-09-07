@@ -36,7 +36,6 @@ const Distribution = () => {
   
   // Search functionality
   const [searchTerm, setSearchTerm] = useState("");
-  const [showDropdown, setShowDropdown] = useState(false);
   
   // Add new center state
   const [showAddCenterModal, setShowAddCenterModal] = useState(false);
@@ -103,6 +102,10 @@ const Distribution = () => {
   
   // Auto-fade state for completed patients
   const [fadingCompletedPatients, setFadingCompletedPatients] = useState([]);
+  
+  // Help popover state
+  const [showNewDistributionHelp, setShowNewDistributionHelp] = useState(false);
+  const [showDailyDistributionHelp, setShowDailyDistributionHelp] = useState(false);
   
   // Accordion state
   const [locationAccordionOpen, setLocationAccordionOpen] = useState(true);
@@ -192,7 +195,6 @@ const Distribution = () => {
       setDeliveryCenters([]);
       setSelectedDeliveryCenter("");
       setSearchTerm(""); // Reset search term
-      setShowDropdown(false); // Close dropdown
       setTypeAccordionOpen(false);
       setDeliveryCenterAccordionOpen(false);
     }
@@ -904,14 +906,12 @@ const Distribution = () => {
     setSelectedDeliveryCenter(centerId);
     const selectedCenter = deliveryCenters.find(center => String(center.id) === centerId);
     setSearchTerm(selectedCenter ? selectedCenter.name : "");
-    setShowDropdown(false);
     // Auto-close accordion after selection
     setDeliveryCenterAccordionOpen(false);
   };
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
-    setShowDropdown(true);
     if (!e.target.value) {
       setSelectedDeliveryCenter("");
     }
@@ -919,9 +919,6 @@ const Distribution = () => {
 
   // Close dropdown when clicking outside
   const handleClickOutside = (e) => {
-    if (!e.target.closest('.search-dropdown-container')) {
-      setShowDropdown(false);
-    }
     if (!e.target.closest('.patient-search-dropdown-container')) {
       setShowPatientDropdown(false);
     }
@@ -937,364 +934,273 @@ const Distribution = () => {
   }, []);
 
   return (
-    <div className="m-6 p-6 bg-white rounded-lg shadow-md space-y-6">
+    <div className="m-6 p-4 bg-white rounded-lg shadow-md space-y-4">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-semibold">Medicine Distribution</h1>
       </div>
       <HR />
 
-      {/* Accordion for Location and Distribution Type Selection */}
-      <div className="space-y-3">
-        
-        {/* Location Selection Accordion */}
-        <div className="border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm">
-          <button
-            onClick={toggleLocationAccordion}
-            className="w-full px-5 py-4 bg-gray-50 hover:bg-gray-100 flex items-center justify-between transition-colors"
-          >
-            <div className="flex items-center gap-3">
-              <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                selectedLocation ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'
-              }`}>
-                {selectedLocation ? (
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                ) : (
-                  <span className="text-sm font-semibold">1</span>
-                )}
-              </div>
-              <div className="text-left">
-                <h3 className="text-lg font-semibold text-gray-800">Select Location</h3>
-                {selectedLocation && (
-                  <p className="text-sm text-gray-600">
-                    {locations.find(loc => loc.id.toString() === selectedLocation)?.name} - {locations.find(loc => loc.id.toString() === selectedLocation)?.locationAddress}
-                  </p>
-                )}
-              </div>
-            </div>
-            <svg 
-              className={`w-5 h-5 text-gray-500 transform transition-transform ${
-                locationAccordionOpen ? 'rotate-180' : 'rotate-0'
-              }`} 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-          
-          {locationAccordionOpen && (
-            <div className="p-4 bg-white">
-              {loading ? (
-                <div className="flex items-center justify-center py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="relative">
-                      <div className="w-5 h-5 rounded-full border-2 border-blue-200"></div>
-                      <div className="absolute top-0 left-0 w-5 h-5 rounded-full border-2 border-blue-600 border-t-transparent animate-spin"></div>
-                    </div>
-                    <span className="text-gray-500">Loading locations...</span>
-                  </div>
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {locations.map((location) => (
-                    <div
-                      key={location.id}
-                      onClick={() => handleLocationChange(location.id.toString())}
-                      className={`
-                        cursor-pointer rounded-md border-2 p-3 text-center transition-all duration-200 hover:shadow-sm
-                        ${selectedLocation === location.id.toString()
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-200 bg-white hover:border-gray-300'
-                        }
-                      `}
-                    >
-                      <div className={`
-                        w-8 h-8 rounded-full flex items-center justify-center mb-2 mx-auto
-                        ${selectedLocation === location.id.toString()
-                          ? 'bg-blue-500 text-white'
-                          : 'bg-gray-100 text-gray-600'
-                        }
-                      `}>
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                      </div>
-                      <h4 className={`font-semibold text-sm ${
-                        selectedLocation === location.id.toString() ? 'text-blue-700' : 'text-gray-800'
-                      }`}>
-                        {location.name}
-                      </h4>
-                      <p className={`text-xs ${
-                        selectedLocation === location.id.toString() ? 'text-blue-600' : 'text-gray-500'
-                      }`}>
-                        {location.locationAddress}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              )}
-              
-              {!loading && locations.length === 0 && (
-                <div className="text-center py-4 text-gray-500">
-                  No locations available at the moment
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Distribution Type Selection Accordion */}
-        <div className="border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm">
-          <button
-            onClick={toggleTypeAccordion}
-            className={`w-full px-5 py-4 flex items-center justify-between transition-colors ${
-              selectedLocation 
-                ? 'bg-gray-50 hover:bg-gray-100 cursor-pointer' 
-                : 'bg-gray-100 cursor-not-allowed opacity-60'
-            }`}
-            disabled={!selectedLocation}
-          >
-            <div className="flex items-center gap-3">
-              <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                selectedMode ? 'bg-green-500 text-white' : 
-                selectedLocation ? 'bg-gray-300 text-gray-600' : 'bg-gray-200 text-gray-400'
-              }`}>
-                {selectedMode ? (
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                ) : (
-                  <span className="text-sm font-semibold">2</span>
-                )}
-              </div>
-              <div className="text-left">
-                <h3 className={`text-lg font-semibold ${selectedLocation ? 'text-gray-800' : 'text-gray-500'}`}>
-                  Select Distribution Type
-                </h3>
-                {selectedMode && (
-                  <p className="text-sm text-gray-600">
-                    {deliveryCenterTypes.find(type => getDeliveryCenterTypeConfig(type.typeName).value === selectedMode)?.typeName}
-                  </p>
-                )}
-                {!selectedLocation && (
-                  <p className="text-xs text-gray-500">Select location first</p>
-                )}
-              </div>
-            </div>
-            <svg 
-              className={`w-5 h-5 text-gray-500 transform transition-transform ${
-                typeAccordionOpen ? 'rotate-180' : 'rotate-0'
-              }`} 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-          
-          {typeAccordionOpen && selectedLocation && (
-            <div className="p-4 bg-white">
-              <div className="flex gap-4 flex-wrap">
-                {loading ? (
-                  <div className="flex items-center gap-3">
-                    <div className="relative">
-                      <div className="w-5 h-5 rounded-full border-2 border-blue-200"></div>
-                      <div className="absolute top-0 left-0 w-5 h-5 rounded-full border-2 border-blue-600 border-t-transparent animate-spin"></div>
-                    </div>
-                    <span className="text-gray-500">Loading distribution types...</span>
-                  </div>
-                ) : (
-                  deliveryCenterTypes.map((type) => {
-                    const config = getDeliveryCenterTypeConfig(type.typeName);
-                    const IconComponent = config.icon;
-                    
-                    return (
-                      <div key={type.id} className="flex items-center gap-2">
-                        <input
-                          type="radio"
-                          id={config.value}
-                          name="distributionMode"
-                          checked={selectedMode === config.value}
-                          onChange={() => handleRadioClick(config.value)}
-                          className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                        />
-                        <div className={`flex gap-2 ${config.bgColor} rounded-md px-3 py-2 cursor-pointer`} 
-                             onClick={() => handleRadioClick(config.value)}>
-                          <div className={`${config.iconBg} p-1 rounded-md`}>
-                            <IconComponent className="text-lg text-white" />
-                          </div>
-                          <div className={`${config.textColor} font-semibold text-sm flex items-center pr-1`}>
-                            {type.typeName}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Delivery Centers Selection Accordion */}
-      {selectedLocation && selectedMode && (
-        <div className="bg-gray-50 border border-gray-200 rounded-lg mb-4">
-          <button 
-            onClick={() => setDeliveryCenterAccordionOpen(!deliveryCenterAccordionOpen)}
-            className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-100 transition-colors"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-              <div>
-                <h3 className="text-sm font-semibold text-gray-800">
-                  Distribution Center & Date
-                </h3>
-                <div className="text-xs text-gray-600 mt-1 space-y-1">
-                  {selectedDeliveryCenter ? (
-                    <p className="text-green-600">Center: {deliveryCenters.find(center => String(center.id) === selectedDeliveryCenter)?.name}</p>
-                  ) : (
-                    <p className="text-gray-500">Choose distribution center and date</p>
-                  )}
-                </div>
-              </div>
-            </div>
-            <svg 
-              className={`w-5 h-5 text-gray-500 transform transition-transform ${
-                deliveryCenterAccordionOpen ? 'rotate-180' : 'rotate-0'
-              }`} 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-          
-          {deliveryCenterAccordionOpen && (
-            <div className="p-4 bg-white border-t border-gray-200">
-              {loadingCenters ? (
-                <div className="flex items-center gap-3">
-                  <div className="relative">
-                    <div className="w-5 h-5 rounded-full border-2 border-blue-200"></div>
-                    <div className="absolute top-0 left-0 w-5 h-5 rounded-full border-2 border-blue-600 border-t-transparent animate-spin"></div>
-                  </div>
-                  <span className="text-gray-500">Loading distribution centers...</span>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Distribution Center Search & Select */}
-                  <div className="space-y-3">
-                    <Label className="text-sm font-medium text-gray-700">
-                      Distribution Center <span className="text-red-500">*</span>
-                    </Label>
-                    <div className="relative search-dropdown-container">
-                      <div className="flex gap-2">
-                        <div className="flex-1 relative">
-                          <input
-                            type="text"
-                            value={searchTerm}
-                            onChange={handleSearchChange}
-                            onFocus={() => setShowDropdown(true)}
-                            placeholder="Search distribution centers..."
-                            className="w-full border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 p-2.5 bg-white"
-                          />
-                          {showDropdown && filteredCenters.length > 0 && (
-                            <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                              {filteredCenters.map((center) => (
-                                <div
-                                  key={center.id}
-                                  onClick={() => handleCenterSelect(String(center.id))}
-                                  className="px-3 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
-                                >
-                                  <div className="text-sm font-medium text-gray-900">{center.name}</div>
-                                  <div className="text-xs text-gray-500">{center.contactPhone || 'No contact'}</div>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                        <button
-                          onClick={() => setShowAddCenterModal(true)}
-                          className="px-3 py-2.5 text-blue-600 border border-blue-300 rounded-lg hover:bg-blue-50 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors flex items-center gap-1 whitespace-nowrap"
-                        >
-                          <FaCirclePlus className="text-sm" />
-                          Add
-                        </button>
-                      </div>
-                    </div>
-                    
-                    {deliveryCenters.length === 0 && (
-                      <div className="text-center py-4 text-gray-500 bg-gray-50 rounded-lg">
-                        <p className="text-sm">No distribution centers available.</p>
-                        <p className="text-xs mt-1">Click "Add" to create one.</p>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Date Selection */}
-                  <div className="space-y-3">
-                    <Label className="text-sm font-medium text-gray-700">
-                      Distribution Date <span className="text-red-500">*</span>
-                    </Label>
-                    <Datepicker
-                      className="w-full"
-                      value={selectedDistributionDate}
-                      defaultDate={selectedDistributionDate}
-                      onSelectedDateChanged={(date) => setSelectedDistributionDate(date)}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Welcome message when no center is selected */}
-      {(!selectedLocation || !selectedMode || !selectedDeliveryCenter) && (
-        <div className="mt-6 text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-          <div className="max-w-md mx-auto">
-            <div className="mb-4">
-              <svg className="w-16 h-16 text-gray-400 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-              </svg>
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Get Started with Medicine Distribution</h3>
-            <p className="text-gray-600 text-sm leading-relaxed">
-              Please complete the steps above to access distribution management:
-            </p>
-            <ul className="text-left text-sm text-gray-600 mt-4 space-y-2">
-              <li className="flex items-center">
-                <div className={`w-4 h-4 rounded-full mr-3 flex items-center justify-center ${
+      {/* Compact Selection Section */}
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 p-4">
+          {/* Location Selection - Compact */}
+          <div className="relative">
+            <label className="block text-xs font-medium text-gray-700 mb-1">
+              <span className="flex items-center gap-1">
+                <div className={`w-4 h-4 rounded-full flex items-center justify-center text-xs ${
                   selectedLocation ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'
                 }`}>
                   {selectedLocation ? '✓' : '1'}
                 </div>
-                Select Location
-              </li>
-              <li className="flex items-center">
-                <div className={`w-4 h-4 rounded-full mr-3 flex items-center justify-center ${
+                Location
+              </span>
+            </label>
+            <div className="relative">
+              <button
+                onClick={toggleLocationAccordion}
+                className="w-full p-2 text-left border border-gray-300 rounded-lg bg-white hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+              >
+                <span className="block truncate">
+                  {selectedLocation 
+                    ? `${locations.find(loc => loc.id.toString() === selectedLocation)?.name}` 
+                    : 'Select location...'}
+                </span>
+                <svg 
+                  className={`absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 transition-transform ${
+                    locationAccordionOpen ? 'rotate-180' : 'rotate-0'
+                  }`} 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              {locationAccordionOpen && (
+                <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                  {loading ? (
+                    <div className="p-3 text-center text-gray-500 text-sm">Loading...</div>
+                  ) : (
+                    locations.map((location) => (
+                      <div
+                        key={location.id}
+                        onClick={() => handleLocationChange(location.id.toString())}
+                        className={`px-3 py-2 cursor-pointer hover:bg-gray-100 border-b border-gray-100 last:border-b-0 ${
+                          selectedLocation === location.id.toString() ? 'bg-blue-50 text-blue-700' : ''
+                        }`}
+                      >
+                        <div className="text-sm font-medium">{location.name}</div>
+                        <div className="text-xs text-gray-500 truncate">{location.locationAddress}</div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Distribution Type Selection - Compact */}
+          <div className="relative">
+            <label className="block text-xs font-medium text-gray-700 mb-1">
+              <span className="flex items-center gap-1">
+                <div className={`w-4 h-4 rounded-full flex items-center justify-center text-xs ${
+                  selectedMode ? 'bg-green-500 text-white' : 
+                  selectedLocation ? 'bg-gray-300 text-gray-600' : 'bg-gray-200 text-gray-400'
+                }`}>
+                  {selectedMode ? '✓' : '2'}
+                </div>
+                Distribution Type
+              </span>
+            </label>
+            <div className="relative">
+              <button
+                onClick={toggleTypeAccordion}
+                disabled={!selectedLocation}
+                className={`w-full p-2 text-left border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm ${
+                  selectedLocation 
+                    ? 'border-gray-300 bg-white hover:bg-gray-50 focus:border-blue-500' 
+                    : 'border-gray-200 bg-gray-100 cursor-not-allowed text-gray-500'
+                }`}
+              >
+                <span className="block truncate">
+                  {selectedMode 
+                    ? deliveryCenterTypes.find(type => getDeliveryCenterTypeConfig(type.typeName).value === selectedMode)?.typeName
+                    : selectedLocation ? 'Select type...' : 'Select location first'}
+                </span>
+                <svg 
+                  className={`absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 transition-transform ${
+                    typeAccordionOpen ? 'rotate-180' : 'rotate-0'
+                  }`} 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              {typeAccordionOpen && selectedLocation && (
+                <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg">
+                  {deliveryCenterTypes.map((type) => {
+                    const config = getDeliveryCenterTypeConfig(type.typeName);
+                    return (
+                      <div
+                        key={type.id}
+                        onClick={() => handleRadioClick(config.value)}
+                        className={`px-3 py-2 cursor-pointer hover:bg-gray-100 border-b border-gray-100 last:border-b-0 ${
+                          selectedMode === config.value ? 'bg-blue-50 text-blue-700' : ''
+                        }`}
+                      >
+                        <div className="text-sm font-medium">{type.typeName}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Distribution Center - Compact */}
+          <div className="relative">
+            <label className="block text-xs font-medium text-gray-700 mb-1">
+              <span className="flex items-center gap-1">
+                <div className={`w-4 h-4 rounded-full flex items-center justify-center text-xs ${
+                  selectedDeliveryCenter ? 'bg-green-500 text-white' : 
+                  (selectedLocation && selectedMode) ? 'bg-gray-300 text-gray-600' : 'bg-gray-200 text-gray-400'
+                }`}>
+                  {selectedDeliveryCenter ? '✓' : '3'}
+                </div>
+                Center
+              </span>
+            </label>
+            <div className="relative">
+              <button
+                onClick={() => setDeliveryCenterAccordionOpen(!deliveryCenterAccordionOpen)}
+                disabled={!selectedLocation || !selectedMode}
+                className={`w-full p-2 text-left border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm ${
+                  (selectedLocation && selectedMode)
+                    ? 'border-gray-300 bg-white hover:bg-gray-50 focus:border-blue-500' 
+                    : 'border-gray-200 bg-gray-100 cursor-not-allowed text-gray-500'
+                }`}
+              >
+                <span className="block truncate">
+                  {selectedDeliveryCenter 
+                    ? `${deliveryCenters.find(center => String(center.id) === selectedDeliveryCenter)?.name}`
+                    : (selectedLocation && selectedMode) ? 'Select center...' : 'Complete steps 1-2'}
+                </span>
+                <svg 
+                  className={`absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 transition-transform ${
+                    deliveryCenterAccordionOpen ? 'rotate-180' : 'rotate-0'
+                  }`} 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              {deliveryCenterAccordionOpen && selectedLocation && selectedMode && (
+                <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                  {loadingCenters ? (
+                    <div className="p-3 text-center text-gray-500 text-sm">Loading...</div>
+                  ) : (
+                    <>
+                      <div className="p-2 border-b border-gray-100">
+                        <div className="flex gap-1">
+                          <input
+                            type="text"
+                            value={searchTerm}
+                            onChange={handleSearchChange}
+                            placeholder="Search centers..."
+                            className="flex-1 border border-gray-300 text-gray-900 text-xs rounded px-2 py-1 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                          />
+                          <button
+                            onClick={() => setShowAddCenterModal(true)}
+                            className="px-2 py-1 text-xs text-blue-600 border border-blue-300 rounded hover:bg-blue-50"
+                          >
+                            <FaCirclePlus className="text-xs" />
+                          </button>
+                        </div>
+                      </div>
+                      {filteredCenters.map((center) => (
+                        <div
+                          key={center.id}
+                          onClick={() => handleCenterSelect(String(center.id))}
+                          className={`px-3 py-2 cursor-pointer hover:bg-gray-100 border-b border-gray-100 last:border-b-0 ${
+                            selectedDeliveryCenter === String(center.id) ? 'bg-blue-50 text-blue-700' : ''
+                          }`}
+                        >
+                          <div className="text-sm font-medium">{center.name}</div>
+                          <div className="text-xs text-gray-500">{center.contactPhone || 'No contact'}</div>
+                        </div>
+                      ))}
+                      {filteredCenters.length === 0 && (
+                        <div className="p-3 text-center text-gray-500 text-sm">
+                          No centers found
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Date Selection - Compact */}
+          <div className="relative">
+            <label className="block text-xs font-medium text-gray-700 mb-1">
+              <span className="flex items-center gap-1">
+                <div className={`w-4 h-4 rounded-full flex items-center justify-center text-xs ${
+                  selectedDistributionDate ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'
+                }`}>
+                  ✓
+                </div>
+                Date
+              </span>
+            </label>
+            <Datepicker
+              className="w-full"
+              value={selectedDistributionDate}
+              defaultDate={selectedDistributionDate}
+              onSelectedDateChanged={(date) => setSelectedDistributionDate(date)}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Compact Welcome Message */}
+      {(!selectedLocation || !selectedMode || !selectedDeliveryCenter) && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="text-center">
+            <h3 className="text-lg font-semibold text-blue-900 mb-2">Complete Setup to Start Distribution</h3>
+            <div className="flex justify-center items-center gap-4 text-sm">
+              <div className="flex items-center gap-1">
+                <div className={`w-4 h-4 rounded-full flex items-center justify-center text-xs ${
+                  selectedLocation ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'
+                }`}>
+                  {selectedLocation ? '✓' : '1'}
+                </div>
+                <span className={selectedLocation ? 'text-green-700' : 'text-gray-600'}>Location</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className={`w-4 h-4 rounded-full flex items-center justify-center text-xs ${
                   selectedMode ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'
                 }`}>
                   {selectedMode ? '✓' : '2'}
                 </div>
-                Choose Distribution Type
-              </li>
-              <li className="flex items-center">
-                <div className={`w-4 h-4 rounded-full mr-3 flex items-center justify-center ${
+                <span className={selectedMode ? 'text-green-700' : 'text-gray-600'}>Type</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className={`w-4 h-4 rounded-full flex items-center justify-center text-xs ${
                   selectedDeliveryCenter ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'
                 }`}>
                   {selectedDeliveryCenter ? '✓' : '3'}
                 </div>
-                Select Distribution Center & Date
-              </li>
-            </ul>
+                <span className={selectedDeliveryCenter ? 'text-green-700' : 'text-gray-600'}>Center</span>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -1342,12 +1248,39 @@ const Distribution = () => {
             {/* Daily Distribution List Tab */}
             {activeTab === "daily-list" && (
               <div>
-                <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <h4 className="font-medium text-blue-900 mb-1">Daily Distribution Report</h4>
-                  <p className="text-sm text-blue-700">
-                    View all medicine distributions for the selected center and date. This shows completed distributions and their details.
-                  </p>
+                {/* Header with Help Icon */}
+                <div className="flex items-center gap-2 mb-4">
+                  <h4 className="text-lg font-semibold text-gray-900">Daily Distributions</h4>
+                  <div className="relative">
+                    <button
+                      onMouseEnter={() => setShowDailyDistributionHelp(true)}
+                      onMouseLeave={() => setShowDailyDistributionHelp(false)}
+                      className="text-gray-400 hover:text-gray-600 transition-colors"
+                      title="Help"
+                    >
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                    
+                    {/* Popover */}
+                    {showDailyDistributionHelp && (
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 bg-gray-900 text-white text-sm rounded-lg p-3 shadow-lg z-50">
+                        <div className="text-center">
+                          <div className="font-medium mb-1">Daily Distribution Report</div>
+                          <div className="text-gray-300">
+                            View all medicine distributions for the selected center and date. This shows completed distributions and their details.
+                          </div>
+                        </div>
+                        {/* Arrow */}
+                        <div className="absolute top-full left-1/2 transform -translate-x-1/2">
+                          <div className="w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
+                
                 <DailyDistributionList 
                   selectedDeliveryCenter={selectedDeliveryCenter}
                   selectedDate={selectedDistributionDate}
@@ -1358,12 +1291,38 @@ const Distribution = () => {
 
             {/* New Distribution Tab */}
             {activeTab === "new-distribution" && (
-              <div className="space-y-6">
-                <div className="mb-4 p-4 bg-green-50 rounded-lg border border-green-200">
-                  <h4 className="font-medium text-green-900 mb-1">Create New Distribution</h4>
-                  <p className="text-sm text-green-700">
-                    Add new medicine distributions for patients. Search for existing patients or add new ones, then select medicines and quantities.
-                  </p>
+              <div className="space-y-4">
+                {/* Header with Help Icon */}
+                <div className="flex items-center gap-2 mb-4">
+                  <h4 className="text-lg font-semibold text-gray-900">New Distribution</h4>
+                  <div className="relative">
+                    <button
+                      onMouseEnter={() => setShowNewDistributionHelp(true)}
+                      onMouseLeave={() => setShowNewDistributionHelp(false)}
+                      className="text-gray-400 hover:text-gray-600 transition-colors"
+                      title="Help"
+                    >
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                    
+                    {/* Popover */}
+                    {showNewDistributionHelp && (
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 bg-gray-900 text-white text-sm rounded-lg p-3 shadow-lg z-50">
+                        <div className="text-center">
+                          <div className="font-medium mb-1">Create New Distribution</div>
+                          <div className="text-gray-300">
+                            Add new medicine distributions for patients. Search for existing patients or add new ones, then select medicines and quantities.
+                          </div>
+                        </div>
+                        {/* Arrow */}
+                        <div className="absolute top-full left-1/2 transform -translate-x-1/2">
+                          <div className="w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
           {/* Completed Patients in Current Session */}
           {completedPatients.length > 0 && (
@@ -1501,7 +1460,7 @@ const Distribution = () => {
 
           {/* Medicine Distribution Table */}
 
-          <div className="overflow-x-auto mb-4 pb-48">
+          <div className="overflow-x-auto mb-4 pb-8">
             <Table className="border border-gray-300">
               <TableHead className="[&>tr>th]:bg-[#E8EFF2] [&>tr>th]:text-black">
                 <TableRow>
