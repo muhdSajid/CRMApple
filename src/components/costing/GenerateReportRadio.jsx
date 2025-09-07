@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useCallback } from "react";
 import { Datepicker, Label } from "flowbite-react";
 
 const GenerateReportRadio = ({ costingData, setCostingData }) => {
@@ -9,14 +9,74 @@ const GenerateReportRadio = ({ costingData, setCostingData }) => {
     { id: "thisYear", label: "This Year" },
     { id: "customDate", label: "Select from date range" },
   ];
+
+  // Helper function to calculate date ranges
+  const getDateRange = useCallback((reportFor) => {
+    const today = new Date();
+    let startDate, endDate;
+
+    switch (reportFor) {
+      case "thisMonth":
+        startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+        endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+        break;
+      case "lastMonth":
+        startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+        endDate = new Date(today.getFullYear(), today.getMonth(), 0);
+        break;
+      case "last3Months":
+        startDate = new Date(today.getFullYear(), today.getMonth() - 2, 1);
+        endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+        break;
+      case "thisYear":
+        startDate = new Date(today.getFullYear(), 0, 1);
+        endDate = new Date(today.getFullYear(), 11, 31);
+        break;
+      case "customDate":
+        startDate = costingData.fromDate;
+        endDate = costingData.toDate;
+        break;
+      default:
+        startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+        endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    }
+
+    return { startDate, endDate };
+  }, [costingData.fromDate, costingData.toDate]);
+
+  // Update dates when reportFor changes (except for customDate)
+  useEffect(() => {
+    if (costingData.reportFor !== 'customDate') {
+      const { startDate, endDate } = getDateRange(costingData.reportFor);
+      setCostingData(prev => ({
+        ...prev,
+        fromDate: startDate,
+        toDate: endDate,
+      }));
+    }
+  }, [costingData.reportFor, getDateRange, setCostingData]);
+
   const handleChange = (e) => {
     setCostingData({
       ...costingData,
       reportFor: e.target.id,
-      toDate: new Date(),
-      fromDate: new Date(),
     });
   };
+
+  const handleFromDateChange = (date) => {
+    setCostingData({
+      ...costingData,
+      fromDate: date,
+    });
+  };
+
+  const handleToDateChange = (date) => {
+    setCostingData({
+      ...costingData,
+      toDate: date,
+    });
+  };
+
   return (
     <>
       <div className="flex flex-wrap gap-4">
@@ -38,31 +98,41 @@ const GenerateReportRadio = ({ costingData, setCostingData }) => {
           </div>
         ))}
       </div>
-      {costingData.reportFor === "customDate" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="from-date">From Date</Label>
-            <Datepicker
-              id="toDate"
-              className="custom-datepicker"
-              maxDate={new Date()}
-              value={costingData.fromDate}
-              onChange={(e) => setCostingData({ ...costingData, fromDate: e })}
-            />
-          </div>
 
-          <div>
-            <Label htmlFor="to-date">To Date</Label>
-            <Datepicker
-              id="toDate"
-              className="custom-datepicker"
-              maxDate={new Date()}
-              value={costingData.toDate}
-              onChange={(e) => setCostingData({ ...costingData, toDate: e })}
-            />
-          </div>
+      {/* From Date and To Date Fields - Always shown */}
+      <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="from-date" value="From Date" />
+          <Datepicker
+            key={`from-${costingData.fromDate?.getTime()}`}
+            id="from-date"
+            value={costingData.fromDate}
+            defaultDate={costingData.fromDate}
+            onSelectedDateChanged={handleFromDateChange}
+            maxDate={costingData.toDate || new Date()}
+            showTodayButton={false}
+            showClearButton={false}
+            className="mt-1"
+            disabled={costingData.reportFor !== 'customDate'}
+          />
         </div>
-      )}
+        <div>
+          <Label htmlFor="to-date" value="To Date" />
+          <Datepicker
+            key={`to-${costingData.toDate?.getTime()}`}
+            id="to-date"
+            value={costingData.toDate}
+            defaultDate={costingData.toDate}
+            onSelectedDateChanged={handleToDateChange}
+            minDate={costingData.fromDate}
+            maxDate={new Date()}
+            showTodayButton={false}
+            showClearButton={false}
+            className="mt-1"
+            disabled={costingData.reportFor !== 'customDate'}
+          />
+        </div>
+      </div>
     </>
   );
 };

@@ -355,3 +355,13 @@ export const getMedicineDistributionsByPatient = async (deliveryCenterId, distri
     throw error;
   }
 };
+
+export const getMedicineDailyCostSummary = async (searchData) => {
+  try {
+    const response = await post(`${apiDomain}/api/medicine-daily-cost-summary/search`, searchData);
+    return response.data || [];
+  } catch (error) {
+    console.error('Error fetching medicine daily cost summary:', error);
+    throw error;
+  }
+};
