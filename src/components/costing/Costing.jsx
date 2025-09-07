@@ -101,9 +101,14 @@ export const Costing = () => {
         locationIds: costingData.location,
         startDate: formatDate(costingData.fromDate),
         endDate: formatDate(costingData.toDate),
+        medicineTypeIds: costingData.category || [],
       };
 
-      console.log('Search data:', searchData);
+      console.log('Search data being sent to API:', {
+        ...searchData,
+        locationCount: searchData.locationIds?.length || 0,
+        medicineTypeCount: searchData.medicineTypeIds?.length || 0
+      });
 
       // Call API
       const results = await getMedicineDailyCostSummary(searchData);
@@ -191,6 +196,31 @@ export const Costing = () => {
         {/* Results Table */}
         {showResults && (
           <div className="mt-8">
+            {/* Filter Summary */}
+            <div className="mb-4 p-4 bg-gray-50 rounded-lg border">
+              <h4 className="text-sm font-medium text-gray-700 mb-2">Applied Filters:</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div>
+                  <span className="font-medium text-gray-600">Date Range:</span>
+                  <span className="ml-1 text-gray-800">
+                    {costingData.fromDate.toLocaleDateString('en-IN')} - {costingData.toDate.toLocaleDateString('en-IN')}
+                  </span>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-600">Locations:</span>
+                  <span className="ml-1 text-gray-800">
+                    {(costingData.location || []).length} selected
+                  </span>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-600">Medicine Types:</span>
+                  <span className="ml-1 text-gray-800">
+                    {(costingData.category || []).length === 0 ? 'All types' : `${(costingData.category || []).length} selected`}
+                  </span>
+                </div>
+              </div>
+            </div>
+            
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">
                 Medicine Cost Summary ({reportResults.length} records)

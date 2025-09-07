@@ -29,24 +29,33 @@ export const SelectLocationMultiple = ({ costingData, setCostingData }) => {
 
   const toggleLocation = (locationId) => {
     setCostingData((prev) => {
-      const location = prev.location || [];
-      const updatedLocation = location.includes(locationId)
-        ? location.filter((id) => id !== locationId)
-        : [...location, locationId];
+      const currentLocation = prev.location || [];
+      const updatedLocation = currentLocation.includes(locationId)
+        ? currentLocation.filter((id) => id !== locationId)
+        : [...currentLocation, locationId];
 
       return { ...prev, location: updatedLocation };
     });
   };
 
   const getSelectedLocationNames = () => {
-    if (!costingData.location || costingData.location.length === 0) {
+    const selectedLocations = costingData.location || [];
+    if (selectedLocations.length === 0) {
       return "Select locations";
     }
     
-    const selectedNames = costingData.location.map(id => {
+    if (selectedLocations.length === locations.length && locations.length > 0) {
+      return `All locations selected (${selectedLocations.length})`;
+    }
+    
+    const selectedNames = selectedLocations.map(id => {
       const location = locations.find(loc => loc.id === id);
       return location ? location.name : `Location ${id}`;
     });
+    
+    if (selectedNames.length > 2) {
+      return `${selectedNames.slice(0, 2).join(", ")} +${selectedNames.length - 2} more`;
+    }
     
     return selectedNames.join(", ");
   };
@@ -72,7 +81,7 @@ export const SelectLocationMultiple = ({ costingData, setCostingData }) => {
         className="border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full cursor-pointer flex items-center justify-between"
         onClick={() => setIsOpen((prev) => !prev)}
       >
-        <span className={`${(!costingData.location || costingData.location.length === 0) ? 'text-gray-500' : ''} truncate`}>
+        <span className={`${(costingData.location || []).length === 0 ? 'text-gray-500' : ''} truncate`}>
           {getSelectedLocationNames()}
         </span>
         <svg 
@@ -103,8 +112,11 @@ export const SelectLocationMultiple = ({ costingData, setCostingData }) => {
               {/* Select All / Deselect All */}
               <div className="px-4 py-2 border-b border-gray-200 bg-gray-50">
                 <button
-                  onClick={() => {
-                    if (costingData.location && costingData.location.length === locations.length) {
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const currentSelection = costingData.location || [];
+                    if (currentSelection.length === locations.length) {
                       // Deselect all
                       setCostingData(prev => ({ ...prev, location: [] }));
                     } else {
@@ -112,9 +124,12 @@ export const SelectLocationMultiple = ({ costingData, setCostingData }) => {
                       setCostingData(prev => ({ ...prev, location: locations.map(loc => loc.id) }));
                     }
                   }}
-                  className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                  className="text-xs text-blue-600 hover:text-blue-800 font-medium focus:outline-none hover:underline transition-colors"
                 >
-                  {costingData.location && costingData.location.length === locations.length ? 'Deselect All' : 'Select All'}
+                  {(costingData.location || []).length === locations.length 
+                    ? `Deselect All (${locations.length})` 
+                    : `Select All (${locations.length})`
+                  }
                 </button>
               </div>
               
@@ -125,7 +140,7 @@ export const SelectLocationMultiple = ({ costingData, setCostingData }) => {
                 >
                   <input
                     type="checkbox"
-                    checked={costingData.location && costingData.location.includes(location.id)}
+                    checked={(costingData.location || []).includes(location.id)}
                     onChange={() => toggleLocation(location.id)}
                     className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mt-0.5 flex-shrink-0"
                   />

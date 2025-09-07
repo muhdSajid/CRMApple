@@ -96,8 +96,6 @@ const GenerateReportRadio = ({ costingData, setCostingData }) => {
           <Datepicker
             key={`from-${costingData.fromDate?.getTime()}`}
             id="from-date"
-            value={costingData.fromDate}
-            defaultDate={costingData.fromDate}
             onSelectedDateChanged={handleFromDateChange}
             maxDate={costingData.toDate || new Date()}
             showTodayButton={false}
@@ -111,8 +109,6 @@ const GenerateReportRadio = ({ costingData, setCostingData }) => {
           <Datepicker
             key={`to-${costingData.toDate?.getTime()}`}
             id="to-date"
-            value={costingData.toDate}
-            defaultDate={costingData.toDate}
             onSelectedDateChanged={handleToDateChange}
             minDate={costingData.fromDate}
             maxDate={new Date()}

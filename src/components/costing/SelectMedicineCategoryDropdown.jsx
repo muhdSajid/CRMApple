@@ -36,24 +36,33 @@ export const SelectMedicineCategoryDropdown = ({ costingData, setCostingData }) 
 
   const toggleCategory = (categoryId) => {
     setCostingData((prev) => {
-      const category = prev.category || [];
-      const updatedCategory = category.includes(categoryId)
-        ? category.filter((id) => id !== categoryId)
-        : [...category, categoryId];
+      const currentCategory = prev.category || [];
+      const updatedCategory = currentCategory.includes(categoryId)
+        ? currentCategory.filter((id) => id !== categoryId)
+        : [...currentCategory, categoryId];
 
       return { ...prev, category: updatedCategory };
     });
   };
 
   const getSelectedCategoryNames = () => {
-    if (!costingData.category || costingData.category.length === 0) {
+    const selectedCategories = costingData.category || [];
+    if (selectedCategories.length === 0) {
       return "Select categories";
     }
     
-    const selectedNames = costingData.category.map(id => {
+    if (selectedCategories.length === medicineTypes.length && medicineTypes.length > 0) {
+      return `All categories selected (${selectedCategories.length})`;
+    }
+    
+    const selectedNames = selectedCategories.map(id => {
       const type = medicineTypes.find(type => type.id === id);
       return type ? type.typeName : `Category ${id}`;
     });
+    
+    if (selectedNames.length > 2) {
+      return `${selectedNames.slice(0, 2).join(", ")} +${selectedNames.length - 2} more`;
+    }
     
     return selectedNames.join(", ");
   };
@@ -80,7 +89,7 @@ export const SelectMedicineCategoryDropdown = ({ costingData, setCostingData }) 
         className="border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full cursor-pointer flex items-center justify-between"
         onClick={() => setIsOpen((prev) => !prev)}
       >
-        <span className={`${(!costingData.category || costingData.category.length === 0) ? 'text-gray-500' : ''} truncate`}>
+        <span className={`${(costingData.category || []).length === 0 ? 'text-gray-500' : ''} truncate`}>
           {getSelectedCategoryNames()}
         </span>
         <svg 
@@ -111,8 +120,11 @@ export const SelectMedicineCategoryDropdown = ({ costingData, setCostingData }) 
               {/* Select All / Deselect All */}
               <div className="px-4 py-2 border-b border-gray-200 bg-gray-50">
                 <button
-                  onClick={() => {
-                    if (costingData.category && costingData.category.length === medicineTypes.length) {
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const currentSelection = costingData.category || [];
+                    if (currentSelection.length === medicineTypes.length) {
                       // Deselect all
                       setCostingData(prev => ({ ...prev, category: [] }));
                     } else {
@@ -120,9 +132,12 @@ export const SelectMedicineCategoryDropdown = ({ costingData, setCostingData }) 
                       setCostingData(prev => ({ ...prev, category: medicineTypes.map(type => type.id) }));
                     }
                   }}
-                  className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                  className="text-xs text-blue-600 hover:text-blue-800 font-medium focus:outline-none hover:underline transition-colors"
                 >
-                  {costingData.category && costingData.category.length === medicineTypes.length ? 'Deselect All' : 'Select All'}
+                  {(costingData.category || []).length === medicineTypes.length 
+                    ? `Deselect All (${medicineTypes.length})` 
+                    : `Select All (${medicineTypes.length})`
+                  }
                 </button>
               </div>
               
@@ -133,7 +148,7 @@ export const SelectMedicineCategoryDropdown = ({ costingData, setCostingData }) 
                 >
                   <input
                     type="checkbox"
-                    checked={costingData.category && costingData.category.includes(type.id)}
+                    checked={(costingData.category || []).includes(type.id)}
                     onChange={() => toggleCategory(type.id)}
                     className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 flex-shrink-0"
                   />
