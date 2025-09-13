@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaPlus, FaEdit, FaTrash, FaMedkit } from 'react-icons/fa';
+import { Modal, ModalBody, ModalHeader } from "flowbite-react";
 import { toast } from 'react-toastify';
 import { 
   getMedicineTypes, 
@@ -14,6 +15,8 @@ const MedicineTypes = () => {
   const [editingType, setEditingType] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [typeToDelete, setTypeToDelete] = useState(null);
   const [formData, setFormData] = useState({
     typeName: '',
     description: ''
@@ -78,19 +81,32 @@ const MedicineTypes = () => {
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this medicine type?')) {
-      try {
-        await deleteMedicineType(id);
-        toast.success('Medicine type deleted successfully!');
-        // Reload the data from server
-        await loadMedicineTypes();
-      } catch (error) {
-        console.error('Error deleting medicine type:', error);
-        const errorMessage = error.response?.data?.message || error.message || 'An error occurred';
-        toast.error(`Failed to delete medicine type: ${errorMessage}`);
-      }
+  const handleDelete = (type) => {
+    setTypeToDelete(type);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!typeToDelete) return;
+
+    try {
+      await deleteMedicineType(typeToDelete.id);
+      toast.success('Medicine type deleted successfully!');
+      // Reload the data from server
+      await loadMedicineTypes();
+    } catch (error) {
+      console.error('Error deleting medicine type:', error);
+      const errorMessage = error.response?.data?.message || error.message || 'An error occurred';
+      toast.error(`Failed to delete medicine type: ${errorMessage}`);
+    } finally {
+      setShowDeleteModal(false);
+      setTypeToDelete(null);
     }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteModal(false);
+    setTypeToDelete(null);
   };
 
   const openAddModal = () => {
@@ -169,7 +185,7 @@ const MedicineTypes = () => {
                       <FaEdit />
                     </button>
                     <button
-                      onClick={() => handleDelete(type.id)}
+                      onClick={() => handleDelete(type)}
                       className="text-red-600 hover:text-red-900"
                       title="Delete"
                     >
@@ -243,6 +259,58 @@ const MedicineTypes = () => {
             </form>
           </div>
         </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && typeToDelete && (
+        <Modal show={showDeleteModal} onClose={cancelDelete}>
+          <ModalHeader>Are you sure?</ModalHeader>
+          <ModalBody>
+            <div className="space-y-4">
+              <div className="flex items-center justify-center mb-4">
+                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                  <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </div>
+              </div>
+              
+              <div className="text-center">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Delete Medicine Type
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  Are you sure you want to delete this medicine type? This action cannot be undone.
+                </p>
+                
+                <div className="bg-gray-50 rounded-lg p-4 text-left mb-4">
+                  <div className="flex items-center">
+                    <FaMedkit className="text-blue-600 mr-3" />
+                    <div>
+                      <div className="font-medium text-gray-900">{typeToDelete.typeName}</div>
+                      <div className="text-sm text-gray-600">{typeToDelete.description}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex gap-3 justify-end">
+                <button
+                  onClick={cancelDelete}
+                  className="bg-white text-gray-700 hover:bg-gray-50 border border-gray-300 font-medium rounded-lg text-sm px-5 py-2.5"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDelete}
+                  className="text-white bg-red-600 border hover:bg-red-700 font-medium rounded-lg text-sm px-5 py-2.5"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </ModalBody>
+        </Modal>
       )}
     </div>
   );
