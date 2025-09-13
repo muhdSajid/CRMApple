@@ -9,7 +9,7 @@ import { IoHeadsetOutline } from "react-icons/io5";
 import { TbMessageQuestion } from "react-icons/tb";
 import { BiSolidCalendarPlus } from "react-icons/bi";
 import { IoSettingsOutline } from "react-icons/io5";
-import { FaMedkit, FaChevronDown, FaChevronRight } from "react-icons/fa";
+import { FaMedkit, FaChevronDown, FaChevronRight, FaMapMarkerAlt } from "react-icons/fa";
 
 const Sidebar = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -100,6 +100,15 @@ const Sidebar = () => {
                   >
                     <FaMedkit className="text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900" />
                     <span className="ms-3">Medicine Types</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/settings/locations"
+                    className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
+                  >
+                    <FaMapMarkerAlt className="text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900" />
+                    <span className="ms-3">Locations</span>
                   </Link>
                 </li>
               </ul>

@@ -17,6 +17,7 @@ import ChangePassword from "./components/auth/ChangePassword";
 import UserManagement from "./components/usermanagment/UserManagment";
 import Settings from "./components/settings/Settings";
 import MedicineTypes from "./components/settings/MedicineTypes";
+import Location from "./components/settings/Location";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import NetworkRequestTracker from "./components/common/NetworkRequestTracker";
 import ErrorBoundary from "./components/common/ErrorBoundary";
@@ -52,6 +53,7 @@ function App() {
             <Route path="/change-password" element={<ChangePassword />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/settings/medicine-types" element={<MedicineTypes />} />
+            <Route path="/settings/locations" element={<Location />} />
           </Route>
         </Routes>
       </Router>

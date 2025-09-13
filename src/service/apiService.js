@@ -62,6 +62,57 @@ export const deleteMedicineType = async (id) => {
   }
 };
 
+// Location management API functions
+export const getLocationsFromSettings = async () => {
+  try {
+    const response = await get(`${apiDomain}/api/v1/locations`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching locations from settings:', error);
+    throw error;
+  }
+};
+
+export const getLocationById = async (id) => {
+  try {
+    const response = await get(`${apiDomain}/api/v1/locations/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching location by ID:', error);
+    throw error;
+  }
+};
+
+export const createLocation = async (locationData) => {
+  try {
+    const response = await post(`${apiDomain}/api/v1/locations`, locationData);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating location:', error);
+    throw error;
+  }
+};
+
+export const updateLocation = async (id, locationData) => {
+  try {
+    const response = await _fetch(`${apiDomain}/api/v1/locations/${id}`, "PUT", locationData);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating location:', error);
+    throw error;
+  }
+};
+
+export const softDeleteLocation = async (id) => {
+  try {
+    const response = await _fetch(`${apiDomain}/api/v1/locations/${id}/soft-delete`, "PUT", null);
+    return response.data;
+  } catch (error) {
+    console.error('Error soft deleting location:', error);
+    throw error;
+  }
+};
+
 export const getPurchaseTypes = async () => {
   try {
     console.log('Making API call to fetch purchase types...');
