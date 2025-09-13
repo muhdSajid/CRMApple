@@ -1,0 +1,251 @@
+import React, { useState, useEffect } from 'react';
+import { FaPlus, FaEdit, FaTrash, FaMedkit } from 'react-icons/fa';
+import { toast } from 'react-toastify';
+import { 
+  getMedicineTypes, 
+  createMedicineType, 
+  updateMedicineType, 
+  deleteMedicineType 
+} from '../../service/apiService';
+
+const MedicineTypes = () => {
+  const [medicineTypes, setMedicineTypes] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingType, setEditingType] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [formData, setFormData] = useState({
+    typeName: '',
+    description: ''
+  });
+
+  // Load medicine types from API
+  useEffect(() => {
+    loadMedicineTypes();
+  }, []);
+
+  const loadMedicineTypes = async () => {
+    try {
+      setLoading(true);
+      const data = await getMedicineTypes();
+      setMedicineTypes(data || []);
+    } catch (error) {
+      console.error('Error loading medicine types:', error);
+      toast.error('Failed to load medicine types. Please try again.');
+      // Fallback to empty array on error
+      setMedicineTypes([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+
+    try {
+      if (editingType) {
+        // Update existing type
+        await updateMedicineType(editingType.id, formData);
+        toast.success('Medicine type updated successfully!');
+      } else {
+        // Add new type
+        await createMedicineType(formData);
+        toast.success('Medicine type added successfully!');
+      }
+
+      // Reload the data from server
+      await loadMedicineTypes();
+      
+      setIsModalOpen(false);
+      setEditingType(null);
+      setFormData({ typeName: '', description: '' });
+    } catch (error) {
+      console.error('Error saving medicine type:', error);
+      const errorMessage = error.response?.data?.message || error.message || 'An error occurred';
+      toast.error(`Failed to save medicine type: ${errorMessage}`);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleEdit = (type) => {
+    setEditingType(type);
+    setFormData({
+      typeName: type.typeName,
+      description: type.description
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this medicine type?')) {
+      try {
+        await deleteMedicineType(id);
+        toast.success('Medicine type deleted successfully!');
+        // Reload the data from server
+        await loadMedicineTypes();
+      } catch (error) {
+        console.error('Error deleting medicine type:', error);
+        const errorMessage = error.response?.data?.message || error.message || 'An error occurred';
+        toast.error(`Failed to delete medicine type: ${errorMessage}`);
+      }
+    }
+  };
+
+  const openAddModal = () => {
+    setEditingType(null);
+    setFormData({ typeName: '', description: '' });
+    setIsModalOpen(true);
+  };
+
+  if (loading) {
+    return (
+      <div className="p-6">
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Medicine Types</h1>
+          <p className="text-gray-600">Manage different types of medicines</p>
+        </div>
+        <button
+          onClick={openAddModal}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+        >
+          <FaPlus />
+          Add Medicine Type
+        </button>
+      </div>
+
+      {/* Medicine Types Table */}
+      <div className="bg-white shadow-md rounded-lg overflow-hidden">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Medicine Type
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Description
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {medicineTypes.length === 0 ? (
+              <tr>
+                <td colSpan="3" className="px-6 py-8 text-center text-gray-500">
+                  No medicine types found. Click "Add Medicine Type" to get started.
+                </td>
+              </tr>
+            ) : (
+              medicineTypes.map((type) => (
+                <tr key={type.id}>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <FaMedkit className="text-blue-600 mr-3" />
+                      <div className="text-sm font-medium text-gray-900">{type.typeName}</div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">{type.description}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <button
+                      onClick={() => handleEdit(type)}
+                      className="text-indigo-600 hover:text-indigo-900 mr-4"
+                      title="Edit"
+                    >
+                      <FaEdit />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(type.id)}
+                      className="text-red-600 hover:text-red-900"
+                      title="Delete"
+                    >
+                      <FaTrash />
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
+          <div className="relative p-8 bg-white w-full max-w-md m-auto rounded-lg shadow-lg">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              {editingType ? 'Edit Medicine Type' : 'Add Medicine Type'}
+            </h3>
+            
+            <form onSubmit={handleSubmit}>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Name *
+                </label>
+                <input
+                  type="text"
+                  value={formData.typeName}
+                  onChange={(e) => setFormData({...formData, typeName: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                  disabled={saving}
+                  placeholder="Enter medicine type name"
+                />
+              </div>
+              
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Description *
+                </label>
+                <textarea
+                  value={formData.description}
+                  onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  rows="3"
+                  required
+                  disabled={saving}
+                  placeholder="Enter medicine type description"
+                />
+              </div>
+              
+              <div className="flex justify-end gap-4">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-4 py-2 text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300"
+                  disabled={saving}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed flex items-center gap-2"
+                  disabled={saving}
+                >
+                  {saving && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>}
+                  {editingType ? 'Update' : 'Add'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default MedicineTypes;

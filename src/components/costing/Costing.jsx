@@ -4,7 +4,7 @@ import { Button, Datepicker, Label, Table, TableBody, TableCell, TableHead, Tabl
 import GenerateReportRadio from "./GenerateReportRadio";
 import SelectLocationMultiple from "./SelectLocationMultiple";
 import SelectMedicineCategoryDropdown from "./SelectMedicineCategoryDropdown";
-import { getMedicineDailyCostSummary } from "../../service/apiService";
+import { getMedicineDailyCostSummary, exportMedicineDailyCostSummary } from "../../service/apiService";
 
 export const Costing = () => {
   const [costingData, setCostingDataState] = useState({
@@ -40,6 +40,7 @@ export const Costing = () => {
 
   const [reportResults, setReportResults] = useState([]);
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
+  const [isExportingReport, setIsExportingReport] = useState(false);
   const [showResults, setShowResults] = useState(false);
 
   // Function to group and merge data by Location, Delivery Center, and Date
@@ -123,6 +124,37 @@ export const Costing = () => {
     }
   };
 
+  const handleExportToExcel = async () => {
+    try {
+      setIsExportingReport(true);
+
+      // Format dates to YYYY-MM-DD
+      const formatDate = (date) => {
+        return date.toISOString().split('T')[0];
+      };
+
+      // Prepare the same API payload as used for generating the report
+      const searchData = {
+        locationIds: costingData.location,
+        startDate: formatDate(costingData.fromDate),
+        endDate: formatDate(costingData.toDate),
+        medicineTypeIds: costingData.category || [],
+      };
+
+      console.log('Exporting data with search criteria:', searchData);
+
+      // Call export API
+      await exportMedicineDailyCostSummary(searchData);
+      toast.success('Excel file downloaded successfully!');
+
+    } catch (error) {
+      console.error('Error exporting to Excel:', error);
+      toast.error('Failed to export to Excel. Please try again.');
+    } finally {
+      setIsExportingReport(false);
+    }
+  };
+
   return (
     <div className="mt-10">
       <div className="p-6 bg-white rounded-lg shadow-md max-w-4xl mx-auto">
@@ -171,6 +203,7 @@ export const Costing = () => {
               onClick={() => {
                 setShowResults(false);
                 setReportResults([]);
+                setIsExportingReport(false);
               }}
             >
               Clear Results
@@ -196,37 +229,36 @@ export const Costing = () => {
         {/* Results Table */}
         {showResults && (
           <div className="mt-8">
-            {/* Filter Summary */}
-            <div className="mb-4 p-4 bg-gray-50 rounded-lg border">
-              <h4 className="text-sm font-medium text-gray-700 mb-2">Applied Filters:</h4>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                <div>
-                  <span className="font-medium text-gray-600">Date Range:</span>
-                  <span className="ml-1 text-gray-800">
-                    {costingData.fromDate.toLocaleDateString('en-IN')} - {costingData.toDate.toLocaleDateString('en-IN')}
-                  </span>
-                </div>
-                <div>
-                  <span className="font-medium text-gray-600">Locations:</span>
-                  <span className="ml-1 text-gray-800">
-                    {(costingData.location || []).length} selected
-                  </span>
-                </div>
-                <div>
-                  <span className="font-medium text-gray-600">Medicine Types:</span>
-                  <span className="ml-1 text-gray-800">
-                    {(costingData.category || []).length === 0 ? 'All types' : `${(costingData.category || []).length} selected`}
-                  </span>
-                </div>
-              </div>
-            </div>
-            
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">
                 Medicine Cost Summary ({reportResults.length} records)
               </h3>
-              <div className="text-sm text-gray-600">
-                Total Cost: ₹{reportResults.reduce((sum, item) => sum + (item.totalPrice || 0), 0).toLocaleString()}
+              <div className="flex items-center gap-4">
+                <div className="text-sm text-gray-600">
+                  Total Cost: ₹{reportResults.reduce((sum, item) => sum + (item.totalPrice || 0), 0).toLocaleString()}
+                </div>
+                {reportResults.length > 0 && (
+                  <Button
+                    type="button"
+                    className="text-white bg-green-600 hover:bg-green-700 font-medium rounded-lg text-sm px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={handleExportToExcel}
+                    disabled={isExportingReport}
+                  >
+                    {isExportingReport ? (
+                      <>
+                        <div className="inline-block w-4 h-4 mr-2 border-2 border-white border-t-transparent animate-spin rounded-full"></div>
+                        Exporting...
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Export to Excel
+                      </>
+                    )}
+                  </Button>
+                )}
               </div>
             </div>
 

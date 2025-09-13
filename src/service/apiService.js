@@ -6,25 +6,58 @@ export const get = (url, props) => _fetch(url, "GET", null, props);
 export const post = (url, data, props, token) =>
   _fetch(url, "POST", data, props, token);
 
-// Cache for medicine types to avoid frequent API calls
-let medicineTypesCache = null;
-let cacheTimestamp = null;
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
-
 export const getMedicineTypes = async () => {
-  // Check if cache is valid
-  if (medicineTypesCache && cacheTimestamp && 
-      (Date.now() - cacheTimestamp < CACHE_DURATION)) {
-    return medicineTypesCache;
-  }
-
   try {
     const response = await get(`${apiDomain}/api/v1/medicine-types`);
-    medicineTypesCache = response.data;
-    cacheTimestamp = Date.now();
-    return medicineTypesCache;
+    return response.data;
   } catch (error) {
     console.error('Error fetching medicine types:', error);
+    throw error;
+  }
+};
+
+export const getMedicineTypeById = async (id) => {
+  try {
+    const response = await get(`${apiDomain}/api/v1/medicine-types/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching medicine type by ID:', error);
+    throw error;
+  }
+};
+
+export const createMedicineType = async (medicineTypeData) => {
+  try {
+    const response = await post(`${apiDomain}/api/v1/medicine-types`, medicineTypeData);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating medicine type:', error);
+    throw error;
+  }
+};
+
+export const updateMedicineType = async (id, medicineTypeData) => {
+  try {
+    const apiData = {
+      id: parseInt(id),
+      typeName: medicineTypeData.typeName,
+      description: medicineTypeData.description
+    };
+    
+    const response = await _fetch(`${apiDomain}/api/v1/medicine-types/${id}`, "PUT", apiData);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating medicine type:', error);
+    throw error;
+  }
+};
+
+export const deleteMedicineType = async (id) => {
+  try {
+    const response = await _fetch(`${apiDomain}/api/v1/medicine-types/${id}`, "DELETE", null);
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting medicine type:', error);
     throw error;
   }
 };
@@ -362,6 +395,51 @@ export const getMedicineDailyCostSummary = async (searchData) => {
     return response.data || [];
   } catch (error) {
     console.error('Error fetching medicine daily cost summary:', error);
+    throw error;
+  }
+};
+
+export const exportMedicineDailyCostSummary = async (searchData) => {
+  try {
+    const userToken = getUserToken();
+    
+    const response = await fetch(`${apiDomain}/api/medicine-daily-cost-summary/export`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/octet-stream',
+        ...(userToken && userToken.token ? { 'Authorization': `Bearer ${userToken.token}` } : {})
+      },
+      body: JSON.stringify(searchData)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Export failed: ${response.statusText}`);
+    }
+
+    // Get the blob data
+    const blob = await response.blob();
+    
+    // Create download link
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    
+    // Generate filename with current date
+    const currentDate = new Date().toISOString().split('T')[0];
+    link.download = `medicine-cost-summary-${currentDate}.xlsx`;
+    
+    // Trigger download
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Clean up
+    window.URL.revokeObjectURL(url);
+    
+    return true;
+  } catch (error) {
+    console.error('Error exporting medicine daily cost summary:', error);
     throw error;
   }
 };

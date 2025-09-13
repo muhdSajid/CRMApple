@@ -15,6 +15,8 @@ import LoginPage from "./components/auth/Login";
 import SignupPage from "./components/auth/Signup";
 import ChangePassword from "./components/auth/ChangePassword";
 import UserManagement from "./components/usermanagment/UserManagment";
+import Settings from "./components/settings/Settings";
+import MedicineTypes from "./components/settings/MedicineTypes";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import NetworkRequestTracker from "./components/common/NetworkRequestTracker";
 import ErrorBoundary from "./components/common/ErrorBoundary";
@@ -48,6 +50,8 @@ function App() {
             <Route path="/userguide" element={<UserGuide />} />
             <Route path="/usermanagment" element={<UserManagement />} />
             <Route path="/change-password" element={<ChangePassword />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/settings/medicine-types" element={<MedicineTypes />} />
           </Route>
         </Routes>
       </Router>

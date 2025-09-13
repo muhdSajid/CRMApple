@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import SVYMLogo from "../Assets/SVYM-logo.jpg";
+import { useState } from "react";
+import SVYMLogo from "../assets/SVYM-logo.jpg";
 import { LuNotebookPen } from "react-icons/lu";
 import { MdAddShoppingCart } from "react-icons/md";
 import { MdCurrencyRupee } from "react-icons/md";
@@ -7,8 +8,12 @@ import { RiWechatLine } from "react-icons/ri";
 import { IoHeadsetOutline } from "react-icons/io5";
 import { TbMessageQuestion } from "react-icons/tb";
 import { BiSolidCalendarPlus } from "react-icons/bi";
+import { IoSettingsOutline } from "react-icons/io5";
+import { FaMedkit, FaChevronDown, FaChevronRight } from "react-icons/fa";
 
 const Sidebar = () => {
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
   return (
     <aside
       id="logo-sidebar"
@@ -72,6 +77,33 @@ const Sidebar = () => {
               <MdCurrencyRupee className="text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900" />
               <span className="flex-1 ms-3 whitespace-nowrap">Costing</span>
             </Link>
+          </li>
+          <li>
+            <button
+              onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+              className="flex items-center w-full p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
+            >
+              <IoSettingsOutline className="text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900" />
+              <span className="flex-1 ms-3 text-left whitespace-nowrap">Settings</span>
+              {isSettingsOpen ? (
+                <FaChevronDown className="text-gray-500" />
+              ) : (
+                <FaChevronRight className="text-gray-500" />
+              )}
+            </button>
+            {isSettingsOpen && (
+              <ul className="pl-8 mt-2 space-y-1">
+                <li>
+                  <Link
+                    to="/settings/medicine-types"
+                    className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
+                  >
+                    <FaMedkit className="text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900" />
+                    <span className="ms-3">Medicine Types</span>
+                  </Link>
+                </li>
+              </ul>
+            )}
           </li>
           <hr className="w-48 h-px mx-auto my-4 bg-gray-300 border-0 rounded-sm md:my-10 dark:bg-gray-700"></hr>
           <li>
