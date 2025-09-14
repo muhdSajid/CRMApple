@@ -78,7 +78,24 @@ const MedicineStock = () => {
         const response = await get(url);
         setLocations(response.data);
         
-        // Set first active location as default
+        // Check for saved location in sessionStorage first
+        const savedLocationId = sessionStorage.getItem('selectedLocationId');
+        
+        if (savedLocationId) {
+          const locationId = parseInt(savedLocationId, 10);
+          const savedLocation = response.data.find(loc => loc.id === locationId && loc.isActive);
+          if (savedLocation) {
+            setSelectedLocationId(locationId);
+            setError(null);
+            return;
+          } else {
+            // Clear invalid saved data
+            sessionStorage.removeItem('selectedLocationId');
+            sessionStorage.removeItem('selectedLocationData');
+          }
+        }
+        
+        // Set first active location as default if no valid saved location
         const activeLocations = response.data.filter(loc => loc.isActive);
         if (activeLocations.length > 0) {
           setSelectedLocationId(activeLocations[0].id);
@@ -157,6 +174,16 @@ const MedicineStock = () => {
 
   const handleTabClick = (locationId) => {
     setSelectedLocationId(locationId);
+    
+    // Save location data to sessionStorage for consistency
+    const selectedLocation = locations.find(loc => loc.id === locationId);
+    if (selectedLocation) {
+      sessionStorage.setItem('selectedLocationId', locationId.toString());
+      sessionStorage.setItem('selectedLocationData', JSON.stringify({
+        locationId: selectedLocation.id,
+        locationName: selectedLocation.name
+      }));
+    }
   };
 
   const handleShowSuccess = (message) => {

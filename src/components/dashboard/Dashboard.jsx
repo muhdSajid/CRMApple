@@ -144,22 +144,10 @@ const Dashboard = () => {
           <h2 className="text-xl font-semibold">Critical Stock & Shortages</h2>
         </div>
 
-        <div className="flex justify-between items-center mt-4 ml-2 mr-2">
-          <input
-            type="text"
-            placeholder="Search..."
-            className="border px-3 py-2 border-gray-300 rounded-md w-1/4 text-sm focus:outline-none focus:ring-0 focus:border-gray-300"
-          />
-
-          <div className="flex gap-2">
-            {/* <FilterPopover /> */}
-            <select className="border border-gray-300 rounded-md px-3 py-1.5 text-sm">
-              <option>This Year</option>
-              <option>Last Year</option>
-            </select>
-          </div>
-        </div>
-        <CriticalStock />
+        <CriticalStock 
+          selectedLocationId={selectedLocationId}
+          selectedLocation={selectedLocation}
+        />
       </div>
       </div>
     </PageWrapper>
