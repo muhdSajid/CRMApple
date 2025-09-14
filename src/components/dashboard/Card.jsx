@@ -124,7 +124,7 @@ const LocationCard = ({ onLocationSelect, selectedLocationId }) => {
             isSelected ? 'bg-[#1a4a6b]' : 'bg-[#F2F6FF]'
           }`}>
             <span className="px-2 py-0.5 text-xs font-bold text-white bg-blue-700 rounded">
-              {item.outOfStockCount || 0}
+              {item.stockStatusCount || 0}
             </span>
             <span className={`text-sm ${
               isSelected ? 'text-blue-200' : 'text-blue-800'

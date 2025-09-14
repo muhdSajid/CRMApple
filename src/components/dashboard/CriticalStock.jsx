@@ -83,6 +83,15 @@ const FlowbiteUrgencyTable = ({ selectedLocationId, selectedLocation }) => {
           textColor: "text-gray-800",
           borderColor: "border-orange-500"
         };
+      case 'Near Expiry':
+        return {
+          indicatorColor: "bg-yellow-500",
+          reasonColor: "text-white",
+          reasonBgColor: "bg-yellow-500",
+          reason: "Near Expiry",
+          textColor: "text-gray-800",
+          borderColor: "border-yellow-500"
+        };
       default:
         return {
           indicatorColor: "bg-gray-500",
