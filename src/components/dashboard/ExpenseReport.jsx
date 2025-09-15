@@ -6,15 +6,8 @@ const ExpensesReport = ({ selectedLocationId }) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [hasRealData, setHasRealData] = useState(false);
   const svgRef = useRef();
-
-  // Fallback data in case API fails
-  const getFallbackData = useCallback(() => [
-    { name: "Antibiotics", value: 28848, color: "#dc2626" },
-    { name: "Vaccines", value: 11508, color: "#facc15" },
-    { name: "Diuretics", value: 4848, color: "#f97316" },
-    { name: "Pain Relievers", value: 8508, color: "#22c55e" },
-  ], []);
 
   // Transform API response to chart-compatible format
   const transformApiDataToChartData = useCallback((apiData) => {
@@ -39,9 +32,9 @@ const ExpensesReport = ({ selectedLocationId }) => {
       }));
     }
     
-    // Fallback to default data structure
-    return getFallbackData();
-  }, [getFallbackData]);
+    // No data available
+    return [];
+  }, []);
 
   // Fetch data from API
   useEffect(() => {
@@ -116,11 +109,13 @@ const ExpensesReport = ({ selectedLocationId }) => {
           // Transform API data to match the chart format
           const transformedData = transformApiDataToChartData(apiData);
           setData(transformedData);
+          setHasRealData(true);
           setError(null); // Clear any previous errors
         } else {
-          // Use fallback data
-          setData(getFallbackData());
-          setError(null); // Don't show error message for fallback data
+          // No real data available
+          setData([]);
+          setHasRealData(false);
+          setError(null); // Don't show error message for no data
         }
         
       } catch (err) {
@@ -128,21 +123,22 @@ const ExpensesReport = ({ selectedLocationId }) => {
         if (err.response?.status === 401 || err.response?.status === 403) {
           setError('Authentication required to access expense data.');
         }
-        setData(getFallbackData());
+        setData([]);
+        setHasRealData(false);
       } finally {
         setLoading(false);
       }
     };
 
     fetchExpenseReport();
-  }, [selectedLocationId, transformApiDataToChartData, getFallbackData]);
+  }, [selectedLocationId, transformApiDataToChartData]);
 
   // Calculate total from current data
   const total = data.reduce((acc, cur) => acc + cur.value, 0);
 
   useEffect(() => {
-    // Don't render chart if data is not loaded yet
-    if (loading || !data.length) return;
+    // Don't render chart if data is not loaded yet or if there's no real data
+    if (loading || !data.length || !hasRealData) return;
     
     const radius = 80;
     const arcGenerator = d3.arc().innerRadius(60).outerRadius(radius);
@@ -174,13 +170,40 @@ const ExpensesReport = ({ selectedLocationId }) => {
       .attr("fill", (d, i) => data[i].color)
       .attr("stroke", "#fff")
       .attr("stroke-width", 2);
-  }, [data, loading]);
+  }, [data, loading, hasRealData]);
 
   // Handle loading state
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="text-gray-600">Loading expense report...</div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="ml-2 text-gray-600">Loading expense report...</div>
+      </div>
+    );
+  }
+
+  // Show empty state when no real data is available
+  if (!hasRealData) {
+    return (
+      <div className="max-w-md mx-auto text-center pt-6">
+        {error && (
+          <div className="mb-4 p-2 bg-yellow-50 border border-yellow-200 rounded-md">
+            <p className="text-xs text-yellow-700">{error}</p>
+          </div>
+        )}
+        
+        <div className="flex flex-col items-center justify-center py-8 bg-gray-50 rounded-lg">
+          <div className="text-4xl text-gray-300 mb-2">📊</div>
+          <h3 className="text-lg font-medium text-gray-600 mb-1">No Expense Data Available</h3>
+          <p className="text-sm text-gray-500 text-center">
+            There are no expense reports to display for this period.
+          </p>
+        </div>
+        
+        <div className="mt-4 text-center">
+          <p className="text-sm text-gray-500">Total Expenses</p>
+          <p className="text-xl font-bold">₹0</p>
+        </div>
       </div>
     );
   }

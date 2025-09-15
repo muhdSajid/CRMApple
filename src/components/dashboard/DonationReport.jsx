@@ -29,22 +29,16 @@ const DonationReport = () => {
     }
   }, [isError, isSuccess, message, dispatch]);
 
-  // Fallback data for when API fails or returns empty data
-  const fallbackData = [
-    { name: "Bangalore", amount: 28848, color: "bg-red-400" },
-    { name: "Mangaluru", amount: 1508, color: "bg-yellow-400" },
-    { name: "Udupi", amount: 5848, color: "bg-orange-400" },
-    { name: "Hassan", amount: 24644, color: "bg-green-400" },
-  ];
-
-  // Use API data if available, otherwise use fallback data
-  const displayData = data && data.length > 0 ? data : fallbackData;
-  const displayTotal = total > 0 ? total : fallbackData.reduce((sum, city) => sum + (city.amount || 0), 0);
+  // Check if we have real data from the API
+  const hasRealData = data && data.length > 0;
+  const displayData = hasRealData ? data : [];
+  const displayTotal = hasRealData ? total : 0;
 
   console.log('=== DONATION REPORT DEBUG ===');
   console.log('API data:', data);
   console.log('Data length:', data?.length);
   console.log('Total from Redux:', total);
+  console.log('Has real data:', hasRealData);
   console.log('Display data:', displayData);
   console.log('Display total:', displayTotal);
   console.log('==============================');
@@ -76,6 +70,32 @@ const DonationReport = () => {
     );
   }
 
+  // Show empty state when no data is available
+  if (!hasRealData) {
+    return (
+      <div className="p-1">
+        <div className="flex justify-between items-start mb-4">
+          <div className="flex items-baseline gap-2">
+            <h2 className="text-3xl font-bold">₹0</h2>
+            <p className="text-sm text-gray-500">received this month</p>
+          </div>
+          <select className="border border-gray-300 rounded-md px-3 py-1.5 text-sm">
+            <option>This Month</option>
+            <option>Last Month</option>
+          </select>
+        </div>
+        
+        <div className="flex flex-col items-center justify-center py-8 bg-gray-50 rounded-lg">
+          <div className="text-4xl text-gray-300 mb-2">📊</div>
+          <h3 className="text-lg font-medium text-gray-600 mb-1">No Donation Data Available</h3>
+          <p className="text-sm text-gray-500 text-center">
+            There are no donation reports to display for this period.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-1">
       <div className="flex justify-between items-start">
@@ -88,15 +108,6 @@ const DonationReport = () => {
           <option>Last Month</option>
         </select>
       </div>
-
-      {/* Show fallback notice if using fallback data */}
-      {(!data || data.length === 0) && !isLoading && (
-        <div className="mb-2 p-2 bg-yellow-50 border border-yellow-200 rounded-md">
-          <p className="text-xs text-yellow-700">
-            📊 Using sample data. Real data will be displayed once API returns valid response.
-          </p>
-        </div>
-      )}
 
       {/* Progress bar */}
       <div className="flex h-2 rounded overflow-hidden my-4">
