@@ -16,7 +16,7 @@ const Layout = () => {
       <Navbar />
       <Sidebar />
       <main 
-        className={`pt-[64px] pl-[220px] min-h-screen transition-opacity duration-200 ${
+        className={`pt-[64px] pl-[256px] min-h-screen transition-opacity duration-200 ${
           isLayoutMounted ? 'opacity-100' : 'opacity-0'
         }`}
         style={{ minHeight: 'calc(100vh - 64px)' }}

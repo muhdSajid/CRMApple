@@ -2,14 +2,14 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import SVYMLogo from "../assets/SVYM-logo.jpg";
 import { LuNotebookPen } from "react-icons/lu";
-import { MdAddShoppingCart } from "react-icons/md";
+import { MdDashboard } from "react-icons/md";
 import { MdCurrencyRupee } from "react-icons/md";
 import { RiWechatLine } from "react-icons/ri";
 import { IoHeadsetOutline } from "react-icons/io5";
 import { TbMessageQuestion } from "react-icons/tb";
 import { BiSolidCalendarPlus } from "react-icons/bi";
 import { IoSettingsOutline } from "react-icons/io5";
-import { FaMedkit, FaChevronDown, FaChevronRight, FaMapMarkerAlt, FaUserShield } from "react-icons/fa";
+import { FaMedkit, FaChevronDown, FaChevronRight, FaMapMarkerAlt, FaUserShield, FaUsers } from "react-icons/fa";
 
 const Sidebar = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -17,7 +17,7 @@ const Sidebar = () => {
   return (
     <aside
       id="logo-sidebar"
-      className="fixed top-0 left-0 z-40 w-55 h-screen pt-4 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
+      className="fixed top-0 left-0 z-40 w-64 h-screen pt-4 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
       aria-label="Sidebar"
     >
       <div className="h-full px-3 pb-6 overflow-y-auto bg-white dark:bg-gray-800">
@@ -33,15 +33,6 @@ const Sidebar = () => {
         <ul className="space-y-1 font-medium pt-5 font-serif">
           <li>
             <Link
-              to="/usermanagment"
-              className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
-            >
-              <LuNotebookPen className="text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900" />
-              <span className="ms-3">User Managment</span>
-            </Link>
-          </li>
-          <li>
-            <Link
               to="/stock"
               className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
             >
@@ -54,8 +45,8 @@ const Sidebar = () => {
               to="/"
               className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
             >
-              <MdAddShoppingCart className="text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900" />
-              <span className="flex-1 ms-3 whitespace-nowrap">Purchase</span>
+              <MdDashboard className="text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900" />
+              <span className="flex-1 ms-3 whitespace-nowrap">Dashboard</span>
             </Link>
           </li>
           <li>
@@ -93,6 +84,15 @@ const Sidebar = () => {
             </button>
             {isSettingsOpen && (
               <ul className="pl-8 mt-2 space-y-1">
+                <li>
+                  <Link
+                    to="/usermanagment"
+                    className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
+                  >
+                    <FaUsers className="text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900" />
+                    <span className="ms-3">User Management</span>
+                  </Link>
+                </li>
                 <li>
                   <Link
                     to="/settings/medicine-types"
