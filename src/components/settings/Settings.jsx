@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaMedkit, FaMapMarkerAlt } from 'react-icons/fa';
+import { FaMedkit, FaMapMarkerAlt, FaUserShield } from 'react-icons/fa';
 
 const Settings = () => {
   return (
@@ -35,6 +35,21 @@ const Settings = () => {
           </div>
           <p className="font-normal text-gray-700 dark:text-gray-400">
             Manage warehouse and storage locations.
+          </p>
+        </Link>
+
+        <Link
+          to="/settings/role-management"
+          className="block p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700"
+        >
+          <div className="flex items-center mb-2">
+            <FaUserShield className="text-purple-600 text-xl mr-3" />
+            <h5 className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">
+              Role Management
+            </h5>
+          </div>
+          <p className="font-normal text-gray-700 dark:text-gray-400">
+            Manage user roles and assign privileges to control system access.
           </p>
         </Link>
       </div>

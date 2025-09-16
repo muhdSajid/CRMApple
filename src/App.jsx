@@ -18,6 +18,7 @@ import UserManagement from "./components/usermanagment/UserManagment";
 import Settings from "./components/settings/Settings";
 import MedicineTypes from "./components/settings/MedicineTypes";
 import Location from "./components/settings/Location";
+import RoleManagement from "./components/settings/RoleManagement";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import NetworkRequestTracker from "./components/common/NetworkRequestTracker";
 import ErrorBoundary from "./components/common/ErrorBoundary";
@@ -54,6 +55,7 @@ function App() {
             <Route path="/settings" element={<Settings />} />
             <Route path="/settings/medicine-types" element={<MedicineTypes />} />
             <Route path="/settings/locations" element={<Location />} />
+            <Route path="/settings/role-management" element={<RoleManagement />} />
           </Route>
         </Routes>
       </Router>

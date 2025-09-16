@@ -494,3 +494,99 @@ export const exportMedicineDailyCostSummary = async (searchData) => {
     throw error;
   }
 };
+
+// Role management API functions
+export const getRoles = async () => {
+  try {
+    const response = await get(`${apiDomain}/api/v1/roles`);
+    console.log('Roles API response:', response);
+    return response.data || [];
+  } catch (error) {
+    console.error('Error fetching roles:', error);
+    throw error;
+  }
+};
+
+export const getRoleById = async (roleId) => {
+  try {
+    const response = await get(`${apiDomain}/api/v1/roles/${roleId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching role by ID:', error);
+    throw error;
+  }
+};
+
+export const getRolePrivileges = async (roleId) => {
+  try {
+    const response = await get(`${apiDomain}/api/v1/roles/${roleId}/privileges`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching role privileges:', error);
+    throw error;
+  }
+};
+
+export const getAllRolesWithPrivileges = async () => {
+  try {
+    const response = await get(`${apiDomain}/api/v1/roles/with-privileges`);
+    console.log('Roles with privileges API response:', response);
+    return response.data || [];
+  } catch (error) {
+    console.error('Error fetching roles with privileges:', error);
+    throw error;
+  }
+};
+
+export const getRoleWithPrivileges = async (roleId) => {
+  try {
+    const response = await get(`${apiDomain}/api/v1/roles/${roleId}/with-privileges`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching role with privileges:', error);
+    throw error;
+  }
+};
+
+export const assignPrivilegesToRole = async (roleId, privilegeIds) => {
+  try {
+    const payload = {
+      roleId: roleId,
+      privilegeIds: privilegeIds
+    };
+    const response = await post(`${apiDomain}/api/v1/roles/assign-privileges`, payload);
+    return response.data;
+  } catch (error) {
+    console.error('Error assigning privileges to role:', error);
+    throw error;
+  }
+};
+
+// Get all available privileges (this might be needed for the UI)
+export const getAllPrivileges = async () => {
+  try {
+    // If this endpoint doesn't exist, we'll extract privileges from roles
+    const response = await get(`${apiDomain}/api/v1/privileges`);
+    return response.data;
+  } catch (error) {
+    console.warn('Privileges endpoint not available, extracting from roles:', error);
+    // Fallback: extract unique privileges from roles
+    try {
+      const rolesData = await getAllRolesWithPrivileges();
+      const privilegesMap = new Map();
+      
+      rolesData.forEach(role => {
+        if (role.privileges) {
+          role.privileges.forEach(privilege => {
+            privilegesMap.set(privilege.id, privilege);
+          });
+        }
+      });
+      
+      return Array.from(privilegesMap.values());
+    } catch (fallbackError) {
+      console.error('Error in fallback privilege extraction:', fallbackError);
+      throw new Error('Unable to fetch privileges');
+    }
+  }
+};
