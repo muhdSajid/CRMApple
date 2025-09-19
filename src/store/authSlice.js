@@ -1,6 +1,25 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
+// Async thunk for fetching user role and privileges
+export const fetchUserRoleAndPrivileges = createAsyncThunk(
+  'auth/fetchUserRoleAndPrivileges',
+  async (userId, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`http://localhost:8080/api/v1/users/getRoleWithPrivileges/${userId}`, {
+        headers: {
+          'accept': 'application/json',
+        },
+      });
+
+      return response.data;
+    } catch (error) {
+      const message = error.response?.data?.message || error.message || 'Failed to fetch role and privileges';
+      return rejectWithValue(message);
+    }
+  }
+);
+
 // Async thunk for login
 export const loginUser = createAsyncThunk(
   'auth/loginUser',
@@ -47,6 +66,7 @@ export const logoutUser = createAsyncThunk(
   async () => {
     localStorage.removeItem('userToken');
     localStorage.removeItem('userInfo');
+    localStorage.removeItem('userRole');
     return null;
   }
 );
@@ -68,12 +88,39 @@ const getUserFromStorage = () => {
         // Token expired, clean up
         localStorage.removeItem('userToken');
         localStorage.removeItem('userInfo');
+        localStorage.removeItem('userRole');
       }
     }
     return null;
   } catch {
     localStorage.removeItem('userToken');
     localStorage.removeItem('userInfo');
+    localStorage.removeItem('userRole');
+    return null;
+  }
+};
+
+// Get role from localStorage
+const getRoleFromStorage = () => {
+  try {
+    const userRole = localStorage.getItem('userRole');
+    const userToken = localStorage.getItem('userToken');
+    
+    if (userRole && userToken) {
+      const tokenData = JSON.parse(userToken);
+      const expiry = Date.parse(tokenData.expiration);
+      
+      // Check if token is expired
+      if (expiry > Date.now()) {
+        return JSON.parse(userRole);
+      } else {
+        // Token expired, clean up
+        localStorage.removeItem('userRole');
+      }
+    }
+    return null;
+  } catch {
+    localStorage.removeItem('userRole');
     return null;
   }
 };
@@ -85,6 +132,10 @@ const initialState = {
   isError: false,
   message: '',
   isAuthenticated: !!getUserFromStorage(),
+  role: getRoleFromStorage(),
+  privileges: getRoleFromStorage()?.privileges || [],
+  isRoleLoading: false,
+  roleError: null,
 };
 
 const authSlice = createSlice({
@@ -100,11 +151,17 @@ const authSlice = createSlice({
     clearError: (state) => {
       state.isError = false;
       state.message = '';
+      state.roleError = null;
     },
     checkAuthStatus: (state) => {
       const user = getUserFromStorage();
       state.user = user;
       state.isAuthenticated = !!user;
+    },
+    clearRole: (state) => {
+      state.role = null;
+      state.privileges = [];
+      state.roleError = null;
     },
   },
   extraReducers: (builder) => {
@@ -132,10 +189,29 @@ const authSlice = createSlice({
         state.user = null;
         state.isAuthenticated = false;
         state.isSuccess = false;
+        state.role = null;
+        state.privileges = [];
+        state.roleError = null;
         state.message = 'Logged out successfully';
+      })
+      .addCase(fetchUserRoleAndPrivileges.pending, (state) => {
+        state.isRoleLoading = true;
+        state.roleError = null;
+      })
+      .addCase(fetchUserRoleAndPrivileges.fulfilled, (state, action) => {
+        state.isRoleLoading = false;
+        state.role = action.payload;
+        state.privileges = action.payload.privileges || [];
+        
+        // Store role and privileges in localStorage for persistence
+        localStorage.setItem('userRole', JSON.stringify(action.payload));
+      })
+      .addCase(fetchUserRoleAndPrivileges.rejected, (state, action) => {
+        state.isRoleLoading = false;
+        state.roleError = action.payload;
       });
   },
 });
 
-export const { reset, clearError, checkAuthStatus } = authSlice.actions;
+export const { reset, clearError, checkAuthStatus, clearRole } = authSlice.actions;
 export default authSlice.reducer;

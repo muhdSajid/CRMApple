@@ -96,4 +96,71 @@ export const isAuthenticated = () => {
   return !!token;
 };
 
+// Get user role and privileges from localStorage
+export const getUserRole = () => {
+  try {
+    const userRole = JSON.parse(localStorage.getItem('userRole')) || null;
+    const userToken = getUserToken();
+    
+    // If token is expired or doesn't exist, return null
+    if (!userToken) {
+      localStorage.removeItem('userRole');
+      return null;
+    }
+    
+    return userRole;
+  } catch (error) {
+    console.error('Error getting user role:', error);
+    localStorage.removeItem('userRole');
+    return null;
+  }
+};
+
+// Get user privileges from localStorage
+export const getUserPrivileges = () => {
+  const userRole = getUserRole();
+  return userRole?.privileges || [];
+};
+
+// Check if user has a specific privilege
+export const hasPrivilege = (privilegeName) => {
+  const privileges = getUserPrivileges();
+  
+  // Check for exact match first
+  const hasExactMatch = privileges.some(privilege => privilege.privilegeName === privilegeName);
+  if (hasExactMatch) return true;
+
+  // Check for super admin privilege (*)
+  const hasSuperAdmin = privileges.some(privilege => privilege.privilegeName === '*');
+  if (hasSuperAdmin) return true;
+
+  // Check for wildcard privileges
+  const privilegeParts = privilegeName.split('.');
+  
+  // Check for category wildcards (e.g., user.* covers user.create, user.read, etc.)
+  for (let i = privilegeParts.length - 1; i > 0; i--) {
+    const wildcardPattern = privilegeParts.slice(0, i).join('.') + '.*';
+    const hasWildcard = privileges.some(privilege => privilege.privilegeName === wildcardPattern);
+    if (hasWildcard) return true;
+  }
+
+  return false;
+};
+
+// Check if user has any of the specified privileges
+export const hasAnyPrivilege = (privilegeNames) => {
+  if (!Array.isArray(privilegeNames)) {
+    return hasPrivilege(privilegeNames);
+  }
+  return privilegeNames.some(privilegeName => hasPrivilege(privilegeName));
+};
+
+// Check if user has all of the specified privileges
+export const hasAllPrivileges = (privilegeNames) => {
+  if (!Array.isArray(privilegeNames)) {
+    return hasPrivilege(privilegeNames);
+  }
+  return privilegeNames.every(privilegeName => hasPrivilege(privilegeName));
+};
+
 

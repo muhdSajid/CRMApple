@@ -4,7 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { Label, Button } from "flowbite-react";
 import { HiEye, HiEyeOff } from "react-icons/hi";
 import { toast } from "react-toastify";
-import { loginUser, reset, clearError } from "../../store/authSlice";
+import { loginUser, reset, clearError, fetchUserRoleAndPrivileges } from "../../store/authSlice";
+import { getUserId } from "../../service/authService";
 
 const LoginPage = () => {
   const [loginData, setLoginData] = useState({
@@ -16,7 +17,7 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { user, isLoading, isError, isSuccess, isAuthenticated, message } = useSelector(
+  const { user, isLoading, isError, isSuccess, isAuthenticated, message, isRoleLoading } = useSelector(
     (state) => state.auth
   );
 
@@ -34,8 +35,28 @@ const LoginPage = () => {
 
     if (isSuccess && user) {
       toast.success("Login successful!");
-      navigate("/");
-      dispatch(reset());
+      
+      // Fetch user role and privileges after successful login
+      const userId = getUserId();
+      if (userId) {
+        dispatch(fetchUserRoleAndPrivileges(userId))
+          .unwrap()
+          .then(() => {
+            navigate("/");
+            dispatch(reset());
+          })
+          .catch((error) => {
+            console.error("Failed to fetch role and privileges:", error);
+            // Still navigate to dashboard even if role fetch fails
+            navigate("/");
+            dispatch(reset());
+          });
+      } else {
+        // If we can't get user ID, still navigate but log the issue
+        console.error("Unable to get user ID for role fetching");
+        navigate("/");
+        dispatch(reset());
+      }
     }
   }, [user, isError, isSuccess, isAuthenticated, message, navigate, dispatch]);
 
@@ -77,7 +98,7 @@ const LoginPage = () => {
               required
               value={loginData.email}
               onChange={handleChange}
-              disabled={isLoading}
+              disabled={isLoading || isRoleLoading}
               className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
             />
           </div>
@@ -92,7 +113,7 @@ const LoginPage = () => {
                 onChange={handleChange}
                 placeholder="••••••••"
                 required
-                disabled={isLoading}
+                disabled={isLoading || isRoleLoading}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
               />
               <button
@@ -100,7 +121,7 @@ const LoginPage = () => {
                 onClick={() => setShowPassword((prev) => !prev)}
                 className="absolute inset-y-0 right-3 flex items-center text-gray-500"
                 tabIndex={-1}
-                disabled={isLoading}
+                disabled={isLoading || isRoleLoading}
               >
                 {showPassword ? <HiEyeOff size={20} /> : <HiEye size={20} />}
               </button>
@@ -110,11 +131,11 @@ const LoginPage = () => {
           <Button 
             type="submit" 
             className="w-full mt-2" 
-            disabled={isLoading}
-            isProcessing={isLoading}
+            disabled={isLoading || isRoleLoading}
+            isProcessing={isLoading || isRoleLoading}
             processingSpinner={<div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>}
           >
-            {isLoading ? "Signing In..." : "Sign In"}
+            {isLoading ? "Signing In..." : isRoleLoading ? "Loading permissions..." : "Sign In"}
           </Button>
         </form>
       </div>
