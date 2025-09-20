@@ -61,7 +61,7 @@ export const addUser = createAsyncThunk(
   'users/addUser',
   async (userData, { rejectWithValue }) => {
     try {
-      const response = await api.post('/v1/users/add', userData);
+      const response = await api.post('/auth/add', userData);
       return response.data;
     } catch (error) {
       const message = error.response?.data?.message || error.message || 'Failed to add user';
@@ -129,6 +129,7 @@ const initialState = {
   isError: false,
   isSuccess: false,
   message: '',
+  temporaryPassword: null,
 };
 
 const usersSlice = createSlice({
@@ -140,6 +141,7 @@ const usersSlice = createSlice({
       state.isSuccess = false;
       state.isError = false;
       state.message = '';
+      state.temporaryPassword = null;
     },
     clearError: (state) => {
       state.isError = false;
@@ -186,12 +188,15 @@ const usersSlice = createSlice({
         state.isError = false;
         state.message = '';
       })
-      .addCase(addUser.fulfilled, (state) => {
+      .addCase(addUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
         // Don't automatically add to the users array to avoid N/A display
         // Instead, let the user refresh or refetch to see the updated list
         state.message = 'User added successfully';
+        console.log('Add user response:', action.payload);
+        state.temporaryPassword = action.payload.temporaryPassword;
+        console.log('Temporary password set:', state.temporaryPassword);
       })
       .addCase(addUser.rejected, (state, action) => {
         state.isLoading = false;
