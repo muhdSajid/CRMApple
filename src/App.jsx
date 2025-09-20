@@ -20,9 +20,10 @@ import MedicineTypes from "./components/settings/MedicineTypes";
 import Location from "./components/settings/Location";
 import RoleManagement from "./components/settings/RoleManagement";
 import ProtectedRoute from "./components/common/ProtectedRoute";
-import NetworkRequestTracker from "./components/common/NetworkRequestTracker";
+import ProtectedRouteWithPrivileges from "./components/common/ProtectedRouteWithPrivileges";
 import ErrorBoundary from "./components/common/ErrorBoundary";
 import { checkAuthStatus } from "./store/authSlice";
+import { PRIVILEGES } from "./constants/constants";
 // Import manual token setup utility (available in console as window.setupManualToken)
 import "./utils/manualTokenSetup";
 
@@ -37,25 +38,79 @@ function App() {
   return (
     <ErrorBoundary>
       <Router>
-        <NetworkRequestTracker />
         <ToastContainer position="top-right" autoClose={"5000"} theme="colored" />
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-            <Route index element={<Dashboard />} />
-            <Route path="/stock" element={<MedicineStock />} />
-            <Route path="/cost" element={<Costing />} />
-            <Route path="/distribution" element={<Distribution />} />
+            {/* Dashboard - requires dashboard view privilege */}
+            <Route index element={
+              <ProtectedRouteWithPrivileges privileges={[PRIVILEGES.DASHBOARD_VIEW]}>
+                <Dashboard />
+              </ProtectedRouteWithPrivileges>
+            } />
+            
+            {/* Medicine Stock - requires medicine stock view privileges */}
+            <Route path="/stock" element={
+              <ProtectedRouteWithPrivileges privileges={[PRIVILEGES.MEDICINE_STOCK_VIEW]}>
+                <MedicineStock />
+              </ProtectedRouteWithPrivileges>
+            } />
+            
+            {/* Costing - requires report costing privileges */}
+            <Route path="/cost" element={
+              <ProtectedRouteWithPrivileges privileges={[PRIVILEGES.REPORT_COSTING]}>
+                <Costing />
+              </ProtectedRouteWithPrivileges>
+            } />
+            
+            {/* Distribution - requires distribution view privileges */}
+            <Route path="/distribution" element={
+              <ProtectedRouteWithPrivileges privileges={[PRIVILEGES.DISTRIBUTION_VIEW]}>
+                <Distribution />
+              </ProtectedRouteWithPrivileges>
+            } />
+            
+            {/* User Management - requires user read privileges */}
+            <Route path="/usermanagment" element={
+              <ProtectedRouteWithPrivileges privileges={[PRIVILEGES.USER_READ]}>
+                <UserManagement />
+              </ProtectedRouteWithPrivileges>
+            } />
+            
+            {/* Settings - requires settings view privileges */}
+            <Route path="/settings" element={
+              <ProtectedRouteWithPrivileges privileges={[PRIVILEGES.SETTINGS_VIEW]}>
+                <Settings />
+              </ProtectedRouteWithPrivileges>
+            } />
+            
+            {/* Medicine Types - requires medicine settings management */}
+            <Route path="/settings/medicine-types" element={
+              <ProtectedRouteWithPrivileges privileges={[PRIVILEGES.MEDICINE_TYPE_MANAGE]}>
+                <MedicineTypes />
+              </ProtectedRouteWithPrivileges>
+            } />
+            
+            {/* Location Management - requires location management */}
+            <Route path="/settings/locations" element={
+              <ProtectedRouteWithPrivileges privileges={[PRIVILEGES.LOCATION_MANAGE]}>
+                <Location />
+              </ProtectedRouteWithPrivileges>
+            } />
+            
+            {/* Role Management - requires role management privileges */}
+            <Route path="/settings/role-management" element={
+              <ProtectedRouteWithPrivileges privileges={[PRIVILEGES.ROLE_MANAGE]}>
+                <RoleManagement />
+              </ProtectedRouteWithPrivileges>
+            } />
+            
+            {/* General authenticated routes without specific privilege requirements */}
             <Route path="/helpcenter" element={<HelpCenter />} />
             <Route path="/faq" element={<FaqPage />} />
             <Route path="/userguide" element={<UserGuide />} />
-            <Route path="/usermanagment" element={<UserManagement />} />
             <Route path="/change-password" element={<ChangePassword />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/settings/medicine-types" element={<MedicineTypes />} />
-            <Route path="/settings/locations" element={<Location />} />
-            <Route path="/settings/role-management" element={<RoleManagement />} />
           </Route>
         </Routes>
       </Router>

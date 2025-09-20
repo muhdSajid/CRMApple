@@ -10,6 +10,8 @@ import { TbMessageQuestion } from "react-icons/tb";
 import { BiSolidCalendarPlus } from "react-icons/bi";
 import { IoSettingsOutline } from "react-icons/io5";
 import { FaMedkit, FaChevronDown, FaChevronRight, FaMapMarkerAlt, FaUserShield, FaUsers } from "react-icons/fa";
+import PrivilegeGuard from "../components/common/PrivilegeGuard";
+import { PRIVILEGE_GROUPS } from "../constants/constants";
 
 const Sidebar = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -31,99 +33,127 @@ const Sidebar = () => {
           </a>
         </div>
         <ul className="space-y-1 font-medium pt-5 font-serif">
-          <li>
-            <Link
-              to="/stock"
-              className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
-            >
-              <LuNotebookPen className="text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900" />
-              <span className="ms-3">Medicine Stock</span>
-            </Link>
-          </li>
-          <li>
-            <Link
-              to="/"
-              className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
-            >
-              <MdDashboard className="text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900" />
-              <span className="flex-1 ms-3 whitespace-nowrap">Dashboard</span>
-            </Link>
-          </li>
-          <li>
-            <Link
-              to="/distribution"
-              className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
-            >
-              <BiSolidCalendarPlus className="text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900" />
-              <span className="flex-1 ms-3 whitespace-nowrap">
-                Distribution
-              </span>
-            </Link>
-          </li>
-          <li>
-            <Link
-              to="/cost"
-              className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
-            >
-              <MdCurrencyRupee className="text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900" />
-              <span className="flex-1 ms-3 whitespace-nowrap">Costing</span>
-            </Link>
-          </li>
-          <li>
-            <button
-              onClick={() => setIsSettingsOpen(!isSettingsOpen)}
-              className="flex items-center w-full p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
-            >
-              <IoSettingsOutline className="text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900" />
-              <span className="flex-1 ms-3 text-left whitespace-nowrap">Settings</span>
-              {isSettingsOpen ? (
-                <FaChevronDown className="text-gray-500" />
-              ) : (
-                <FaChevronRight className="text-gray-500" />
+          <PrivilegeGuard privileges={PRIVILEGE_GROUPS.MEDICINE_STOCK_ACCESS}>
+            <li>
+              <Link
+                to="/stock"
+                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
+              >
+                <LuNotebookPen className="text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900" />
+                <span className="ms-3">Medicine Stock</span>
+              </Link>
+            </li>
+          </PrivilegeGuard>
+          
+          <PrivilegeGuard privileges={PRIVILEGE_GROUPS.DASHBOARD_ACCESS}>
+            <li>
+              <Link
+                to="/"
+                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
+              >
+                <MdDashboard className="text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900" />
+                <span className="flex-1 ms-3 whitespace-nowrap">Dashboard</span>
+              </Link>
+            </li>
+          </PrivilegeGuard>
+          
+          <PrivilegeGuard privileges={PRIVILEGE_GROUPS.DISTRIBUTION_ACCESS}>
+            <li>
+              <Link
+                to="/distribution"
+                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
+              >
+                <BiSolidCalendarPlus className="text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900" />
+                <span className="flex-1 ms-3 whitespace-nowrap">
+                  Distribution
+                </span>
+              </Link>
+            </li>
+          </PrivilegeGuard>
+          
+          <PrivilegeGuard privileges={PRIVILEGE_GROUPS.COSTING_ACCESS}>
+            <li>
+              <Link
+                to="/cost"
+                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
+              >
+                <MdCurrencyRupee className="text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900" />
+                <span className="flex-1 ms-3 whitespace-nowrap">Costing</span>
+              </Link>
+            </li>
+          </PrivilegeGuard>
+          
+          <PrivilegeGuard privileges={PRIVILEGE_GROUPS.SETTINGS_ACCESS}>
+            <li>
+              <button
+                onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+                className="flex items-center w-full p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
+              >
+                <IoSettingsOutline className="text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900" />
+                <span className="flex-1 ms-3 text-left whitespace-nowrap">Settings</span>
+                {isSettingsOpen ? (
+                  <FaChevronDown className="text-gray-500" />
+                ) : (
+                  <FaChevronRight className="text-gray-500" />
+                )}
+              </button>
+              {isSettingsOpen && (
+                <ul className="pl-8 mt-2 space-y-1">
+                  <PrivilegeGuard privileges={PRIVILEGE_GROUPS.USER_MANAGEMENT_ACCESS}>
+                    <li>
+                      <Link
+                        to="/usermanagment"
+                        className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
+                      >
+                        <FaUsers className="text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900" />
+                        <span className="ms-3">User Management</span>
+                      </Link>
+                    </li>
+                  </PrivilegeGuard>
+                  
+                  <PrivilegeGuard privileges={PRIVILEGE_GROUPS.MEDICINE_TYPES_ACCESS}>
+                    <li>
+                      <Link
+                        to="/settings/medicine-types"
+                        className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
+                      >
+                        <FaMedkit className="text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900" />
+                        <span className="ms-3">Medicine Types</span>
+                      </Link>
+                    </li>
+                  </PrivilegeGuard>
+                  
+                  <PrivilegeGuard privileges={PRIVILEGE_GROUPS.LOCATIONS_ACCESS}>
+                    <li>
+                      <Link
+                        to="/settings/locations"
+                        className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
+                      >
+                        <FaMapMarkerAlt className="text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900" />
+                        <span className="ms-3">Locations</span>
+                      </Link>
+                    </li>
+                  </PrivilegeGuard>
+                  
+                  <PrivilegeGuard privileges={PRIVILEGE_GROUPS.ROLE_MANAGEMENT_ACCESS}>
+                    <li>
+                      <Link
+                        to="/settings/role-management"
+                        className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
+                      >
+                        <FaUserShield className="text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900" />
+                        <span className="ms-3">Role Management</span>
+                      </Link>
+                    </li>
+                  </PrivilegeGuard>
+                </ul>
               )}
-            </button>
-            {isSettingsOpen && (
-              <ul className="pl-8 mt-2 space-y-1">
-                <li>
-                  <Link
-                    to="/usermanagment"
-                    className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
-                  >
-                    <FaUsers className="text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900" />
-                    <span className="ms-3">User Management</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/settings/medicine-types"
-                    className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
-                  >
-                    <FaMedkit className="text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900" />
-                    <span className="ms-3">Medicine Types</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/settings/locations"
-                    className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
-                  >
-                    <FaMapMarkerAlt className="text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900" />
-                    <span className="ms-3">Locations</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/settings/role-management"
-                    className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
-                  >
-                    <FaUserShield className="text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900" />
-                    <span className="ms-3">Role Management</span>
-                  </Link>
-                </li>
-              </ul>
-            )}
-          </li>
+            </li>
+          </PrivilegeGuard>
+          
           <hr className="w-48 h-px mx-auto my-4 bg-gray-300 border-0 rounded-sm md:my-10 dark:bg-gray-700"></hr>
+          
+          {/* User Guide, FAQ, and Help Center - typically accessible to all users */}
           <li>
             <Link
               to="/userguide"

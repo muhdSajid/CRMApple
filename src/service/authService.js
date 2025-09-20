@@ -47,18 +47,19 @@ export const getUserInfo = () => {
 export const getUserId = () => {
   const userToken = getUserToken();
   if (!userToken || !userToken.token) {
+    console.log('❌ getUserId: No valid token found');
     return null;
   }
 
   // First try to get user ID from stored userInfo (from authentication response)
   const userInfo = getUserInfo();
-  if (userInfo && userInfo.id) {
-    return userInfo.id;
-  }
   
-  // Fallback to userId field if available
-  if (userInfo && userInfo.userId) {
-    return userInfo.userId;
+  if (userInfo) {
+    // Try different possible field names for user ID
+    if (userInfo.id) return userInfo.id;
+    if (userInfo.userId) return userInfo.userId;
+    if (userInfo.user_id) return userInfo.user_id;
+    if (userInfo.sub) return userInfo.sub; // JWT subject
   }
 
   // If not available in userInfo, decode JWT token as last resort
@@ -66,10 +67,40 @@ export const getUserId = () => {
   if (decodedToken) {
     // JWT typically uses 'sub' field for subject (user identifier)
     // Try different possible fields where user ID might be stored
-    return decodedToken.userId || decodedToken.sub || decodedToken.id || decodedToken.email;
+    const tokenUserId = decodedToken.userId || 
+           decodedToken.user_id ||
+           decodedToken.sub || 
+           decodedToken.id || 
+           decodedToken.email;
+    
+    if (tokenUserId) {
+      return tokenUserId;
+    }
   }
 
+  console.log('❌ getUserId: Could not extract user ID from stored data or token');
   return null;
+};
+
+export const getRoleId = () => {
+  const userInfo = getUserInfo();
+  
+  // Debug logging
+  if (typeof window !== 'undefined' && window.location.search.includes('debug=true')) {
+    console.log('getRoleId - userInfo:', userInfo);
+  }
+  
+  if (!userInfo) {
+    return null;
+  }
+
+  // Try different possible field names for role ID
+  return userInfo.roleId || 
+         userInfo.role_id || 
+         userInfo.role?.id || 
+         userInfo.roles?.[0]?.id ||
+         userInfo.userRole?.id ||
+         userInfo.user_role?.id;
 };
 
 export const getUserFullName = () => {
@@ -119,7 +150,18 @@ export const getUserRole = () => {
 // Get user privileges from localStorage
 export const getUserPrivileges = () => {
   const userRole = getUserRole();
-  return userRole?.privileges || [];
+  const privileges = userRole?.privileges || [];
+  
+  // Debug logging for troubleshooting
+  if (typeof window !== 'undefined' && window.location.search.includes('debug=true')) {
+    console.log('getUserPrivileges():', {
+      userRole,
+      privileges,
+      privilegeNames: privileges.map(p => p?.privilegeName).filter(Boolean)
+    });
+  }
+  
+  return privileges;
 };
 
 // Check if user has a specific privilege

@@ -3,6 +3,7 @@
  */
 
 import { getUserRole, getUserPrivileges } from '../service/authService';
+import { PRIVILEGES, PRIVILEGE_GROUPS } from '../constants/constants';
 
 /**
  * Check if the current user has a specific privilege
@@ -13,12 +14,27 @@ import { getUserRole, getUserPrivileges } from '../service/authService';
 export const hasPrivilege = (privilegeName) => {
   const privileges = getUserPrivileges();
   
+  // Safety check
+  if (!privileges || !Array.isArray(privileges)) {
+    console.warn('getUserPrivileges() returned invalid data:', privileges);
+    return false;
+  }
+  
+  if (!privilegeName || typeof privilegeName !== 'string') {
+    console.warn('Invalid privilegeName provided to hasPrivilege:', privilegeName);
+    return false;
+  }
+  
   // Check for exact match first
-  const hasExactMatch = privileges.some(privilege => privilege.privilegeName === privilegeName);
+  const hasExactMatch = privileges.some(privilege => 
+    privilege && privilege.privilegeName === privilegeName
+  );
   if (hasExactMatch) return true;
 
   // Check for super admin privilege (*)
-  const hasSuperAdmin = privileges.some(privilege => privilege.privilegeName === '*');
+  const hasSuperAdmin = privileges.some(privilege => 
+    privilege && privilege.privilegeName === '*'
+  );
   if (hasSuperAdmin) return true;
 
   // Check for wildcard privileges
@@ -27,7 +43,9 @@ export const hasPrivilege = (privilegeName) => {
   // Check for category wildcards (e.g., user.* covers user.create, user.read, etc.)
   for (let i = privilegeParts.length - 1; i > 0; i--) {
     const wildcardPattern = privilegeParts.slice(0, i).join('.') + '.*';
-    const hasWildcard = privileges.some(privilege => privilege.privilegeName === wildcardPattern);
+    const hasWildcard = privileges.some(privilege => 
+      privilege && privilege.privilegeName === wildcardPattern
+    );
     if (hasWildcard) return true;
   }
 
@@ -121,112 +139,6 @@ export const getUserPrivilegeNames = () => {
  */
 export const isAdmin = () => {
   return hasRole('ROLE_ADMIN');
-};
-
-/**
- * System privilege constants matching the actual backend privileges
- * These correspond to the exact privilege names returned by the API
- */
-export const PRIVILEGES = {
-  // User Management Privileges
-  USER_CREATE: 'user.create',
-  USER_READ: 'user.read',
-  USER_UPDATE: 'user.update',
-  USER_DELETE: 'user.delete',
-  USER_ALL: 'user.*',
-
-  // Medicine Stock Privileges
-  MEDICINE_STOCK_VIEW: 'medicine.stock.view',
-  MEDICINE_STOCK_DETAILS: 'medicine.stock.details',
-  MEDICINE_STOCK_CREATE: 'medicine.stock.create',
-  MEDICINE_STOCK_UPDATE: 'medicine.stock.update',
-  MEDICINE_STOCK_BATCH_ADD: 'medicine.stock.batch.add',
-  MEDICINE_STOCK_BATCH_EDIT: 'medicine.stock.batch.edit',
-  MEDICINE_STOCK_BATCH_DELETE: 'medicine.stock.batch.delete',
-  MEDICINE_STOCK_ALL: 'medicine.stock.*',
-
-  // Dashboard Privileges
-  DASHBOARD_VIEW: 'dashboard.view',
-  DASHBOARD_ALL: 'dashboard.*',
-
-  // Distribution Privileges
-  MEDICINE_DISTRIBUTION_VIEW: 'medicine.distribution.view',
-  MEDICINE_DISTRIBUTION_DETAILS: 'medicine.distribution.details',
-  MEDICINE_DISTRIBUTION_CREATE: 'medicine.distribution.create',
-  MEDICINE_DISTRIBUTION_CENTER_ADD: 'medicine.distribution.center.add',
-  MEDICINE_DISTRIBUTION_PATIENT_ADD: 'medicine.distribution.patient.add',
-  MEDICINE_DISTRIBUTION_ALL: 'medicine.distribution.*',
-
-  // Report Privileges
-  REPORT_COSTING: 'Report.costing',
-  REPORT_ALL: 'Report.*',
-
-  // Settings Privileges
-  SETTINGS_MEDICINE_ALL: 'settings.medicince.*',
-  SETTINGS_LOCATION_ALL: 'settings.location.*',
-  SETTINGS_ALL: 'settings.*',
-
-  // Super Admin Privilege
-  ALL: '*',
-};
-
-/**
- * Privilege groups for easier management
- */
-export const PRIVILEGE_GROUPS = {
-  // User Management
-  USER_MANAGEMENT: [
-    PRIVILEGES.USER_CREATE,
-    PRIVILEGES.USER_READ,
-    PRIVILEGES.USER_UPDATE,
-    PRIVILEGES.USER_DELETE,
-    PRIVILEGES.USER_ALL
-  ],
-
-  // Medicine Stock Management
-  MEDICINE_STOCK: [
-    PRIVILEGES.MEDICINE_STOCK_VIEW,
-    PRIVILEGES.MEDICINE_STOCK_DETAILS,
-    PRIVILEGES.MEDICINE_STOCK_CREATE,
-    PRIVILEGES.MEDICINE_STOCK_UPDATE,
-    PRIVILEGES.MEDICINE_STOCK_ALL
-  ],
-
-  // Medicine Stock Batch Operations
-  MEDICINE_BATCH: [
-    PRIVILEGES.MEDICINE_STOCK_BATCH_ADD,
-    PRIVILEGES.MEDICINE_STOCK_BATCH_EDIT,
-    PRIVILEGES.MEDICINE_STOCK_BATCH_DELETE
-  ],
-
-  // Dashboard Access
-  DASHBOARD: [
-    PRIVILEGES.DASHBOARD_VIEW,
-    PRIVILEGES.DASHBOARD_ALL
-  ],
-
-  // Distribution Management
-  DISTRIBUTION: [
-    PRIVILEGES.MEDICINE_DISTRIBUTION_VIEW,
-    PRIVILEGES.MEDICINE_DISTRIBUTION_DETAILS,
-    PRIVILEGES.MEDICINE_DISTRIBUTION_CREATE,
-    PRIVILEGES.MEDICINE_DISTRIBUTION_CENTER_ADD,
-    PRIVILEGES.MEDICINE_DISTRIBUTION_PATIENT_ADD,
-    PRIVILEGES.MEDICINE_DISTRIBUTION_ALL
-  ],
-
-  // Reporting
-  REPORTS: [
-    PRIVILEGES.REPORT_COSTING,
-    PRIVILEGES.REPORT_ALL
-  ],
-
-  // Settings Management
-  SETTINGS: [
-    PRIVILEGES.SETTINGS_MEDICINE_ALL,
-    PRIVILEGES.SETTINGS_LOCATION_ALL,
-    PRIVILEGES.SETTINGS_ALL
-  ]
 };
 
 /**

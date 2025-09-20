@@ -1,21 +1,62 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import api from '../service/api';
 import axios from 'axios';
 
 // Async thunk for fetching user role and privileges
 export const fetchUserRoleAndPrivileges = createAsyncThunk(
   'auth/fetchUserRoleAndPrivileges',
-  async (userId, { rejectWithValue }) => {
+  async ({ userId, token }, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`http://localhost:8080/api/v1/users/getRoleWithPrivileges/${userId}`, {
+      console.log('=== PRIVILEGE API CALL DEBUG ===');
+      console.log('UserId:', userId);
+      console.log('Token preview:', token ? token.substring(0, 30) + '...' : 'NO TOKEN');
+      console.log('Full token length:', token ? token.length : 0);
+      
+      // Use the same API instance but with explicit token override
+      // The api instance will handle CORS and other configurations properly
+      const response = await api.get(`/v1/users/getRoleWithPrivileges/${userId}`, {
         headers: {
-          'accept': 'application/json',
-        },
+          'Authorization': `Bearer ${token}`, // Override with the new token
+        }
       });
 
+      console.log('✅ API Success - Response:', response.data);
+      console.log('Response status:', response.status);
       return response.data;
     } catch (error) {
-      const message = error.response?.data?.message || error.message || 'Failed to fetch role and privileges';
-      return rejectWithValue(message);
+      console.error('❌ API Call Failed:', error);
+      
+      // More specific error handling for axios
+      if (error.response) {
+        const status = error.response.status;
+        const data = error.response.data;
+        
+        console.error('Response status:', status);
+        console.error('Response data:', data);
+        console.error('Response headers:', error.response.headers);
+        
+        if (status === 401) {
+          console.error('🔒 Authentication failed - token might be invalid or expired');
+          console.error('Token used:', token ? token.substring(0, 50) + '...' : 'NO TOKEN');
+          return rejectWithValue('Authentication failed. Please login again.');
+        } else if (status === 403) {
+          console.error('🚫 Authorization failed - insufficient permissions');
+          return rejectWithValue('Access denied. Insufficient permissions.');
+        } else if (status === 404) {
+          console.error('👤 User not found');
+          return rejectWithValue('User not found.');
+        } else {
+          console.error('🔥 API Error:', data);
+          return rejectWithValue(data?.message || `API Error: ${status}`);
+        }
+      } else if (error.request) {
+        console.error('🌐 Network error - no response received');
+        console.error('Request details:', error.request);
+        return rejectWithValue('Network error. Please check your connection.');
+      } else {
+        console.error('⚙️ Request setup error:', error.message);
+        return rejectWithValue('Failed to fetch role and privileges.');
+      }
     }
   }
 );
@@ -37,6 +78,7 @@ export const loginUser = createAsyncThunk(
       // Store token securely in localStorage
       const userData = response.data;
       console.log('Login response data:', userData);
+      console.log('Login response keys:', Object.keys(userData));
       
       // Check for different token field names
       const token = userData.token || userData.accessToken || userData.access_token || userData.authToken;
@@ -167,11 +209,13 @@ const authSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(loginUser.pending, (state) => {
+        console.log('🔄 loginUser.pending');
         state.isLoading = true;
         state.isError = false;
         state.message = '';
       })
       .addCase(loginUser.fulfilled, (state, action) => {
+        console.log('✅ loginUser.fulfilled:', action.payload);
         state.isLoading = false;
         state.isSuccess = true;
         state.isAuthenticated = true;
@@ -179,6 +223,7 @@ const authSlice = createSlice({
         state.message = 'Login successful';
       })
       .addCase(loginUser.rejected, (state, action) => {
+        console.log('❌ loginUser.rejected:', action.payload);
         state.isLoading = false;
         state.isError = true;
         state.isAuthenticated = false;
@@ -195,18 +240,22 @@ const authSlice = createSlice({
         state.message = 'Logged out successfully';
       })
       .addCase(fetchUserRoleAndPrivileges.pending, (state) => {
+        console.log('🔄 fetchUserRoleAndPrivileges.pending');
         state.isRoleLoading = true;
         state.roleError = null;
       })
       .addCase(fetchUserRoleAndPrivileges.fulfilled, (state, action) => {
+        console.log('✅ fetchUserRoleAndPrivileges.fulfilled:', action.payload);
         state.isRoleLoading = false;
         state.role = action.payload;
         state.privileges = action.payload.privileges || [];
         
         // Store role and privileges in localStorage for persistence
         localStorage.setItem('userRole', JSON.stringify(action.payload));
+        console.log('✅ Stored userRole in localStorage');
       })
       .addCase(fetchUserRoleAndPrivileges.rejected, (state, action) => {
+        console.log('❌ fetchUserRoleAndPrivileges.rejected:', action.payload);
         state.isRoleLoading = false;
         state.roleError = action.payload;
       });

@@ -17,8 +17,9 @@ import PaginationComponant from "../common/Pagination";
 import ViewStock from "./ViewStock";
 import { AddMedicineModal } from "./AddMedicineModal";
 import { EditMedicineModal } from "./EditMedicineModal";
+import PrivilegeGuard from "../common/PrivilegeGuard";
 import { get } from "../../service/apiService";
-import { apiDomain } from "../../constants/constants";
+import { apiDomain, PRIVILEGES } from "../../constants/constants";
 import PageWrapper from "../common/PageWrapper";
 
 const MedicineStock = () => {
@@ -448,14 +449,16 @@ const MedicineStock = () => {
           </div>
 
           <div className="flex gap-2">
-            <Button
-              color="blue"
-              size="sm"
-              className="text-xs px-2 py-1 h-8 bg-sky-800 hover:bg-sky-900"
-              onClick={() => setIsModalOpen(true)}
-            >
-              <FaPlus className="mr-2" /> Add Medicine
-            </Button>
+            <PrivilegeGuard privileges={[PRIVILEGES.MEDICINE_STOCK_CREATE, PRIVILEGES.MEDICINE_STOCK_ALL, PRIVILEGES.ALL]}>
+              <Button
+                color="blue"
+                size="sm"
+                className="text-xs px-2 py-1 h-8 bg-sky-800 hover:bg-sky-900"
+                onClick={() => setIsModalOpen(true)}
+              >
+                <FaPlus className="mr-2" /> Add Medicine
+              </Button>
+            </PrivilegeGuard>
             <div className="relative">
               <button
                 ref={filterButtonRef}
@@ -653,38 +656,42 @@ const MedicineStock = () => {
                             </button>
                           </Tooltip>
                           */}
-                          <Tooltip content="Edit Medicine">
-                            <button 
-                              onClick={() => {
-                                setEditingMedicineId(item.medicineId);
-                                setIsEditModalOpen(true);
-                              }} 
-                              className="group relative flex items-center justify-center w-8 h-8 text-yellow-600 hover:text-white bg-yellow-50 hover:bg-yellow-600 border border-yellow-200 hover:border-yellow-600 rounded-lg transition-all duration-200"
-                            >
-                              <MdEdit className="text-lg" />
-                            </button>
-                          </Tooltip>
-                          <Tooltip content="View All Batches">
-                            <button 
-                              onClick={() => {
-                                console.log('Setting selectedMedicineId to:', item.medicineId);
-                                console.log('Current item data:', item);
-                                console.log('Stock threshold from item:', item.stockThreshold);
-                                
-                                // Set medicine ID and medicine data, then open modal
-                                setSelectedMedicineId(item.medicineId);
-                                setSelectedMedicineData({
-                                  medicineName: item.medicineName,
-                                  medicineTypeName: item.medicineTypeName,
-                                  stockThreshold: item.stockThreshold
-                                });
-                                setIsOpen(true);
-                              }} 
-                              className="group relative flex items-center justify-center w-8 h-8 text-green-600 hover:text-white bg-green-50 hover:bg-green-600 border border-green-200 hover:border-green-600 rounded-lg transition-all duration-200"
-                            >
-                              <HiViewList className="text-lg" />
-                            </button>
-                          </Tooltip>
+                          <PrivilegeGuard privileges={[PRIVILEGES.MEDICINE_STOCK_UPDATE, PRIVILEGES.MEDICINE_STOCK_ALL, PRIVILEGES.ALL]}>
+                            <Tooltip content="Edit Medicine">
+                              <button 
+                                onClick={() => {
+                                  setEditingMedicineId(item.medicineId);
+                                  setIsEditModalOpen(true);
+                                }} 
+                                className="group relative flex items-center justify-center w-8 h-8 text-yellow-600 hover:text-white bg-yellow-50 hover:bg-yellow-600 border border-yellow-200 hover:border-yellow-600 rounded-lg transition-all duration-200"
+                              >
+                                <MdEdit className="text-lg" />
+                              </button>
+                            </Tooltip>
+                          </PrivilegeGuard>
+                          <PrivilegeGuard privileges={[PRIVILEGES.MEDICINE_STOCK_VIEW, PRIVILEGES.MEDICINE_STOCK_DETAILS, PRIVILEGES.MEDICINE_STOCK_ALL, PRIVILEGES.ALL]}>
+                            <Tooltip content="View All Batches">
+                              <button 
+                                onClick={() => {
+                                  console.log('Setting selectedMedicineId to:', item.medicineId);
+                                  console.log('Current item data:', item);
+                                  console.log('Stock threshold from item:', item.stockThreshold);
+                                  
+                                  // Set medicine ID and medicine data, then open modal
+                                  setSelectedMedicineId(item.medicineId);
+                                  setSelectedMedicineData({
+                                    medicineName: item.medicineName,
+                                    medicineTypeName: item.medicineTypeName,
+                                    stockThreshold: item.stockThreshold
+                                  });
+                                  setIsOpen(true);
+                                }} 
+                                className="group relative flex items-center justify-center w-8 h-8 text-green-600 hover:text-white bg-green-50 hover:bg-green-600 border border-green-200 hover:border-green-600 rounded-lg transition-all duration-200"
+                              >
+                                <HiViewList className="text-lg" />
+                              </button>
+                            </Tooltip>
+                          </PrivilegeGuard>
                         </div>
                       </TableCell>
                     </TableRow>

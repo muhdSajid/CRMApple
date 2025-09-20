@@ -16,7 +16,9 @@ import {
   Spinner,
 } from "flowbite-react";
 import { fetchUsers, addUser, fetchRoles, reset, clearError, updateUserComplete } from "../../store/usersSlice";
+import PrivilegeGuard from "../common/PrivilegeGuard";
 import PageWrapper from "../common/PageWrapper";
+import { PRIVILEGES } from "../../constants/constants";
 
 const UserManagement = () => {
   const [showModal, setShowModal] = useState(false);
@@ -425,23 +427,26 @@ const UserManagement = () => {
   };
 
   return (
-    <PageWrapper isLoading={!initialLoadComplete && isLoading}>
-      <div className="page-container p-6 mx-auto">
-        <div className="bg-white rounded-xl p-16 shadow ">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold">User Management</h2>
-            <Button
-              size="sm"
-              onClick={() => setShowModal(true)}
-              disabled={isLoading}
-              className="flex items-center gap-2 text-white bg-[#2D506B] border hover:bg-sky-900 font-medium rounded-lg text-sm px-4 py-2.5"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              Add User
-            </Button>
-          </div>
+    <PrivilegeGuard privileges={[PRIVILEGES.USER_READ, PRIVILEGES.USER_ALL, PRIVILEGES.ALL]}>
+      <PageWrapper isLoading={!initialLoadComplete && isLoading}>
+        <div className="page-container p-6 mx-auto">
+          <div className="bg-white rounded-xl p-16 shadow ">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold">User Management</h2>
+              <PrivilegeGuard privileges={[PRIVILEGES.USER_CREATE, PRIVILEGES.USER_ALL, PRIVILEGES.ALL]}>
+                <Button
+                  size="sm"
+                  onClick={() => setShowModal(true)}
+                  disabled={isLoading}
+                  className="flex items-center gap-2 text-white bg-[#2D506B] border hover:bg-sky-900 font-medium rounded-lg text-sm px-4 py-2.5"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Add User
+                </Button>
+              </PrivilegeGuard>
+            </div>
 
         {/* Search Bar */}
         <div className="mb-4">
@@ -929,6 +934,7 @@ const UserManagement = () => {
       )}
       </div>
     </PageWrapper>
+    </PrivilegeGuard>
   );
 };
 

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { FaMedkit, FaMapMarkerAlt, FaUserShield, FaUsers } from 'react-icons/fa';
 import PrivilegeGuard from '../common/PrivilegeGuard';
 import { usePrivileges } from '../../hooks/usePrivileges';
-import { PRIVILEGES } from '../../utils/privilegeUtils';
+import { PRIVILEGES } from '../../constants/constants';
 
 const Settings = () => {
   const { roleDisplayName, isRoleLoaded } = usePrivileges();
@@ -21,7 +21,7 @@ const Settings = () => {
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <PrivilegeGuard 
-          privileges={[PRIVILEGES.USER_READ, PRIVILEGES.USER_ALL]} 
+          privileges={[PRIVILEGES.USER_READ]} 
           fallback={
             <div className="block p-6 bg-gray-50 border border-gray-200 rounded-lg opacity-50">
               <div className="flex items-center mb-2">
@@ -53,7 +53,7 @@ const Settings = () => {
         </PrivilegeGuard>
 
         <PrivilegeGuard 
-          privileges={[PRIVILEGES.SETTINGS_MEDICINE_ALL, PRIVILEGES.SETTINGS_ALL]}
+          privileges={[PRIVILEGES.MEDICINE_TYPE_MANAGE]}
           fallback={
             <div className="block p-6 bg-gray-50 border border-gray-200 rounded-lg opacity-50">
               <div className="flex items-center mb-2">
@@ -85,7 +85,7 @@ const Settings = () => {
         </PrivilegeGuard>
 
         <PrivilegeGuard 
-          privileges={[PRIVILEGES.SETTINGS_LOCATION_ALL, PRIVILEGES.SETTINGS_ALL]}
+          privileges={[PRIVILEGES.LOCATION_MANAGE]}
           fallback={
             <div className="block p-6 bg-gray-50 border border-gray-200 rounded-lg opacity-50">
               <div className="flex items-center mb-2">
@@ -117,7 +117,7 @@ const Settings = () => {
         </PrivilegeGuard>
 
         <PrivilegeGuard 
-          roles="ROLE_ADMIN"
+          privileges={[PRIVILEGES.ROLE_MANAGE]}
           fallback={
             <div className="block p-6 bg-gray-50 border border-gray-200 rounded-lg opacity-50">
               <div className="flex items-center mb-2">
@@ -127,7 +127,7 @@ const Settings = () => {
                 </h5>
               </div>
               <p className="font-normal text-gray-400">
-                Access restricted - admin role required.
+                Access restricted - requires role management privileges.
               </p>
             </div>
           }

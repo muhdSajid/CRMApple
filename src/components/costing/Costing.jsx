@@ -4,7 +4,9 @@ import { Button, Datepicker, Label, Table, TableBody, TableCell, TableHead, Tabl
 import GenerateReportRadio from "./GenerateReportRadio";
 import SelectLocationMultiple from "./SelectLocationMultiple";
 import SelectMedicineCategoryDropdown from "./SelectMedicineCategoryDropdown";
+import PrivilegeGuard from "../common/PrivilegeGuard";
 import { getMedicineDailyCostSummary, exportMedicineDailyCostSummary } from "../../service/apiService";
+import { PRIVILEGES } from "../../constants/constants";
 
 export const Costing = () => {
   const [costingData, setCostingDataState] = useState({
@@ -156,11 +158,12 @@ export const Costing = () => {
   };
 
   return (
-    <div className="mt-10">
-      <div className="p-6 bg-white rounded-lg shadow-md max-w-4xl mx-auto">
-        <h2 className="text-xl font-bold mb-4 border-b pb-2">
-          Cost Report Generator
-        </h2>
+    <PrivilegeGuard privileges={[PRIVILEGES.REPORT_COSTING, PRIVILEGES.REPORT_ALL, PRIVILEGES.ALL]}>
+      <div className="mt-10">
+        <div className="p-6 bg-white rounded-lg shadow-md max-w-4xl mx-auto">
+          <h2 className="text-xl font-bold mb-4 border-b pb-2">
+            Cost Report Generator
+          </h2>
 
         <form className="space-y-6">
                     <GenerateReportRadio
@@ -330,5 +333,6 @@ export const Costing = () => {
         )}
       </div>
     </div>
+    </PrivilegeGuard>
   );
 };
