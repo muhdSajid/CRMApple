@@ -2,20 +2,44 @@ import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { fetchDonationReport, reset, clearError } from "../../store/donationSlice";
+import { getLast12MonthsOptions, getCurrentMonthYear } from "../../utils/dateUtils";
 
 const DonationReport = () => {
   const [hasInitialized, setHasInitialized] = useState(false);
+  const [selectedMonthYear, setSelectedMonthYear] = useState('');
   const dispatch = useDispatch();
   const { data, total, isLoading, isError, isSuccess, message } = useSelector((state) => state.donation);
 
-  // Fetch data on component mount
+  // Get month options for the last 12 months
+  const monthOptions = getLast12MonthsOptions();
+  const currentMonthYear = getCurrentMonthYear();
+
+  // Initialize with current month selected
   useEffect(() => {
     if (!hasInitialized) {
-      console.log('Fetching donation report data - first call only');
-      dispatch(fetchDonationReport());
+      const currentValue = `${currentMonthYear.month}-${currentMonthYear.year}`;
+      setSelectedMonthYear(currentValue);
+      
+      console.log('Fetching donation report data - loading current month data');
+      dispatch(fetchDonationReport({
+        month: currentMonthYear.month,
+        year: currentMonthYear.year
+      }));
       setHasInitialized(true);
     }
-  }, [dispatch, hasInitialized]);
+  }, [dispatch, hasInitialized, currentMonthYear.month, currentMonthYear.year]);
+
+  // Handle month/year selection change
+  const handleMonthYearChange = (e) => {
+    const value = e.target.value;
+    setSelectedMonthYear(value);
+    
+    // Parse month and year from selection
+    const [month, year] = value.split('-').map(Number);
+    
+    console.log('Fetching donation report with params:', { month, year });
+    dispatch(fetchDonationReport({ month, year }));
+  };
 
   // Handle error and success states
   useEffect(() => {
@@ -77,11 +101,20 @@ const DonationReport = () => {
         <div className="flex justify-between items-start mb-4">
           <div className="flex items-baseline gap-2">
             <h2 className="text-3xl font-bold">₹0</h2>
-            <p className="text-sm text-gray-500">received this month</p>
+            <p className="text-sm text-gray-500">
+              received in {monthOptions.find(opt => opt.value === selectedMonthYear)?.displayName || 'selected period'}
+            </p>
           </div>
-          <select className="border border-gray-300 rounded-md px-3 py-1.5 text-sm">
-            <option>This Month</option>
-            <option>Last Month</option>
+          <select 
+            className="border border-gray-300 rounded-md px-3 py-1.5 text-sm"
+            value={selectedMonthYear}
+            onChange={handleMonthYearChange}
+          >
+            {monthOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.displayName}
+              </option>
+            ))}
           </select>
         </div>
         
@@ -101,11 +134,20 @@ const DonationReport = () => {
       <div className="flex justify-between items-start">
         <div className="flex items-baseline gap-2">
           <h2 className="text-3xl font-bold">₹{displayTotal.toLocaleString()}</h2>
-          <p className="text-sm text-gray-500">received this month</p>
+          <p className="text-sm text-gray-500">
+            received in {monthOptions.find(opt => opt.value === selectedMonthYear)?.displayName || 'selected period'}
+          </p>
         </div>
-        <select className="border border-gray-300 rounded-md px-3 py-1.5 text-sm">
-          <option>This Month</option>
-          <option>Last Month</option>
+        <select 
+          className="border border-gray-300 rounded-md px-3 py-1.5 text-sm"
+          value={selectedMonthYear}
+          onChange={handleMonthYearChange}
+        >
+          {monthOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.displayName}
+            </option>
+          ))}
         </select>
       </div>
 

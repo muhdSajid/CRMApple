@@ -4,16 +4,30 @@ import api from '../service/api';
 // Async thunk to fetch donation report data
 export const fetchDonationReport = createAsyncThunk(
   'donation/fetchDonationReport',
-  async (_, { rejectWithValue, getState }) => {
+  async (params = {}, { rejectWithValue, getState }) => {
     try {
       const state = getState();
       const isAuthenticated = state.auth.isAuthenticated;
       
+      // Extract parameters with defaults
+      const { month, year } = params;
+      
       console.log('=== FETCH DONATION REPORT DEBUG ===');
       console.log('Is authenticated:', isAuthenticated);
-      console.log('Making API call to: /v1/donation-report');
+      console.log('Parameters:', { month, year });
       
-      const response = await api.get('/v1/donation-report');
+      let apiUrl;
+      if (month && year) {
+        // Use new API endpoint for specific month/year
+        apiUrl = `/v1/donation-report/${month}/${year}`;
+        console.log('Making API call to:', apiUrl);
+      } else {
+        // Use existing API endpoint for general report
+        apiUrl = '/v1/donation-report';
+        console.log('Making API call to:', apiUrl);
+      }
+      
+      const response = await api.get(apiUrl);
       console.log('Donation report fetched successfully:', response.data);
       console.log('Response data type:', typeof response.data);
       console.log('Response data is array:', Array.isArray(response.data));
