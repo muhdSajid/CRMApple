@@ -138,17 +138,24 @@ const DonationReport = () => {
             received in {monthOptions.find(opt => opt.value === selectedMonthYear)?.displayName || 'selected period'}
           </p>
         </div>
-        <select 
-          className="border border-gray-300 rounded-md px-3 py-1.5 text-sm"
-          value={selectedMonthYear}
-          onChange={handleMonthYearChange}
-        >
-          {monthOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.displayName}
-            </option>
-          ))}
-        </select>
+        <div className="relative">
+          <select 
+            className="appearance-none bg-white border border-gray-300 hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-lg px-4 py-2.5 pr-10 text-sm font-medium text-gray-700 transition-all duration-200 ease-in-out shadow-sm hover:shadow-md cursor-pointer"
+            value={selectedMonthYear}
+            onChange={handleMonthYearChange}
+          >
+            {monthOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.displayName}
+              </option>
+            ))}
+          </select>
+          <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+            <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+        </div>
       </div>
 
       {/* Progress bar */}
