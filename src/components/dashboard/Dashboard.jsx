@@ -12,6 +12,7 @@ import { PRIVILEGES } from "../../constants/constants";
 const Dashboard = () => {
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [selectedLocationId, setSelectedLocationId] = useState(null);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [isComponentMounted, setIsComponentMounted] = useState(false);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
@@ -129,15 +130,21 @@ const Dashboard = () => {
 
             <div className="flex items-center justify-end gap-2 mb-4">
               {/* <FilterPopover /> */}
-              <select className="border border-gray-300 rounded-md px-3 py-1.5 text-sm">
-                <option>This Year</option>
-                <option>Last Year</option>
+              <select 
+                className="border border-gray-300 rounded-md px-3 py-1.5 text-sm"
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+              >
+                <option value={new Date().getFullYear()}>{new Date().getFullYear()}</option>
+                <option value={new Date().getFullYear() - 1}>{new Date().getFullYear() - 1}</option>
+                <option value={new Date().getFullYear() - 2}>{new Date().getFullYear() - 2}</option>
               </select>
             </div>
 
             <ExpensesReport 
               selectedLocationId={selectedLocationId} 
               selectedLocation={selectedLocation} 
+              selectedYear={selectedYear}
             />
           </div>
         </div>

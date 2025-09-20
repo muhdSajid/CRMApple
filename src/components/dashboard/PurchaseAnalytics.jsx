@@ -9,10 +9,17 @@ const PurchaseAnalytics = ({ selectedLocationId, selectedLocation }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [tooltipData, setTooltipData] = useState(null);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const svgRef = useRef();
   const wrapperRef = useRef();
   const height = 160;
   const margin = { top: 10, right: 10, bottom: 30, left: 50 }; // Increased left margin for larger labels
+
+  // Generate year options (current year and last 2 years)
+  const getYearOptions = useCallback(() => {
+    const currentYear = new Date().getFullYear();
+    return [currentYear, currentYear - 1, currentYear - 2];
+  }, []);
 
   // Fallback data in case API fails
   const getFallbackData = useCallback(() => [
@@ -67,8 +74,8 @@ const PurchaseAnalytics = ({ selectedLocationId, selectedLocation }) => {
         // Use selectedLocationId if available, otherwise default to location ID 1
         const locationId = selectedLocationId || 1;
         
-        // API endpoint for location analytics monthly with dynamic location ID
-        const url = `${apiDomain}/api/v1/location-analytics/monthly/${locationId}`;
+        // API endpoint for location analytics monthly with dynamic location ID and year
+        const url = `${apiDomain}/api/v1/location-analytics/monthly/${locationId}/${selectedYear}`;
         
         const response = await get(url);
         
@@ -87,7 +94,7 @@ const PurchaseAnalytics = ({ selectedLocationId, selectedLocation }) => {
     };
 
     fetchPurchaseAnalytics();
-  }, [selectedLocationId, transformApiDataToChartData, getFallbackData]); // Add all dependencies
+  }, [selectedLocationId, selectedYear, transformApiDataToChartData, getFallbackData]); // Add all dependencies
 
   // Chart rendering useEffect
   useEffect(() => {
@@ -244,9 +251,14 @@ const PurchaseAnalytics = ({ selectedLocationId, selectedLocation }) => {
         </div>
         <div className="flex items-center justify-end gap-2">
           {/* <FilterPopover /> */}
-          <select className="border border-gray-300 rounded-md px-3 py-1.5 text-sm">
-            <option>This Year</option>
-            <option>Last Year</option>
+          <select 
+            className="border border-gray-300 rounded-md px-3 py-1.5 text-sm"
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(Number(e.target.value))}
+          >
+            {getYearOptions().map(year => (
+              <option key={year} value={year}>{year}</option>
+            ))}
           </select>
         </div>
       </div>

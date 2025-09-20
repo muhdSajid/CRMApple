@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
 import * as d3 from "d3";
 import { get, getMedicineDailyCostSummary } from "../../service/apiService";
 
-const ExpensesReport = ({ selectedLocationId }) => {
+const ExpensesReport = ({ selectedLocationId, selectedYear }) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -45,14 +45,15 @@ const ExpensesReport = ({ selectedLocationId }) => {
         
         // Use selectedLocationId if available, otherwise default to location ID 1
         const locationId = selectedLocationId || 1;
+        const year = selectedYear || new Date().getFullYear();
         
-        // Try primary expense report API first
+        // Try primary expense report API first with year parameter
         let apiData = null;
         let apiWorked = false;
         
         try {
           // Use proxy path (without domain) - this will be handled by Vite proxy
-          const url = `/api/v1/expense-report/location/${locationId}`;
+          const url = `/api/v1/expense-report/location/${locationId}/${year}`;
           const response = await get(url);
           apiData = response.data;
           apiWorked = true;
@@ -131,7 +132,7 @@ const ExpensesReport = ({ selectedLocationId }) => {
     };
 
     fetchExpenseReport();
-  }, [selectedLocationId, transformApiDataToChartData]);
+  }, [selectedLocationId, selectedYear, transformApiDataToChartData]);
 
   // Calculate total from current data
   const total = data.reduce((acc, cur) => acc + cur.value, 0);

@@ -43,7 +43,6 @@ const LoginPage = () => {
     if (isSuccess && user && !privilegesFetched && !isRoleLoading) {
       console.log('=== LOGIN SUCCESS DETECTED ===');
       console.log('Login success detected, user data:', user);
-      toast.success("Login successful!");
       
       // Mark that we're about to fetch privileges to prevent multiple calls
       setPrivilegesFetched(true);
