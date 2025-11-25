@@ -1,6 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../service/api';
-import axios from 'axios';
 
 // Async thunk for fetching user role and privileges
 export const fetchUserRoleAndPrivileges = createAsyncThunk(
@@ -66,13 +65,11 @@ export const loginUser = createAsyncThunk(
   'auth/loginUser',
   async (credentials, { rejectWithValue }) => {
     try {
-      const response = await axios.post('http://localhost:8081/api/auth/signin', {
+      // Use the api instance which routes through Nginx proxy in production
+      // In production: /api/auth/signin -> Nginx -> http://localhost:8081/api/auth/signin
+      const response = await api.post('/auth/signin', {
         email: credentials.email,
         password: credentials.password,
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
       });
 
       // Store token securely in localStorage

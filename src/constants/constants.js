@@ -1,8 +1,9 @@
 const isProduction = import.meta.env.MODE === "production";
 
-// Use proxy path for development, full URL for production
-export const apiDomain = isProduction ? "" : "";
-export const authApiDomain = "http://localhost:8081";
+// Use relative paths (proxied through Nginx in production)
+// In development, vite.config.js handles the proxy
+export const apiDomain = "";  // Uses /api baseURL from axios instance
+export const authApiDomain = isProduction ? "/api" : "/api";  // Routes through Nginx proxy in production
 
 /**
  * System Privileges - Complete list of all privileges in the system
