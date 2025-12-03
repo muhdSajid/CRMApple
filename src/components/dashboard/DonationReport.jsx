@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { toast } from "react-toastify";
 import { fetchDonationReport, reset, clearError } from "../../store/donationSlice";
 import { getLast12MonthsOptions, getCurrentMonthYear } from "../../utils/dateUtils";
 
@@ -42,9 +41,11 @@ const DonationReport = () => {
   };
 
   // Handle error and success states
+  // Note: Errors are silently handled - no toast notifications shown
   useEffect(() => {
     if (isError) {
-      toast.error(message);
+      // Suppress error toast notification - errors are handled gracefully in UI
+      // toast.error(message);
       dispatch(clearError());
     }
 

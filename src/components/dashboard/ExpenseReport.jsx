@@ -5,7 +5,6 @@ import { get, getMedicineDailyCostSummary } from "../../service/apiService";
 const ExpensesReport = ({ selectedLocationId, selectedYear }) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [hasRealData, setHasRealData] = useState(false);
   const svgRef = useRef();
 
@@ -41,7 +40,6 @@ const ExpensesReport = ({ selectedLocationId, selectedYear }) => {
     const fetchExpenseReport = async () => {
       try {
         setLoading(true);
-        setError(null);
         
         // Use selectedLocationId if available, otherwise default to location ID 1
         const locationId = selectedLocationId || 1;
@@ -57,7 +55,7 @@ const ExpensesReport = ({ selectedLocationId, selectedYear }) => {
           const response = await get(url);
           apiData = response.data;
           apiWorked = true;
-        } catch (primaryErr) {
+        } catch {
           
           // Try alternative cost summary API if available
           try {
@@ -99,10 +97,7 @@ const ExpensesReport = ({ selectedLocationId, selectedYear }) => {
           
           // If neither API worked, we'll use fallback data
           if (!apiWorked) {
-            // Only set error if it's an authentication or serious issue
-            if (primaryErr.response?.status === 401 || primaryErr.response?.status === 403) {
-              setError('Authentication required to fetch expense data.');
-            }
+            // Silently handle errors - no notifications shown
           }
         }
         
@@ -111,19 +106,15 @@ const ExpensesReport = ({ selectedLocationId, selectedYear }) => {
           const transformedData = transformApiDataToChartData(apiData);
           setData(transformedData);
           setHasRealData(true);
-          setError(null); // Clear any previous errors
         } else {
-          // No real data available
+          // No real data available - suppress error notification
           setData([]);
           setHasRealData(false);
-          setError(null); // Don't show error message for no data
         }
         
-      } catch (err) {
-        // Only show error for serious issues, not for normal API failures
-        if (err.response?.status === 401 || err.response?.status === 403) {
-          setError('Authentication required to access expense data.');
-        }
+      } catch {
+        // Suppress all error notifications - errors handled gracefully in UI
+        // No toast notifications or error alerts shown
         setData([]);
         setHasRealData(false);
       } finally {
@@ -187,12 +178,6 @@ const ExpensesReport = ({ selectedLocationId, selectedYear }) => {
   if (!hasRealData) {
     return (
       <div className="max-w-md mx-auto text-center pt-6">
-        {error && (
-          <div className="mb-4 p-2 bg-yellow-50 border border-yellow-200 rounded-md">
-            <p className="text-xs text-yellow-700">{error}</p>
-          </div>
-        )}
-        
         <div className="flex flex-col items-center justify-center py-8 bg-gray-50 rounded-lg">
           <div className="text-4xl text-gray-300 mb-2">📊</div>
           <h3 className="text-lg font-medium text-gray-600 mb-1">No Expense Data Available</h3>
@@ -211,12 +196,6 @@ const ExpensesReport = ({ selectedLocationId, selectedYear }) => {
 
   return (
     <div className="max-w-md mx-auto text-center pt-6">
-      {error && (
-        <div className="mb-4 p-2 bg-yellow-50 border border-yellow-200 rounded-md">
-          <p className="text-xs text-yellow-700">{error}</p>
-        </div>
-      )}
-      
       <svg ref={svgRef} className="mx-auto"></svg>
       <div className="-mt-12 text-center">
         <p className="text-sm text-gray-500">Total Expenses</p>
