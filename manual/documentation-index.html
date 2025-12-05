@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation Index - Inventory Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+        }
+        
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .nav {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .nav a {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background 0.3s;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        
+        .nav a:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        h2 {
+            color: #667eea;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            font-size: 1.6em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        h3 {
+            color: #333;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        
+        p {
+            margin-bottom: 15px;
+            line-height: 1.7;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: #f9f9f9;
+        }
+        
+        th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        tr:hover {
+            background: #f0f0f0;
+        }
+        
+        .doc-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .doc-link:hover {
+            text-decoration: underline;
+        }
+        
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        
+        .highlight {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        
+        .footer {
+            background: #f8f9fa;
+            padding: 20px 40px;
+            text-align: center;
+            color: #666;
+            border-top: 1px solid #ddd;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Documentation Index</h1>
+            <p>Master Index of All Documentation</p>
+            <div class="nav">
+                <a href="index.html">← Back to Index</a>
+                <a href="getting-started.html">Getting Started →</a>
+            </div>
+        </div>
+        
+        <div class="content">
+            <h2>📖 All Available Documentation</h2>
+            
+            <table>
+                <tr>
+                    <th>Document</th>
+                    <th>For</th>
+                    <th>Time</th>
+                    <th>Purpose</th>
+                </tr>
+                <tr>
+                    <td><a href="getting-started.html" class="doc-link">🚀 Getting Started Guide</a></td>
+                    <td>New Users</td>
+                    <td>5-10 min</td>
+                    <td>Quick onboarding</td>
+                </tr>
+                <tr>
+                    <td><a href="user-manual.html" class="doc-link">📘 User Manual</a></td>
+                    <td>All Users</td>
+                    <td>30-45 min</td>
+                    <td>Complete system guide</td>
+                </tr>
+                <tr>
+                    <td><a href="quick-reference.html" class="doc-link">📌 Quick Reference</a></td>
+                    <td>Daily Users</td>
+                    <td>Reference</td>
+                    <td>Quick lookup</td>
+                </tr>
+                <tr>
+                    <td><a href="admin-guide.html" class="doc-link">👨‍💼 Admin Guide</a></td>
+                    <td>Administrators</td>
+                    <td>1-2 hours</td>
+                    <td>System administration</td>
+                </tr>
+                <tr>
+                    <td><a href="documentation-index.html" class="doc-link">📚 Documentation Index</a></td>
+                    <td>All Users</td>
+                    <td>Navigation</td>
+                    <td>Find what you need</td>
+                </tr>
+                <tr>
+                    <td><a href="documentation-summary.html" class="doc-link">✅ Documentation Summary</a></td>
+                    <td>All Users</td>
+                    <td>Overview</td>
+                    <td>Generation summary</td>
+                </tr>
+            </table>
+            
+            <h2>🎯 Which Guide Should I Read?</h2>
+            
+            <h3>I'm a New User</h3>
+            <div class="info-box">
+                <strong>Start with:</strong> <a href="getting-started.html" class="doc-link">Getting Started Guide</a><br>
+                <strong>Then:</strong> <a href="user-manual.html" class="doc-link">User Manual</a> (relevant sections)<br>
+                <strong>Keep handy:</strong> <a href="quick-reference.html" class="doc-link">Quick Reference Guide</a>
+            </div>
+            
+            <h3>I Work with This System Daily</h3>
+            <div class="info-box">
+                <strong>Keep handy:</strong> <a href="quick-reference.html" class="doc-link">Quick Reference Guide</a><br>
+                <strong>Refer to:</strong> <a href="user-manual.html" class="doc-link">User Manual</a> (for details)<br>
+                <strong>Navigate:</strong> <a href="documentation-index.html" class="doc-link">Documentation Index</a> (find topics)
+            </div>
+            
+            <h3>I'm a System Administrator</h3>
+            <div class="info-box">
+                <strong>Read:</strong> <a href="admin-guide.html" class="doc-link">Administrator Guide</a><br>
+                <strong>Reference:</strong> <a href="user-manual.html" class="doc-link">User Manual</a> (user-facing features)<br>
+                <strong>Bookmark:</strong> Important sections in Admin Guide
+            </div>
+            
+            <h3>I Need Help with Specific Task</h3>
+            <div class="info-box">
+                <strong>Quick lookup (2 min):</strong> <a href="quick-reference.html" class="doc-link">Quick Reference Guide</a><br>
+                <strong>Detailed instructions:</strong> <a href="user-manual.html" class="doc-link">User Manual</a><br>
+                <strong>Find topic:</strong> Use this index or Ctrl+F to search
+            </div>
+            
+            <h2>🔍 Quick Topic Finder</h2>
+            
+            <table>
+                <tr>
+                    <th>Topic</th>
+                    <th>Getting Started</th>
+                    <th>User Manual</th>
+                    <th>Quick Ref</th>
+                    <th>Admin Guide</th>
+                </tr>
+                <tr>
+                    <td><strong>Authentication</strong></td>
+                    <td>✅ Basics</td>
+                    <td>✅ Detailed</td>
+                    <td>✅ Quick</td>
+                    <td>✅ Security</td>
+                </tr>
+                <tr>
+                    <td><strong>Dashboard</strong></td>
+                    <td>✅ Overview</td>
+                    <td>✅ Complete</td>
+                    <td>✅ Summary</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td><strong>Medicine Stock</strong></td>
+                    <td>✅ Intro</td>
+                    <td>✅ Detailed</td>
+                    <td>✅ Tasks</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td><strong>Distribution</strong></td>
+                    <td>-</td>
+                    <td>✅ Complete</td>
+                    <td>✅ Tasks</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td><strong>Costing/Reports</strong></td>
+                    <td>-</td>
+                    <td>✅ Complete</td>
+                    <td>✅ Tasks</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td><strong>User Management</strong></td>
+                    <td>-</td>
+                    <td>✅ Complete</td>
+                    <td>-</td>
+                    <td>✅ Detailed</td>
+                </tr>
+                <tr>
+                    <td><strong>System Setup</strong></td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>✅ Complete</td>
+                </tr>
+                <tr>
+                    <td><strong>Backup/Recovery</strong></td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>✅ Complete</td>
+                </tr>
+                <tr>
+                    <td><strong>Troubleshooting</strong></td>
+                    <td>✅ Basic</td>
+                    <td>✅ Detailed</td>
+                    <td>✅ Common</td>
+                    <td>✅ Advanced</td>
+                </tr>
+            </table>
+            
+            <h2>📋 Feature Coverage</h2>
+            
+            <p>The complete documentation suite covers:</p>
+            
+            <ul>
+                <li>✅ <strong>Authentication & Security</strong> - Login, passwords, session management</li>
+                <li>✅ <strong>Dashboard</strong> - Overview, widgets, reports</li>
+                <li>✅ <strong>Medicine Stock Management</strong> - Add, edit, view, batch management</li>
+                <li>✅ <strong>Distribution</strong> - By location, by patient, tracking</li>
+                <li>✅ <strong>Costing Reports</strong> - Location costs, category expenses</li>
+                <li>✅ <strong>Settings & Configuration</strong> - Medicine types, locations, roles</li>
+                <li>✅ <strong>User Management</strong> - Create, edit, disable users</li>
+                <li>✅ <strong>Role Management</strong> - Create roles, assign permissions</li>
+                <li>✅ <strong>System Administration</strong> - Setup, deployment, maintenance</li>
+                <li>✅ <strong>Database Management</strong> - Backup, restore, optimization</li>
+                <li>✅ <strong>Troubleshooting</strong> - Common issues and fixes</li>
+            </ul>
+            
+            <h2>💾 Access Information</h2>
+            
+            <table>
+                <tr>
+                    <th>Resource</th>
+                    <th>Location</th>
+                </tr>
+                <tr>
+                    <td><strong>System URL</strong></td>
+                    <td>http://27.34.245.92</td>
+                </tr>
+                <tr>
+                    <td><strong>Support Email</strong></td>
+                    <td>support@inventory.local</td>
+                </tr>
+                <tr>
+                    <td><strong>Documentation Folder</strong></td>
+                    <td>./manual/</td>
+                </tr>
+                <tr>
+                    <td><strong>Markdown Files</strong></td>
+                    <td>All .md files</td>
+                </tr>
+                <tr>
+                    <td><strong>HTML Files</strong></td>
+                    <td>All .html files</td>
+                </tr>
+            </table>
+            
+            <h2>🚀 Common Documentation Paths</h2>
+            
+            <h3>Path 1: "I'm logging in for the first time"</h3>
+            <div class="highlight">
+                <a href="getting-started.html" class="doc-link">Getting Started Guide</a> → Step 1: Your First Login
+            </div>
+            
+            <h3>Path 2: "How do I add a new medicine?"</h3>
+            <div class="highlight">
+                <a href="user-manual.html" class="doc-link">User Manual</a> → Medicine Stock Management → Adding New Medicine
+            </div>
+            
+            <h3>Path 3: "I need a quick reference"</h3>
+            <div class="highlight">
+                <a href="quick-reference.html" class="doc-link">Quick Reference Guide</a> → Medicine Stock Tasks → Add New Medicine
+            </div>
+            
+            <h3>Path 4: "I need to set up the system"</h3>
+            <div class="highlight">
+                <a href="admin-guide.html" class="doc-link">Administrator Guide</a> → Installation & Deployment
+            </div>
+            
+            <h2>📞 Support & Help</h2>
+            
+            <div class="info-box">
+                <strong>Can't find something?</strong><br>
+                • Use Ctrl+F to search this page<br>
+                • Check the Quick Topic Finder table above<br>
+                • Follow a documentation path above<br>
+                • Contact support@inventory.local
+            </div>
+            
+            <h2>✅ Documentation Statistics</h2>
+            
+            <table>
+                <tr>
+                    <th>Metric</th>
+                    <th>Value</th>
+                </tr>
+                <tr>
+                    <td>Total Documents</td>
+                    <td>6 guides + 1 index</td>
+                </tr>
+                <tr>
+                    <td>Total Content Size</td>
+                    <td>104 KB of documentation</td>
+                </tr>
+                <tr>
+                    <td>Total Lines</td>
+                    <td>2500+ lines of content</td>
+                </tr>
+                <tr>
+                    <td>Feature Coverage</td>
+                    <td>100% of system</td>
+                </tr>
+                <tr>
+                    <td>User Levels</td>
+                    <td>4 (Beginner, Regular, Admin, Manager)</td>
+                </tr>
+                <tr>
+                    <td>Step-by-Step Guides</td>
+                    <td>100+ procedures</td>
+                </tr>
+                <tr>
+                    <td>FAQ Entries</td>
+                    <td>50+ questions</td>
+                </tr>
+                <tr>
+                    <td>Troubleshooting Topics</td>
+                    <td>30+ solutions</td>
+                </tr>
+            </table>
+        </div>
+        
+        <div class="footer">
+            <p><strong>Inventory Management System - Documentation Index</strong></p>
+            <p>Version 2.0 | Generated: November 26, 2025</p>
+            <p><a href="index.html">← Back to Main Index</a></p>
+        </div>
+    </div>
+</body>
+</html>

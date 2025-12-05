@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Start Here - Inventory Management System Documentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 50px 40px;
+        }
+        
+        h2 {
+            color: #667eea;
+            margin: 30px 0 20px 0;
+            font-size: 1.6em;
+        }
+        
+        p {
+            margin-bottom: 15px;
+            line-height: 1.8;
+            font-size: 1.05em;
+        }
+        
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .button-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            text-decoration: none;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .button-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        
+        .button-card h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+        
+        .button-card p {
+            font-size: 0.95em;
+            margin: 0;
+            opacity: 0.9;
+        }
+        
+        .icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .highlight {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 5px;
+        }
+        
+        .highlight h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+        
+        .highlight p {
+            margin: 0;
+            color: #856404;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 25px 0;
+        }
+        
+        .info-card {
+            background: #f0f0f0;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .info-card h4 {
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+        
+        .info-card p {
+            margin: 0;
+            font-size: 0.95em;
+        }
+        
+        .footer {
+            background: #f8f9fa;
+            padding: 30px 40px;
+            text-align: center;
+            color: #666;
+            border-top: 1px solid #ddd;
+        }
+        
+        .footer p {
+            margin: 5px 0;
+        }
+        
+        a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        a:hover {
+            text-decoration: underline;
+        }
+        
+        ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎉 Welcome!</h1>
+            <p>Inventory Management System Documentation</p>
+        </div>
+        
+        <div class="content">
+            <h2>📚 Complete Documentation Suite Ready!</h2>
+            
+            <p>Welcome to the Inventory Management System documentation. This folder contains comprehensive guides for users of all levels - from new users to system administrators.</p>
+            
+            <div class="highlight">
+                <h3>👉 Where to Start?</h3>
+                <p>Choose your starting point based on your role and experience level:</p>
+            </div>
+            
+            <h2>🎯 Choose Your Path</h2>
+            
+            <div class="button-grid">
+                <a href="getting-started.html" class="button-card">
+                    <div class="icon">👶</div>
+                    <h3>New User?</h3>
+                    <p>Start with the Getting Started Guide (5-10 min)</p>
+                </a>
+                
+                <a href="quick-reference.html" class="button-card">
+                    <div class="icon">⚡</div>
+                    <h3>Daily User?</h3>
+                    <p>Use Quick Reference Guide (print it!)</p>
+                </a>
+                
+                <a href="user-manual.html" class="button-card">
+                    <div class="icon">📘</div>
+                    <h3>Need Details?</h3>
+                    <p>Read the complete User Manual</p>
+                </a>
+                
+                <a href="admin-guide.html" class="button-card">
+                    <div class="icon">👨‍💼</div>
+                    <h3>Administrator?</h3>
+                    <p>Check the Administrator Guide</p>
+                </a>
+            </div>
+            
+            <h2>📋 Available Documentation</h2>
+            
+            <div class="info-grid">
+                <div class="info-card">
+                    <h4>🚀 Getting Started</h4>
+                    <p>First-time user onboarding. Learn login, dashboard, and basics.</p>
+                </div>
+                
+                <div class="info-card">
+                    <h4>📘 User Manual</h4>
+                    <p>Complete system guide. All features explained in detail.</p>
+                </div>
+                
+                <div class="info-card">
+                    <h4>📌 Quick Reference</h4>
+                    <p>Print-friendly quick lookup for common tasks.</p>
+                </div>
+                
+                <div class="info-card">
+                    <h4>👨‍💼 Admin Guide</h4>
+                    <p>System setup, deployment, and maintenance guide.</p>
+                </div>
+                
+                <div class="info-card">
+                    <h4>📚 Documentation Index</h4>
+                    <p>Master index. Find what you need quickly.</p>
+                </div>
+                
+                <div class="info-card">
+                    <h4>✅ Documentation Summary</h4>
+                    <p>Generation summary and content overview.</p>
+                </div>
+            </div>
+            
+            <h2>🎯 Quick Facts</h2>
+            
+            <ul>
+                <li>✅ <strong>7 documentation files</strong> covering all topics</li>
+                <li>✅ <strong>2500+ lines</strong> of detailed content</li>
+                <li>✅ <strong>100% feature coverage</strong> of the system</li>
+                <li>✅ <strong>4 audience levels:</strong> New users, Daily users, Admins, Managers</li>
+                <li>✅ <strong>Multiple formats:</strong> Markdown (.md) and HTML (.html)</li>
+                <li>✅ <strong>Print-friendly:</strong> Quick Reference Guide optimized for printing</li>
+                <li>✅ <strong>Searchable:</strong> Use Ctrl+F to search within documents</li>
+                <li>✅ <strong>Ready to use:</strong> No setup needed!</li>
+            </ul>
+            
+            <h2>💻 System Information</h2>
+            
+            <div class="info-grid">
+                <div class="info-card">
+                    <h4>🌐 System URL</h4>
+                    <p>http://27.34.245.92</p>
+                </div>
+                
+                <div class="info-card">
+                    <h4>📧 Support Email</h4>
+                    <p>support@inventory.local</p>
+                </div>
+                
+                <div class="info-card">
+                    <h4>💾 Database</h4>
+                    <p>PostgreSQL inventory_db</p>
+                </div>
+                
+                <div class="info-card">
+                    <h4>🖥️ Backend</h4>
+                    <p>Java Spring Boot (port 8081)</p>
+                </div>
+            </div>
+            
+            <h2>🚀 What to Do Next</h2>
+            
+            <p><strong>1. Choose Your Document:</strong> Select from the button grid above based on your role</p>
+            
+            <p><strong>2. Start Reading:</strong> Each document is self-contained with clear navigation</p>
+            
+            <p><strong>3. Print Quick Reference:</strong> (Optional) Print the Quick Reference Guide to keep at your desk</p>
+            
+            <p><strong>4. Share with Team:</strong> Share relevant documents with your colleagues</p>
+            
+            <p><strong>5. Bookmark This Page:</strong> Save this index for future reference</p>
+            
+            <h2>📱 Formats Available</h2>
+            
+            <ul>
+                <li><strong>HTML Files (.html):</strong> Best for reading in web browser with navigation</li>
+                <li><strong>Markdown Files (.md):</strong> Can be edited, version controlled, and converted</li>
+                <li><strong>Print:</strong> All documents are print-friendly</li>
+                <li><strong>Digital:</strong> All documents are fully searchable (Ctrl+F)</li>
+            </ul>
+            
+            <h2>🎓 Learning Paths</h2>
+            
+            <h3>Path 1: New User (Today)</h3>
+            <ol>
+                <li>Read: <a href="getting-started.html">Getting Started Guide</a> (10 min)</li>
+                <li>Bookmark: <a href="quick-reference.html">Quick Reference Guide</a></li>
+                <li>Start using the system!</li>
+            </ol>
+            
+            <h3>Path 2: Regular User (This Week)</h3>
+            <ol>
+                <li>Review: <a href="quick-reference.html">Quick Reference Guide</a> (common tasks)</li>
+                <li>Reference: <a href="user-manual.html">User Manual</a> (as needed for details)</li>
+                <li>Navigate: <a href="documentation-index.html">Documentation Index</a> (find topics)</li>
+            </ol>
+            
+            <h3>Path 3: System Administrator (This Month)</h3>
+            <ol>
+                <li>Read: <a href="admin-guide.html">Administrator Guide</a> (thoroughly)</li>
+                <li>Reference: <a href="user-manual.html">User Manual</a> (user-facing features)</li>
+                <li>Bookmark: Important sections for future reference</li>
+            </ol>
+            
+            <h2>💡 Pro Tips</h2>
+            
+            <ul>
+                <li>💡 Use Ctrl+F to search for specific topics within any document</li>
+                <li>💡 Print the <a href="quick-reference.html">Quick Reference Guide</a> for your desk</li>
+                <li>💡 Share the <a href="getting-started.html">Getting Started Guide</a> with new users</li>
+                <li>💡 Use the <a href="documentation-index.html">Documentation Index</a> to find anything</li>
+                <li>💡 All documents are in the same folder, easily accessible</li>
+            </ul>
+            
+            <h2>✅ Questions?</h2>
+            
+            <p><strong>Can't find something?</strong> Try these:</p>
+            <ul>
+                <li>✅ Check the <a href="documentation-index.html">Documentation Index</a></li>
+                <li>✅ Use Ctrl+F to search within a document</li>
+                <li>✅ Look in the <a href="user-manual.html">User Manual FAQ</a> section</li>
+                <li>✅ Contact support: support@inventory.local</li>
+            </ul>
+            
+            <p style="margin-top: 30px; text-align: center; font-size: 1.1em;">
+                <strong>Ready to get started? Choose your guide above! 🚀</strong>
+            </p>
+        </div>
+        
+        <div class="footer">
+            <p><strong>Inventory Management System</strong></p>
+            <p>Complete Documentation Suite</p>
+            <p>Version 2.0 | Generated: November 26, 2025</p>
+            <p>All documentation files are located in this folder</p>
+        </div>
+    </div>
+</body>
+</html>

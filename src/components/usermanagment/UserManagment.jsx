@@ -15,7 +15,7 @@ import {
   Label,
   Spinner,
 } from "flowbite-react";
-import { fetchUsers, addUser, fetchRoles, reset, clearError, updateUserComplete } from "../../store/usersSlice";
+import { fetchUsers, addUser, fetchRoles, reset, clearError, updateUserComplete, resetUserPassword, fetchAllLocations, fetchUserLocations, updateUserLocations } from "../../store/usersSlice";
 import PrivilegeGuard from "../common/PrivilegeGuard";
 import PageWrapper from "../common/PageWrapper";
 import { PRIVILEGES } from "../../constants/constants";
@@ -25,6 +25,8 @@ const UserManagement = () => {
   const [showViewModal, setShowViewModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showTempPasswordModal, setShowTempPasswordModal] = useState(false);
+  const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
+  const [showLocationModal, setShowLocationModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [hasInitialized, setHasInitialized] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -44,9 +46,10 @@ const UserManagement = () => {
   });
   const [isComponentMounted, setIsComponentMounted] = useState(false);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  const [selectedLocationIds, setSelectedLocationIds] = useState([]);
 
   const dispatch = useDispatch();
-  const { users, roles, isLoading, isError, isSuccess, message, temporaryPassword } = useSelector((state) => state.users);
+  const { users, roles, locations, userLocations, isLoading, isError, isSuccess, message, temporaryPassword, resetPassword } = useSelector((state) => state.users);
 
   // Debug users and roles when they change (reduced logging)
   useEffect(() => {
@@ -93,11 +96,17 @@ const UserManagement = () => {
     if (isSuccess && message) {
       console.log('Success handling - message:', message);
       console.log('Success handling - temporaryPassword:', temporaryPassword);
+      console.log('Success handling - resetPassword:', resetPassword);
       if (message.includes('added successfully') && temporaryPassword) {
         // Show temporary password modal for user creation
         console.log('Showing temporary password modal');
         setShowTempPasswordModal(true);
         // Don't reset immediately for add user to preserve temporaryPassword
+      } else if (message.includes('Password reset successfully') && resetPassword) {
+        // Show reset password modal for password reset
+        console.log('Showing reset password modal');
+        setShowResetPasswordModal(true);
+        // Don't reset immediately to preserve resetPassword
       } else {
         // Show regular toast for other success messages
         console.log('Showing regular toast');
@@ -110,7 +119,7 @@ const UserManagement = () => {
         dispatch(fetchUsers());
       }
     }
-  }, [isError, isSuccess, message, dispatch, temporaryPassword]);
+  }, [isError, isSuccess, message, dispatch, temporaryPassword, resetPassword]);
 
   // Effect to sync editFormData when selectedUser changes (for edit modal)
   useEffect(() => {
@@ -138,6 +147,21 @@ const UserManagement = () => {
       console.log('============================');
     }
   }, [selectedUser, showEditModal, roles]);
+
+  // Effect to sync selected locations when userLocations changes
+  useEffect(() => {
+    if (showLocationModal && userLocations.length >= 0) {
+      console.log('=== SYNC LOCATION DATA EFFECT ===');
+      console.log('User locations:', userLocations);
+      
+      // Extract location IDs from userLocations
+      const locationIds = userLocations.map(ul => ul.locationId);
+      console.log('Setting selected location IDs:', locationIds);
+      
+      setSelectedLocationIds(locationIds);
+      console.log('========================');
+    }
+  }, [userLocations, showLocationModal]);
 
   const handleInputChange = (e) => {
     setFormData({
@@ -192,6 +216,65 @@ const UserManagement = () => {
   const handleCloseTempPasswordModal = () => {
     setShowTempPasswordModal(false);
     dispatch(reset());
+  };
+
+  const handleResetPassword = (user) => {
+    console.log('Reset password clicked for user:', user);
+    if (window.confirm(`Are you sure you want to reset the password for ${user.firstName} ${user.lastName}?`)) {
+      dispatch(resetUserPassword(user.id));
+    }
+  };
+
+  const handleCloseResetPasswordModal = () => {
+    setShowResetPasswordModal(false);
+    dispatch(reset());
+  };
+
+  const handleManageLocations = async (user) => {
+    console.log('Manage locations clicked for user:', user);
+    setSelectedUser(user);
+    
+    // Fetch all locations if not already loaded
+    if (locations.length === 0) {
+      await dispatch(fetchAllLocations());
+    }
+    
+    // Fetch user's current locations
+    await dispatch(fetchUserLocations(user.id));
+    
+    setShowLocationModal(true);
+  };
+
+  const handleLocationCheckboxChange = (locationId) => {
+    setSelectedLocationIds(prev => {
+      if (prev.includes(locationId)) {
+        return prev.filter(id => id !== locationId);
+      } else {
+        return [...prev, locationId];
+      }
+    });
+  };
+
+  const handleSaveLocations = () => {
+    if (!selectedUser) return;
+    
+    console.log('Saving locations for user:', selectedUser.id);
+    console.log('Selected location IDs:', selectedLocationIds);
+    
+    dispatch(updateUserLocations({
+      userId: selectedUser.id,
+      locationIds: selectedLocationIds
+    }));
+    
+    setShowLocationModal(false);
+    setSelectedUser(null);
+    setSelectedLocationIds([]);
+  };
+
+  const handleCloseLocationModal = () => {
+    setShowLocationModal(false);
+    setSelectedUser(null);
+    setSelectedLocationIds([]);
   };
 
   const handleEditSubmit = (e) => {
@@ -576,6 +659,31 @@ const UserManagement = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                       </svg>
                     </button>
+                    <PrivilegeGuard privileges={[PRIVILEGES.USER_UPDATE, PRIVILEGES.USER_ALL, PRIVILEGES.ALL]}>
+                      <button
+                        onClick={() => handleResetPassword(user)}
+                        disabled={isLoading}
+                        className="group relative flex items-center justify-center w-8 h-8 text-orange-600 hover:text-white bg-orange-50 hover:bg-orange-600 border border-orange-200 hover:border-orange-600 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Reset Password"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                        </svg>
+                      </button>
+                    </PrivilegeGuard>
+                    <PrivilegeGuard privileges={[PRIVILEGES.USER_UPDATE, PRIVILEGES.USER_ALL, PRIVILEGES.ALL]}>
+                      <button
+                        onClick={() => handleManageLocations(user)}
+                        disabled={isLoading}
+                        className="group relative flex items-center justify-center w-8 h-8 text-purple-600 hover:text-white bg-purple-50 hover:bg-purple-600 border border-purple-200 hover:border-purple-600 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Manage Locations"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                      </button>
+                    </PrivilegeGuard>
                   </TableCell>
                 </TableRow>
               ))
@@ -926,6 +1034,182 @@ const UserManagement = () => {
                   className="text-white bg-[#2D506B] border hover:bg-sky-900 font-medium rounded-lg text-sm px-5 py-2.5"
                 >
                   Close
+                </Button>
+              </div>
+            </div>
+          </ModalBody>
+        </Modal>
+      )}
+
+      {/* Reset Password Modal */}
+      {showResetPasswordModal && resetPassword && (
+        <Modal show={showResetPasswordModal} onClose={handleCloseResetPasswordModal} size="md">
+          <ModalHeader>PASSWORD RESET SUCCESSFUL</ModalHeader>
+          <ModalBody>
+            <div className="space-y-4">
+              <div className="text-center">
+                <div className="flex items-center justify-center mb-4">
+                  <div className="flex items-center justify-center w-12 h-12 bg-green-100 rounded-full">
+                    <svg className="w-6 h-6 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Password Reset Successfully!</h3>
+                <p className="text-gray-600 mb-4">A new password has been generated for this user:</p>
+              </div>
+              
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <Label className="block text-sm font-medium text-gray-700 mb-2">New Password</Label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={resetPassword}
+                    readOnly
+                    className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm font-mono select-all focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(resetPassword);
+                      toast.success('Password copied to clipboard!');
+                    }}
+                    className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    Copy
+                  </Button>
+                </div>
+              </div>
+
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm text-yellow-800">
+                      <strong>Important:</strong> Please share this new password with the user securely. 
+                      They should change it upon next login.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-center gap-2 pt-4">
+                <Button
+                  type="button"
+                  onClick={handleCloseResetPasswordModal}
+                  className="text-white bg-[#2D506B] border hover:bg-sky-900 font-medium rounded-lg text-sm px-5 py-2.5"
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
+          </ModalBody>
+        </Modal>
+      )}
+
+      {/* Location Mapping Modal */}
+      {showLocationModal && selectedUser && (
+        <Modal show={showLocationModal} onClose={handleCloseLocationModal} size="lg">
+          <ModalHeader>MANAGE LOCATIONS FOR {selectedUser.firstName} {selectedUser.lastName}</ModalHeader>
+          <ModalBody>
+            <div className="space-y-4">
+              <div className="mb-4">
+                <p className="text-sm text-gray-600">
+                  Select the locations this user should have access to:
+                </p>
+              </div>
+
+              {/* Locations List with Checkboxes */}
+              <div className="max-h-96 overflow-y-auto border border-gray-200 rounded-lg p-4">
+                {locations.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <svg className="w-12 h-12 mx-auto mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <p>No locations available</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {locations.map((location) => (
+                      <div
+                        key={location.id}
+                        className={`flex items-start p-3 border rounded-lg transition-all duration-200 cursor-pointer hover:bg-gray-50 ${
+                          selectedLocationIds.includes(location.id)
+                            ? 'border-blue-500 bg-blue-50'
+                            : 'border-gray-200'
+                        }`}
+                        onClick={() => handleLocationCheckboxChange(location.id)}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedLocationIds.includes(location.id)}
+                          onChange={() => handleLocationCheckboxChange(location.id)}
+                          className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                        <div className="ml-3 flex-1">
+                          <div className="flex items-center justify-between">
+                            <label className="font-medium text-gray-900 cursor-pointer">
+                              {location.name}
+                            </label>
+                            {location.isActive ? (
+                              <span className="inline-flex items-center px-2 py-1 text-xs font-medium text-green-800 bg-green-100 rounded-full">
+                                Active
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-800 bg-gray-100 rounded-full">
+                                Inactive
+                              </span>
+                            )}
+                          </div>
+                          {location.locationAddress && (
+                            <p className="mt-1 text-sm text-gray-500">
+                              {location.locationAddress}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Selected count */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <div className="flex items-center">
+                  <svg className="w-5 h-5 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-sm font-medium text-blue-800">
+                    {selectedLocationIds.length} location{selectedLocationIds.length !== 1 ? 's' : ''} selected
+                  </span>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex justify-end gap-2 pt-4">
+                <Button
+                  type="button"
+                  onClick={handleCloseLocationModal}
+                  disabled={isLoading}
+                  className="bg-white text-[#2D506B] hover:bg-blue-50 border border-[#2D506B] font-medium rounded-lg text-sm px-5 py-2.5 disabled:opacity-50"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleSaveLocations}
+                  disabled={isLoading}
+                  className="text-white bg-[#2D506B] border hover:bg-sky-900 font-medium rounded-lg text-sm px-5 py-2.5 disabled:opacity-50"
+                >
+                  {isLoading ? 'Saving...' : 'Save Locations'}
                 </Button>
               </div>
             </div>

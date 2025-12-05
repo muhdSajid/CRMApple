@@ -122,14 +122,88 @@ export const assignRole = createAsyncThunk(
   }
 );
 
+// Async thunk to reset user password
+export const resetUserPassword = createAsyncThunk(
+  'users/resetUserPassword',
+  async (userId, { rejectWithValue }) => {
+    try {
+      console.log('Resetting password for user:', userId);
+      const response = await api.post(`/auth/reset/${userId}`);
+      console.log('Password reset response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error resetting password:', error);
+      const message = error.response?.data?.message || error.message || 'Failed to reset password';
+      return rejectWithValue(message);
+    }
+  }
+);
+
+// Async thunk to fetch all locations
+export const fetchAllLocations = createAsyncThunk(
+  'users/fetchAllLocations',
+  async (_, { rejectWithValue }) => {
+    try {
+      console.log('Making API call to: /v1/locations');
+      const response = await api.get('/v1/locations');
+      console.log('Locations fetched successfully:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching locations:', error);
+      const message = error.response?.data?.message || error.message || 'Failed to fetch locations';
+      return rejectWithValue(message);
+    }
+  }
+);
+
+// Async thunk to fetch user locations
+export const fetchUserLocations = createAsyncThunk(
+  'users/fetchUserLocations',
+  async (userId, { rejectWithValue }) => {
+    try {
+      console.log('Making API call to: /v1/user-locations/user/' + userId);
+      const response = await api.get(`/v1/user-locations/user/${userId}`);
+      console.log('User locations fetched successfully:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching user locations:', error);
+      const message = error.response?.data?.message || error.message || 'Failed to fetch user locations';
+      return rejectWithValue(message);
+    }
+  }
+);
+
+// Async thunk to update user locations
+export const updateUserLocations = createAsyncThunk(
+  'users/updateUserLocations',
+  async ({ userId, locationIds }, { rejectWithValue }) => {
+    try {
+      console.log('Updating user locations:', { userId, locationIds });
+      const response = await api.put('/v1/user-locations', {
+        userId: userId,
+        locationIds: locationIds
+      });
+      console.log('User locations updated successfully:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating user locations:', error);
+      const message = error.response?.data?.message || error.message || 'Failed to update user locations';
+      return rejectWithValue(message);
+    }
+  }
+);
+
 const initialState = {
   users: [],
   roles: [],
+  locations: [],
+  userLocations: [],
   isLoading: false,
   isError: false,
   isSuccess: false,
   message: '',
   temporaryPassword: null,
+  resetPassword: null,
 };
 
 const usersSlice = createSlice({
@@ -142,6 +216,7 @@ const usersSlice = createSlice({
       state.isError = false;
       state.message = '';
       state.temporaryPassword = null;
+      state.resetPassword = null;
     },
     clearError: (state) => {
       state.isError = false;
@@ -251,6 +326,74 @@ const usersSlice = createSlice({
         state.message = 'Role assigned successfully';
       })
       .addCase(assignRole.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload;
+      })
+      // Reset user password
+      .addCase(resetUserPassword.pending, (state) => {
+        state.isLoading = true;
+        state.isError = false;
+        state.message = '';
+        state.resetPassword = null;
+      })
+      .addCase(resetUserPassword.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.message = action.payload.message || 'Password reset successfully';
+        state.resetPassword = action.payload.newPassword;
+        console.log('Reset password set:', state.resetPassword);
+      })
+      .addCase(resetUserPassword.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload;
+        state.resetPassword = null;
+      })
+      // Fetch all locations
+      .addCase(fetchAllLocations.pending, (state) => {
+        state.isLoading = true;
+        state.isError = false;
+        state.message = '';
+      })
+      .addCase(fetchAllLocations.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.locations = action.payload;
+      })
+      .addCase(fetchAllLocations.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload;
+      })
+      // Fetch user locations
+      .addCase(fetchUserLocations.pending, (state) => {
+        state.isLoading = true;
+        state.isError = false;
+        state.message = '';
+      })
+      .addCase(fetchUserLocations.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.userLocations = action.payload;
+      })
+      .addCase(fetchUserLocations.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload;
+      })
+      // Update user locations
+      .addCase(updateUserLocations.pending, (state) => {
+        state.isLoading = true;
+        state.isError = false;
+        state.message = '';
+      })
+      .addCase(updateUserLocations.fulfilled, (state) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.message = 'User locations updated successfully';
+      })
+      .addCase(updateUserLocations.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
         state.message = action.payload;

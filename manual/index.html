@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Management System - Documentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+        }
+        
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .doc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .doc-card {
+            background: #f8f9fa;
+            border-left: 5px solid #667eea;
+            padding: 25px;
+            border-radius: 8px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+        
+        .doc-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .doc-card h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+        
+        .doc-card .meta {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .doc-card .meta span {
+            display: inline-block;
+            margin-right: 15px;
+        }
+        
+        .doc-card p {
+            color: #555;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        
+        .doc-card ul {
+            list-style: none;
+            margin-bottom: 15px;
+        }
+        
+        .doc-card ul li {
+            color: #666;
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .doc-card ul li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .doc-button {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        
+        .doc-button:hover {
+            background: #764ba2;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-box h4 {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+        
+        .stat-box p {
+            opacity: 0.9;
+        }
+        
+        .quick-links {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        
+        .quick-links h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .quick-links a {
+            display: inline-block;
+            background: white;
+            border: 2px solid #667eea;
+            color: #667eea;
+            padding: 10px 15px;
+            margin: 5px;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .quick-links a:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        .table th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        .table td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .table tr:hover {
+            background: #f5f5f5;
+        }
+        
+        .footer {
+            background: #f8f9fa;
+            padding: 30px 40px;
+            text-align: center;
+            color: #666;
+            border-top: 1px solid #ddd;
+        }
+        
+        .footer p {
+            margin-bottom: 10px;
+        }
+        
+        .highlight {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .highlight strong {
+            color: #856404;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .doc-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .emoji {
+            font-size: 1.2em;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Inventory Management System</h1>
+            <p>Complete Documentation & User Manual Suite</p>
+        </div>
+        
+        <div class="content">
+            <!-- Statistics -->
+            <div class="section">
+                <h2><span class="emoji">📊</span>Documentation Statistics</h2>
+                <div class="stats">
+                    <div class="stat-box">
+                        <h4>7</h4>
+                        <p>Documentation Files</p>
+                    </div>
+                    <div class="stat-box">
+                        <h4>2500+</h4>
+                        <p>Lines of Content</p>
+                    </div>
+                    <div class="stat-box">
+                        <h4>100%</h4>
+                        <p>Feature Coverage</p>
+                    </div>
+                    <div class="stat-box">
+                        <h4>4</h4>
+                        <p>User Levels</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Links -->
+            <div class="section">
+                <h2><span class="emoji">⚡</span>Quick Navigation</h2>
+                <div class="quick-links">
+                    <a href="getting-started.html">🚀 Getting Started</a>
+                    <a href="user-manual.html">📘 User Manual</a>
+                    <a href="quick-reference.html">📌 Quick Reference</a>
+                    <a href="admin-guide.html">👨‍💼 Admin Guide</a>
+                    <a href="documentation-index.html">📚 Documentation Index</a>
+                    <a href="documentation-summary.html">✅ Summary</a>
+                    <a href="start-here.html">🎉 Start Here</a>
+                </div>
+            </div>
+            
+            <!-- Main Documentation -->
+            <div class="section">
+                <h2><span class="emoji">📖</span>Main Documentation</h2>
+                <div class="doc-grid">
+                    <div class="doc-card">
+                        <h3>🚀 Getting Started Guide</h3>
+                        <div class="meta">
+                            <span>👶 For: New Users</span>
+                            <span>⏱️ 5-10 min</span>
+                        </div>
+                        <p>Perfect starting point for new users. Learn how to log in, understand your role, and complete your first tasks.</p>
+                        <ul>
+                            <li>First login steps</li>
+                            <li>Password update</li>
+                            <li>Dashboard overview</li>
+                            <li>Navigation tips</li>
+                        </ul>
+                        <a href="getting-started.html" class="doc-button">Read Guide →</a>
+                    </div>
+                    
+                    <div class="doc-card">
+                        <h3>📘 User Manual</h3>
+                        <div class="meta">
+                            <span>💼 For: All Users</span>
+                            <span>⏱️ 30-45 min</span>
+                        </div>
+                        <p>Comprehensive guide to all system features, including authentication, dashboard, stock management, distribution, and reporting.</p>
+                        <ul>
+                            <li>Authentication & security</li>
+                            <li>Dashboard deep dive</li>
+                            <li>Stock management</li>
+                            <li>Distribution tracking</li>
+                            <li>Costing reports</li>
+                        </ul>
+                        <a href="user-manual.html" class="doc-button">Read Manual →</a>
+                    </div>
+                    
+                    <div class="doc-card">
+                        <h3>📌 Quick Reference Guide</h3>
+                        <div class="meta">
+                            <span>⚡ For: Daily Users</span>
+                            <span>⏱️ Reference</span>
+                        </div>
+                        <p>Quick lookup guide for common tasks. Print and keep at your desk! Includes keyboard shortcuts, common issues, and permission matrix.</p>
+                        <ul>
+                            <li>Common task quick steps</li>
+                            <li>Keyboard shortcuts</li>
+                            <li>Troubleshooting guide</li>
+                            <li>Permission matrix</li>
+                        </ul>
+                        <a href="quick-reference.html" class="doc-button">View Reference →</a>
+                    </div>
+                    
+                    <div class="doc-card">
+                        <h3>👨‍💼 Administrator Guide</h3>
+                        <div class="meta">
+                            <span>🔧 For: System Admins</span>
+                            <span>⏱️ 1-2 hours</span>
+                        </div>
+                        <p>Complete guide for system setup, deployment, database management, user administration, backup & recovery, and troubleshooting.</p>
+                        <ul>
+                            <li>System architecture</li>
+                            <li>Installation & deployment</li>
+                            <li>Database management</li>
+                            <li>Backup & recovery</li>
+                            <li>Monitoring & maintenance</li>
+                        </ul>
+                        <a href="admin-guide.html" class="doc-button">Read Guide →</a>
+                    </div>
+                    
+                    <div class="doc-card">
+                        <h3>📚 Documentation Index</h3>
+                        <div class="meta">
+                            <span>🔍 For: All Users</span>
+                            <span>⏱️ Navigation</span>
+                        </div>
+                        <p>Master index of all guides. Find what you need with quick topic finder, feature coverage matrix, and documentation paths.</p>
+                        <ul>
+                            <li>Guide descriptions</li>
+                            <li>Topic finder</li>
+                            <li>Feature coverage matrix</li>
+                            <li>Common search paths</li>
+                        </ul>
+                        <a href="documentation-index.html" class="doc-button">View Index →</a>
+                    </div>
+                    
+                    <div class="doc-card">
+                        <h3>✅ Documentation Summary</h3>
+                        <div class="meta">
+                            <span>📋 For: All Users</span>
+                            <span>⏱️ Overview</span>
+                        </div>
+                        <p>Summary of documentation generation including statistics, learning paths, and how to use the documentation effectively.</p>
+                        <ul>
+                            <li>Documentation statistics</li>
+                            <li>Learning paths</li>
+                            <li>How to use guides</li>
+                            <li>Best practices</li>
+                        </ul>
+                        <a href="documentation-summary.html" class="doc-button">View Summary →</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Getting Started Table -->
+            <div class="section">
+                <h2><span class="emoji">🎯</span>Which Guide Should I Read?</h2>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>You Are...</th>
+                            <th>Start With</th>
+                            <th>Then Read</th>
+                            <th>Keep Handy</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>New User</strong></td>
+                            <td>Getting Started Guide</td>
+                            <td>User Manual</td>
+                            <td>Quick Reference</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Regular User</strong></td>
+                            <td>Quick Reference</td>
+                            <td>User Manual</td>
+                            <td>Quick Reference</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Administrator</strong></td>
+                            <td>Admin Guide</td>
+                            <td>User Manual</td>
+                            <td>Admin Guide</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Manager</strong></td>
+                            <td>User Manual</td>
+                            <td>Quick Reference</td>
+                            <td>Admin Guide (partial)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Important Notice -->
+            <div class="section">
+                <div class="highlight">
+                    <strong>💡 Pro Tip:</strong> Start with "Getting Started Guide" if you're new, or "Quick Reference Guide" if you need quick answers. Use the Documentation Index to find specific topics.
+                </div>
+            </div>
+            
+            <!-- Support -->
+            <div class="section">
+                <h2><span class="emoji">📞</span>Support & Help</h2>
+                <div class="doc-card">
+                    <h3>Get Help</h3>
+                    <ul>
+                        <li><strong>In-App Help:</strong> Available in the Help Center menu</li>
+                        <li><strong>FAQ:</strong> Check the FAQ page in the application</li>
+                        <li><strong>Email Support:</strong> support@inventory.local</li>
+                        <li><strong>System URL:</strong> http://27.34.245.92</li>
+                        <li><strong>Documentation:</strong> All files available in this manual folder</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>Inventory Management System</strong> - Complete Documentation Suite</p>
+            <p>Version 2.0 | Generated: November 26, 2025</p>
+            <p>© 2025 All Rights Reserved</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Manual - Inventory Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+        }
+        
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.05em;
+        }
+        
+        .nav {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .nav a {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background 0.3s;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        
+        .nav a:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .content {
+            padding: 40px;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+        
+        .toc {
+            background: #f0f0f0;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        
+        .toc h3 {
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+        
+        .toc ul {
+            list-style: none;
+            margin-left: 0;
+        }
+        
+        .toc li {
+            margin-bottom: 8px;
+        }
+        
+        .toc a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        .toc a:hover {
+            text-decoration: underline;
+        }
+        
+        h2 {
+            color: #667eea;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-size: 1.6em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        h3 {
+            color: #333;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        h4 {
+            color: #555;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            font-size: 1.05em;
+        }
+        
+        p {
+            margin-bottom: 15px;
+            line-height: 1.7;
+        }
+        
+        ul, ol {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: #f9f9f9;
+            font-size: 0.95em;
+        }
+        
+        th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        tr:hover {
+            background: #f0f0f0;
+        }
+        
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #d63384;
+        }
+        
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-size: 0.95em;
+        }
+        
+        .highlight {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .highlight strong {
+            color: #856404;
+        }
+        
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        
+        .success-box {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        
+        .footer {
+            background: #f8f9fa;
+            padding: 20px 40px;
+            text-align: center;
+            color: #666;
+            border-top: 1px solid #ddd;
+            font-size: 0.9em;
+        }
+        
+        .print-button {
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background 0.3s;
+            margin-bottom: 20px;
+        }
+        
+        .print-button:hover {
+            background: #764ba2;
+        }
+        
+        @media print {
+            body { background: white; padding: 0; }
+            .container { box-shadow: none; }
+            .nav, .print-button { display: none; }
+        }
+        
+        @media (max-width: 768px) {
+            .header { padding: 20px; }
+            .header h1 { font-size: 1.5em; }
+            .content { padding: 20px; max-height: none; overflow: visible; }
+            h2 { font-size: 1.3em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📘 User Manual</h1>
+            <p>Complete Guide to Inventory Management System</p>
+            <div class="nav">
+                <a href="index.html">← Back to Index</a>
+                <a href="getting-started.html">Getting Started →</a>
+                <a href="quick-reference.html">Quick Reference →</a>
+            </div>
+        </div>
+        
+        <div class="content">
+            <button class="print-button" onclick="window.print()">🖨️ Print This Page</button>
+            
+            <div class="toc">
+                <h3>📋 Quick Navigation</h3>
+                <ul>
+                    <li><a href="#authentication">Authentication & Login</a></li>
+                    <li><a href="#dashboard">Dashboard Overview</a></li>
+                    <li><a href="#stock">Medicine Stock Management</a></li>
+                    <li><a href="#distribution">Medicine Distribution</a></li>
+                    <li><a href="#costing">Costing Reports</a></li>
+                    <li><a href="#settings">Settings & Configuration</a></li>
+                    <li><a href="#users">User & Role Management</a></li>
+                    <li><a href="#faq">FAQ & Troubleshooting</a></li>
+                </ul>
+            </div>
+            
+            <div class="highlight">
+                <strong>📌 Note:</strong> This is a comprehensive guide. For quick reference, see the <a href="quick-reference.html">Quick Reference Guide</a>.
+            </div>
+            
+            <h2 id="authentication">🔐 Authentication & Login</h2>
+            
+            <h3>System Access</h3>
+            <ul>
+                <li><strong>URL:</strong> http://27.34.245.92</li>
+                <li><strong>Browser Requirements:</strong> Chrome, Firefox, Safari, or Edge (latest versions)</li>
+                <li><strong>Internet:</strong> Required for database connectivity</li>
+            </ul>
+            
+            <h3>How to Login</h3>
+            <ol>
+                <li>Open your web browser</li>
+                <li>Go to http://27.34.245.92</li>
+                <li>Enter your email address</li>
+                <li>Enter your password</li>
+                <li>Click "Sign In"</li>
+            </ol>
+            
+            <div class="success-box">
+                <strong>✅ Success!</strong> You're logged in when redirected to the Dashboard.
+            </div>
+            
+            <h3>Password Management</h3>
+            
+            <h4>Change Your Password</h4>
+            <ol>
+                <li>Click your email/profile name (top-right corner)</li>
+                <li>Select "Change Password"</li>
+                <li>Enter current password</li>
+                <li>Enter new password
+                    <ul>
+                        <li>At least 8 characters</li>
+                        <li>One uppercase letter</li>
+                        <li>One lowercase letter</li>
+                        <li>One number</li>
+                        <li>One special character (!@#$%^&*)</li>
+                    </ul>
+                </li>
+                <li>Confirm new password</li>
+                <li>Click "Update Password"</li>
+            </ol>
+            
+            <h4>Forgot Your Password?</h4>
+            <p>Contact your system administrator. They can reset your password from the User Management section.</p>
+            
+            <h3>Session Management</h3>
+            <ul>
+                <li><strong>Session Duration:</strong> 24 hours</li>
+                <li><strong>Auto-Logout:</strong> After 24 hours of inactivity</li>
+                <li><strong>Manual Logout:</strong> Click your name → "Logout"</li>
+            </ul>
+            
+            <h2 id="dashboard">📊 Dashboard Overview</h2>
+            
+            <p>The Dashboard is your home page, showing key metrics and reports at a glance.</p>
+            
+            <h3>Dashboard Widgets</h3>
+            
+            <h4>1. Donation Report</h4>
+            <p>Shows money received by location</p>
+            <ul>
+                <li><strong>What It Shows:</strong> Total donations in ₹ by location</li>
+                <li><strong>How to Use:</strong> Select month/year, view total and breakdown</li>
+                <li><strong>Filter:</strong> Month/Year selector</li>
+                <li><strong>Display:</strong> Progress bar with location breakdown</li>
+            </ul>
+            
+            <h4>2. Purchase Analytics</h4>
+            <p>Medicine purchase data and trends</p>
+            <ul>
+                <li><strong>What It Shows:</strong> Purchase statistics and trending medicines</li>
+                <li><strong>How to Use:</strong> Select year, analyze trends</li>
+                <li><strong>Filter:</strong> Year selector</li>
+                <li><strong>Display:</strong> Charts and statistics</li>
+            </ul>
+            
+            <h4>3. Critical Stock Report</h4>
+            <p>Medicines running low on stock</p>
+            <ul>
+                <li><strong>What It Shows:</strong> Medicines below minimum quantity</li>
+                <li><strong>Color Code:</strong> Yellow (low), Red (critical)</li>
+                <li><strong>Action:</strong> Click to view details or reorder</li>
+            </ul>
+            
+            <h4>4. Expense Report</h4>
+            <p>Tracks medicine expenses by category</p>
+            <ul>
+                <li><strong>What It Shows:</strong> Expense breakdown by category</li>
+                <li><strong>Filter:</strong> Location, Year</li>
+                <li><strong>Display:</strong> Pie chart with percentages</li>
+            </ul>
+            
+            <h2 id="stock">💊 Medicine Stock Management</h2>
+            
+            <h3>Accessing Medicine Stock</h3>
+            <ol>
+                <li>Click "Medicine Stock" in the left sidebar</li>
+                <li>You'll see a list of all medicines with stock levels</li>
+            </ol>
+            
+            <h3>Understanding Stock View</h3>
+            
+            <table>
+                <tr>
+                    <th>Column</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td><strong>Medicine Name</strong></td>
+                    <td>Name of the medicine</td>
+                </tr>
+                <tr>
+                    <td><strong>Category</strong></td>
+                    <td>Medicine category (Antibiotic, Pain Relief, etc.)</td>
+                </tr>
+                <tr>
+                    <td><strong>Quantity</strong></td>
+                    <td>Current stock quantity</td>
+                </tr>
+                <tr>
+                    <td><strong>Unit</strong></td>
+                    <td>Unit of measurement (tablets, bottles, ml)</td>
+                </tr>
+                <tr>
+                    <td><strong>Minimum Level</strong></td>
+                    <td>Minimum quantity to maintain</td>
+                </tr>
+                <tr>
+                    <td><strong>Status</strong></td>
+                    <td>Stock status (In Stock, Low, Critical)</td>
+                </tr>
+            </table>
+            
+            <h3>Stock Status Colors</h3>
+            <ul>
+                <li>🟢 <strong>Green (In Stock)</strong> - Good quantity</li>
+                <li>🟡 <strong>Yellow (Low Stock)</strong> - Close to minimum</li>
+                <li>🔴 <strong>Red (Critical)</strong> - Below minimum, urgent reorder</li>
+            </ul>
+            
+            <h3>Adding New Medicine</h3>
+            <ol>
+                <li>Click "+ Add Medicine" button</li>
+                <li>Fill in the form:
+                    <ul>
+                        <li><strong>Medicine Name:</strong> e.g., "Aspirin 500mg"</li>
+                        <li><strong>Category:</strong> Select from dropdown</li>
+                        <li><strong>Quantity:</strong> Current stock amount</li>
+                        <li><strong>Unit:</strong> tablets, bottles, ml, etc.</li>
+                        <li><strong>Minimum Level:</strong> Reorder point</li>
+                        <li><strong>Manufacturer:</strong> Medicine manufacturer</li>
+                        <li><strong>Price Per Unit:</strong> Cost per unit</li>
+                    </ul>
+                </li>
+                <li>Click "Add Medicine"</li>
+            </ol>
+            
+            <h3>Managing Batches (Lots)</h3>
+            
+            <h4>What is a Batch?</h4>
+            <p>A batch is a group of medicines from the same production run, identified by a unique lot number.</p>
+            
+            <h4>Adding a Batch</h4>
+            <ol>
+                <li>Select a medicine from the list</li>
+                <li>Click "Manage Batches" or "Add Batch"</li>
+                <li>Fill batch details:
+                    <ul>
+                        <li><strong>Batch Number:</strong> Unique identifier (LOT20250001)</li>
+                        <li><strong>Expiry Date:</strong> When medicine expires</li>
+                        <li><strong>Quantity:</strong> Number of units</li>
+                        <li><strong>Manufacturing Date:</strong> When produced</li>
+                        <li><strong>Cost Price:</strong> Cost per unit</li>
+                    </ul>
+                </li>
+                <li>Click "Add Batch"</li>
+            </ol>
+            
+            <h3>Search & Filter</h3>
+            
+            <h4>Search</h4>
+            <ul>
+                <li>Type medicine name in search box</li>
+                <li>Results filter in real-time</li>
+            </ul>
+            
+            <h4>Filter</h4>
+            <ul>
+                <li><strong>By Status:</strong> All, In Stock, Low, Critical</li>
+                <li><strong>By Category:</strong> Select medicine type</li>
+                <li><strong>By Date:</strong> Date range filter</li>
+            </ul>
+            
+            <h2 id="distribution">🚚 Medicine Distribution</h2>
+            
+            <h3>Understanding Distribution</h3>
+            <p>Distribution is when medicines are sent to a location or patient.</p>
+            
+            <h3>Distribution Types</h3>
+            
+            <h4>1. By Location</h4>
+            <p>Send medicines to delivery centers</p>
+            <ul>
+                <li>Select delivery center</li>
+                <li>Add medicines and quantities</li>
+                <li>Specify received by person</li>
+                <li>Add special notes</li>
+            </ul>
+            
+            <h4>2. By Patient</h4>
+            <p>Give medicines to individual patients</p>
+            <ul>
+                <li>Search and select patient</li>
+                <li>Set urgency level (Normal, Urgent, Critical)</li>
+                <li>Add medicines with dosage</li>
+                <li>Add delivery instructions</li>
+            </ul>
+            
+            <h3>Distribution Status</h3>
+            <table>
+                <tr>
+                    <th>Status</th>
+                    <th>Meaning</th>
+                </tr>
+                <tr>
+                    <td>🟢 <strong>Pending</strong></td>
+                    <td>Ready to process</td>
+                </tr>
+                <tr>
+                    <td>🟡 <strong>In Transit</strong></td>
+                    <td>On the way</td>
+                </tr>
+                <tr>
+                    <td>🔵 <strong>Delivered</strong></td>
+                    <td>Successfully received</td>
+                </tr>
+                <tr>
+                    <td>⚫ <strong>Cancelled</strong></td>
+                    <td>Not going</td>
+                </tr>
+                <tr>
+                    <td>🔴 <strong>Failed</strong></td>
+                    <td>Delivery problem</td>
+                </tr>
+            </table>
+            
+            <h3>How to Create a Distribution</h3>
+            
+            <h4>Distribution by Location</h4>
+            <ol>
+                <li>Click "Medicine Distribution" in sidebar</li>
+                <li>Click "+ New Distribution" → "By Location"</li>
+                <li>Select delivery center</li>
+                <li>Enter distribution date</li>
+                <li>Enter received by (person name)</li>
+                <li>Click "Add Medicine" for each medicine:
+                    <ul>
+                        <li>Select medicine</li>
+                        <li>Enter quantity</li>
+                        <li>Confirm unit price</li>
+                    </ul>
+                </li>
+                <li>Review total cost</li>
+                <li>Click "Create Distribution"</li>
+            </ol>
+            
+            <h4>Distribution by Patient</h4>
+            <ol>
+                <li>Click "Medicine Distribution" in sidebar</li>
+                <li>Click "+ New Distribution" → "By Patient"</li>
+                <li>Search for patient by name/ID</li>
+                <li>Set delivery date</li>
+                <li>Set urgency level</li>
+                <li>Add medicines:
+                    <ul>
+                        <li>Select medicine</li>
+                        <li>Enter prescribed quantity</li>
+                        <li>Add notes (dosage instructions)</li>
+                    </ul>
+                </li>
+                <li>Click "Distribute"</li>
+            </ol>
+            
+            <h3>Viewing Distribution History</h3>
+            <ol>
+                <li>Go to Medicine Distribution</li>
+                <li>Click "View History"</li>
+                <li>Filter by:
+                    <ul>
+                        <li>Date range</li>
+                        <li>Location</li>
+                        <li>Patient name</li>
+                        <li>Status</li>
+                    </ul>
+                </li>
+                <li>Click on a distribution to view details</li>
+            </ol>
+            
+            <h2 id="costing">💰 Costing Reports</h2>
+            
+            <p>Generate detailed financial reports on medicine costs and expenses.</p>
+            
+            <h3>Report Types</h3>
+            
+            <h4>1. Location Cost Report</h4>
+            <ol>
+                <li>Go to Costing section</li>
+                <li>Select "Location Cost Report"</li>
+                <li>Choose location from dropdown</li>
+                <li>Select month and year</li>
+                <li>View:
+                    <ul>
+                        <li>Total cost for location</li>
+                        <li>Medicine-wise cost breakdown</li>
+                        <li>Quantity distributed per medicine</li>
+                    </ul>
+                </li>
+            </ol>
+            
+            <h4>2. Category Expense Report</h4>
+            <ol>
+                <li>Select "Category Expense"</li>
+                <li>Choose year</li>
+                <li>View pie chart showing:
+                    <ul>
+                        <li>Cost by medicine category</li>
+                        <li>Percentage distribution</li>
+                        <li>Total for each category</li>
+                    </ul>
+                </li>
+            </ol>
+            
+            <h3>Exporting Reports</h3>
+            <ol>
+                <li>Generate or view the report</li>
+                <li>Click "Export" button</li>
+                <li>Choose format:
+                    <ul>
+                        <li>📄 <strong>PDF</strong> - Print-ready</li>
+                        <li>📊 <strong>Excel</strong> - Editable spreadsheet</li>
+                        <li>📋 <strong>CSV</strong> - Data analysis</li>
+                    </ul>
+                </li>
+                <li>File downloads automatically</li>
+            </ol>
+            
+            <h2 id="settings">⚙️ Settings & Configuration</h2>
+            
+            <h3>Accessing Settings</h3>
+            <p><strong>Admin access required</strong></p>
+            <ol>
+                <li>Click "Settings" in sidebar</li>
+                <li>Choose from:
+                    <ul>
+                        <li>Medicine Types</li>
+                        <li>Locations</li>
+                        <li>Role Management</li>
+                    </ul>
+                </li>
+            </ol>
+            
+            <h3>Medicine Types</h3>
+            
+            <h4>View All Medicine Types</h4>
+            <ol>
+                <li>Settings → Medicine Types</li>
+                <li>See all medicine categories</li>
+            </ol>
+            
+            <h4>Add New Medicine Type</h4>
+            <ol>
+                <li>Click "+ Add Medicine Type"</li>
+                <li>Enter:
+                    <ul>
+                        <li><strong>Type Name:</strong> e.g., "Antibiotics"</li>
+                        <li><strong>Description:</strong> Brief description</li>
+                        <li><strong>Code:</strong> Short code (e.g., "AB")</li>
+                    </ul>
+                </li>
+                <li>Click "Add"</li>
+            </ol>
+            
+            <h3>Location Management</h3>
+            
+            <h4>Add New Location</h4>
+            <ol>
+                <li>Settings → Locations</li>
+                <li>Click "+ Add Location"</li>
+                <li>Enter:
+                    <ul>
+                        <li><strong>Location Name:</strong> e.g., "Hospital A"</li>
+                        <li><strong>Address:</strong> Full address</li>
+                        <li><strong>Contact Person:</strong> Name</li>
+                        <li><strong>Phone:</strong> Contact number</li>
+                        <li><strong>Email:</strong> Email address</li>
+                    </ul>
+                </li>
+                <li>Click "Add Location"</li>
+            </ol>
+            
+            <h2 id="users">👥 User & Role Management</h2>
+            
+            <h3>User Management (Admin Only)</h3>
+            
+            <h4>View All Users</h4>
+            <ol>
+                <li>Settings → User Management</li>
+                <li>See list of all system users</li>
+            </ol>
+            
+            <h4>Create New User</h4>
+            <ol>
+                <li>Click "+ Add User"</li>
+                <li>Enter:
+                    <ul>
+                        <li><strong>First Name</strong></li>
+                        <li><strong>Last Name</strong></li>
+                        <li><strong>Email:</strong> Email for login</li>
+                        <li><strong>Role:</strong> Select from dropdown</li>
+                    </ul>
+                </li>
+                <li>Click "Create User"</li>
+                <li>User receives email with temporary password</li>
+            </ol>
+            
+            <h4>Reset User Password</h4>
+            <ol>
+                <li>Find user in list</li>
+                <li>Click "Reset Password"</li>
+                <li>Confirm</li>
+                <li>User receives password reset email</li>
+            </ol>
+            
+            <h4>Change User Role</h4>
+            <ol>
+                <li>Find user in list</li>
+                <li>Click "Edit"</li>
+                <li>Select new role</li>
+                <li>Click "Update User"</li>
+            </ol>
+            
+            <h3>Understanding Roles</h3>
+            
+            <table>
+                <tr>
+                    <th>Role</th>
+                    <th>Permissions</th>
+                </tr>
+                <tr>
+                    <td><strong>Viewer</strong></td>
+                    <td>View dashboards and reports only</td>
+                </tr>
+                <tr>
+                    <td><strong>Operator</strong></td>
+                    <td>Create distributions, view stock</td>
+                </tr>
+                <tr>
+                    <td><strong>Manager</strong></td>
+                    <td>Manage stock, distributions, reports</td>
+                </tr>
+                <tr>
+                    <td><strong>Admin</strong></td>
+                    <td>Access all features including settings</td>
+                </tr>
+            </table>
+            
+            <h2 id="faq">❓ FAQ & Troubleshooting</h2>
+            
+            <h3>Common Issues</h3>
+            
+            <h4>Q: Can't Log In?</h4>
+            <ul>
+                <li>Check email spelling</li>
+                <li>Verify password (case-sensitive)</li>
+                <li>Ensure Caps Lock is OFF</li>
+                <li>Clear browser cache</li>
+                <li>Ask admin to reset password</li>
+            </ul>
+            
+            <h4>Q: Page Keeps Loading?</h4>
+            <ul>
+                <li>Check internet connection</li>
+                <li>Clear browser cache</li>
+                <li>Try different browser</li>
+                <li>Contact support</li>
+            </ul>
+            
+            <h4>Q: Can't See a Feature?</h4>
+            <ul>
+                <li>Your role may not have permission</li>
+                <li>Ask your administrator</li>
+                <li>Check Settings if you're admin</li>
+            </ul>
+            
+            <h4>Q: Can't Download Report?</h4>
+            <ul>
+                <li>Disable popup blocker</li>
+                <li>Check browser download settings</li>
+                <li>Try different file format</li>
+                <li>Contact support</li>
+            </ul>
+            
+            <h3>Getting Help</h3>
+            <ul>
+                <li>📧 <strong>Email:</strong> support@inventory.local</li>
+                <li>💬 <strong>In-app Help:</strong> Available in Help Center</li>
+                <li>📚 <strong>Documentation:</strong> Check this manual</li>
+                <li>👤 <strong>Administrator:</strong> Contact your admin</li>
+            </ul>
+            
+            <div class="success-box">
+                <strong>✅ Found the answer?</strong> Share this knowledge with your team to help them too!
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>Inventory Management System - User Manual</strong></p>
+            <p>Version 2.0 | Generated: November 26, 2025</p>
+            <p><a href="index.html">← Back to Documentation Index</a></p>
+        </div>
+    </div>
+</body>
+</html>

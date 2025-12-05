@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrator Guide - Inventory Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+        }
+        
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .nav {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .nav a {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background 0.3s;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        
+        .nav a:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        p {
+            margin-bottom: 15px;
+            line-height: 1.7;
+            font-size: 1.05em;
+        }
+        
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .button {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 5px;
+            text-decoration: none;
+            margin: 10px 5px;
+            transition: background 0.3s;
+        }
+        
+        .button:hover {
+            background: #764ba2;
+        }
+        
+        ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+        
+        li {
+            margin-bottom: 10px;
+        }
+        
+        .footer {
+            background: #f8f9fa;
+            padding: 20px 40px;
+            text-align: center;
+            color: #666;
+            border-top: 1px solid #ddd;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>👨‍💼 Administrator Guide</h1>
+            <p>System Administration, Setup & Maintenance</p>
+            <div class="nav">
+                <a href="index.html">← Back to Index</a>
+                <a href="user-manual.html">User Manual →</a>
+            </div>
+        </div>
+        
+        <div class="content">
+            <h2>System Administration Guide</h2>
+            
+            <p>This comprehensive guide covers everything system administrators need to know to setup, deploy, and maintain the Inventory Management System.</p>
+            
+            <h2>📖 What's Included</h2>
+            
+            <ul>
+                <li><strong>System Architecture</strong> - Technology stack and system design</li>
+                <li><strong>Installation & Deployment</strong> - Step-by-step setup guide</li>
+                <li><strong>Database Management</strong> - Backup, restore, and maintenance</li>
+                <li><strong>User & Role Administration</strong> - User management and permissions</li>
+                <li><strong>Backup & Recovery</strong> - Disaster recovery procedures</li>
+                <li><strong>Monitoring & Maintenance</strong> - System health and optimization</li>
+                <li><strong>Troubleshooting</strong> - Advanced issue resolution</li>
+                <li><strong>Security Configuration</strong> - SSL, firewall, and security setup</li>
+            </ul>
+            
+            <h2>🎯 For Administrators</h2>
+            
+            <p>This guide is specifically designed for system administrators and IT staff responsible for:</p>
+            
+            <ul>
+                <li>Installing and deploying the system</li>
+                <li>Managing databases and backups</li>
+                <li>Creating and managing user accounts</li>
+                <li>Configuring roles and permissions</li>
+                <li>Monitoring system performance</li>
+                <li>Troubleshooting advanced issues</li>
+                <li>Implementing security measures</li>
+                <li>Maintaining system stability</li>
+            </ul>
+            
+            <div class="info-box">
+                <strong>📌 Note:</strong> This guide assumes familiarity with server administration, Linux/Windows, databases, and command-line interfaces.
+            </div>
+            
+            <h2>Key Topics Covered</h2>
+            
+            <ul>
+                <li>System requirements and prerequisites</li>
+                <li>Ubuntu/Linux server setup</li>
+                <li>PostgreSQL database setup</li>
+                <li>Java/Spring Boot deployment</li>
+                <li>Nginx web server configuration</li>
+                <li>Database backup strategies</li>
+                <li>User account creation and management</li>
+                <li>Role-based access control (RBAC)</li>
+                <li>System monitoring and logs</li>
+                <li>Performance optimization</li>
+                <li>Security hardening</li>
+                <li>Disaster recovery procedures</li>
+            </ul>
+            
+            <h2>📊 System Architecture</h2>
+            
+            <ul>
+                <li><strong>Frontend:</strong> React 19 with Vite, deployed via Nginx</li>
+                <li><strong>Backend:</strong> Spring Boot on port 8081</li>
+                <li><strong>Database:</strong> PostgreSQL</li>
+                <li><strong>Web Server:</strong> Nginx (reverse proxy)</li>
+                <li><strong>Authentication:</strong> JWT tokens</li>
+                <li><strong>Server IP:</strong> 27.34.245.92</li>
+            </ul>
+            
+            <h2>Getting Started</h2>
+            
+            <p>To access the full Administrator Guide, please refer to the <code>ADMINISTRATOR_GUIDE.md</code> file included in the documentation package.</p>
+            
+            <p><strong>The markdown file contains:</strong></p>
+            <ul>
+                <li>Detailed installation procedures</li>
+                <li>Configuration examples</li>
+                <li>Bash scripts and commands</li>
+                <li>Database setup instructions</li>
+                <li>Troubleshooting guide</li>
+                <li>Emergency procedures</li>
+            </ul>
+            
+            <h2>Quick Reference</h2>
+            
+            <div class="info-box">
+                <strong>📋 Important Paths:</strong><br>
+                • Frontend: <code>/var/www/inventory-ui/</code><br>
+                • Backend: <code>/home/it-admin/be-service/code/inventory_app_v1/</code><br>
+                • Database: <code>inventory_db</code><br>
+                • Nginx Config: <code>/etc/nginx/conf.d/inventory-ui.conf</code>
+            </div>
+            
+            <h2>Support Resources</h2>
+            
+            <ul>
+                <li>📧 <strong>Technical Support:</strong> support@inventory.local</li>
+                <li>📚 <strong>Documentation:</strong> See included markdown files</li>
+                <li>🔧 <strong>Server IP:</strong> 27.34.245.92</li>
+                <li>🗄️ <strong>Database:</strong> PostgreSQL on port 5432</li>
+                <li>🖥️ <strong>Backend:</strong> Java on port 8081</li>
+            </ul>
+            
+            <h2>Next Steps</h2>
+            
+            <p>For detailed information, procedures, and examples:</p>
+            
+            <a href="ADMINISTRATOR_GUIDE.md" class="button">📄 Open Administrator Guide (Markdown)</a>
+            <a href="index.html" class="button">← Back to Documentation</a>
+        </div>
+        
+        <div class="footer">
+            <p><strong>Inventory Management System - Administrator Guide</strong></p>
+            <p>Version 2.0 | Generated: November 26, 2025</p>
+            <p>For system administrators and IT staff</p>
+        </div>
+    </div>
+</body>
+</html>

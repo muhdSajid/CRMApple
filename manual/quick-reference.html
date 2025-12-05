@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Reference Guide - Inventory Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+        }
+        
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.05em;
+        }
+        
+        .nav {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .nav a {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background 0.3s;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        
+        .nav a:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .content {
+            padding: 40px;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+        
+        h2 {
+            color: #667eea;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        h3 {
+            color: #333;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        p {
+            margin-bottom: 12px;
+            line-height: 1.6;
+        }
+        
+        ul, ol {
+            margin-left: 20px;
+            margin-bottom: 12px;
+        }
+        
+        li {
+            margin-bottom: 6px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            background: #f9f9f9;
+            font-size: 0.95em;
+        }
+        
+        th {
+            background: #667eea;
+            color: white;
+            padding: 10px;
+            text-align: left;
+        }
+        
+        td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        tr:hover {
+            background: #f0f0f0;
+        }
+        
+        .quick-box {
+            background: #f0f9ff;
+            border-left: 3px solid #2196f3;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-size: 0.95em;
+        }
+        
+        .highlight {
+            background: #fff3cd;
+            border-left: 3px solid #ffc107;
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 4px;
+        }
+        
+        code {
+            background: #f4f4f4;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #d63384;
+        }
+        
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 15px 0;
+        }
+        
+        .column-box {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 3px solid #667eea;
+        }
+        
+        .footer {
+            background: #f8f9fa;
+            padding: 20px 40px;
+            text-align: center;
+            color: #666;
+            border-top: 1px solid #ddd;
+            font-size: 0.9em;
+        }
+        
+        .print-button {
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background 0.3s;
+            margin-bottom: 20px;
+        }
+        
+        .print-button:hover {
+            background: #764ba2;
+        }
+        
+        .print-note {
+            color: #666;
+            font-style: italic;
+            font-size: 0.9em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        @media print {
+            body { background: white; padding: 0; }
+            .container { box-shadow: none; }
+            .nav, .print-button, .print-note { display: none; }
+        }
+        
+        @media (max-width: 768px) {
+            .header { padding: 20px; }
+            .header h1 { font-size: 1.5em; }
+            .content { padding: 20px; max-height: none; overflow: visible; }
+            .two-column { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📌 Quick Reference Guide</h1>
+            <p>Common Tasks & Quick Lookup for Inventory Management System</p>
+            <div class="nav">
+                <a href="index.html">← Back to Index</a>
+                <a href="user-manual.html">Full User Manual →</a>
+                <a href="getting-started.html">Getting Started →</a>
+            </div>
+        </div>
+        
+        <div class="content">
+            <button class="print-button" onclick="window.print()">🖨️ Print This Page</button>
+            <p class="print-note">💡 Print this guide to keep at your desk for quick reference!</p>
+            
+            <h2>🔐 Authentication</h2>
+            
+            <h3>Login</h3>
+            <div class="quick-box">
+                <strong>URL:</strong> http://27.34.245.92<br>
+                <strong>Email:</strong> your-email@example.com<br>
+                <strong>Password:</strong> your-password<br>
+                <strong>Step:</strong> Enter email, password, click "Sign In"
+            </div>
+            
+            <h3>Change Password</h3>
+            <ol>
+                <li>Click profile name (top-right)</li>
+                <li>Select "Change Password"</li>
+                <li>Enter old + new password</li>
+                <li>Click "Update"</li>
+            </ol>
+            
+            <h2>🎯 Main Modules</h2>
+            
+            <table>
+                <tr>
+                    <th>Module</th>
+                    <th>Purpose</th>
+                    <th>Access Level</th>
+                </tr>
+                <tr>
+                    <td><strong>Dashboard</strong></td>
+                    <td>View overview & reports</td>
+                    <td>All users</td>
+                </tr>
+                <tr>
+                    <td><strong>Medicine Stock</strong></td>
+                    <td>Manage inventory</td>
+                    <td>Stock managers</td>
+                </tr>
+                <tr>
+                    <td><strong>Distribution</strong></td>
+                    <td>Track medicine delivery</td>
+                    <td>Distributors</td>
+                </tr>
+                <tr>
+                    <td><strong>Costing</strong></td>
+                    <td>Financial reports</td>
+                    <td>Managers+</td>
+                </tr>
+                <tr>
+                    <td><strong>Settings</strong></td>
+                    <td>System configuration</td>
+                    <td>Admins only</td>
+                </tr>
+            </table>
+            
+            <h2>📊 Dashboard Quick Tasks</h2>
+            
+            <h3>View Donation Report</h3>
+            <ol>
+                <li>Go to Dashboard</li>
+                <li>Find "Donation Report" widget</li>
+                <li>Select month/year dropdown</li>
+                <li>View total and breakdown</li>
+            </ol>
+            
+            <h3>Check Critical Stock</h3>
+            <ol>
+                <li>Dashboard → "Critical Stock Report"</li>
+                <li>Red items = critically low</li>
+                <li>Yellow items = low stock</li>
+                <li>Click item to view details</li>
+            </ol>
+            
+            <h2>💊 Medicine Stock Tasks</h2>
+            
+            <h3>Add New Medicine</h3>
+            <ol>
+                <li>Medicine Stock → "+ Add Medicine"</li>
+                <li>Fill name, category, quantity, unit, min level</li>
+                <li>Click "Add Medicine"</li>
+                <li>Go to "Manage Batches" to add batch details</li>
+            </ol>
+            
+            <h3>Find Low Stock Items</h3>
+            <ol>
+                <li>Medicine Stock page</li>
+                <li>Filter by status dropdown</li>
+                <li>Select "Low" or "Critical"</li>
+                <li>View filtered items</li>
+            </ol>
+            
+            <h3>Update Stock Quantity</h3>
+            <ol>
+                <li>Find medicine in list</li>
+                <li>Click "Edit"</li>
+                <li>Change quantity</li>
+                <li>Click "Save"</li>
+            </ol>
+            
+            <h2>🚚 Distribution Tasks</h2>
+            
+            <h3>Create Distribution to Location</h3>
+            <ol>
+                <li>Distribution → "+ New Distribution"</li>
+                <li>Select "By Location"</li>
+                <li>Choose delivery center</li>
+                <li>Add medicines and quantities</li>
+                <li>Click "Create Distribution"</li>
+            </ol>
+            
+            <h3>Create Patient Distribution</h3>
+            <ol>
+                <li>Distribution → "+ New Distribution"</li>
+                <li>Select "By Patient"</li>
+                <li>Search for patient</li>
+                <li>Add medicines</li>
+                <li>Set urgency level</li>
+                <li>Click "Distribute"</li>
+            </ol>
+            
+            <h3>Track Distribution Status</h3>
+            <ol>
+                <li>Distribution → View History</li>
+                <li>Filter by location/patient/date</li>
+                <li>Check status (Pending/In Transit/Delivered)</li>
+                <li>Click for detailed view</li>
+            </ol>
+            
+            <h2>💰 Costing & Reports</h2>
+            
+            <h3>Generate Location Cost Report</h3>
+            <ol>
+                <li>Costing → "Location Cost Report"</li>
+                <li>Select location</li>
+                <li>Choose month/year</li>
+                <li>Review cost breakdown</li>
+                <li>Export as PDF/Excel</li>
+            </ol>
+            
+            <h3>Export Report</h3>
+            <ol>
+                <li>Generate report</li>
+                <li>Click "Export" button</li>
+                <li>Choose format (PDF/Excel/CSV)</li>
+                <li>File downloads automatically</li>
+            </ol>
+            
+            <h2>⌨️ Keyboard Shortcuts</h2>
+            
+            <table>
+                <tr>
+                    <th>Shortcut</th>
+                    <th>Action</th>
+                </tr>
+                <tr>
+                    <td><code>Ctrl + F</code></td>
+                    <td>Search on page</td>
+                </tr>
+                <tr>
+                    <td><code>Ctrl + P</code></td>
+                    <td>Print page</td>
+                </tr>
+                <tr>
+                    <td><code>F5</code></td>
+                    <td>Refresh page</td>
+                </tr>
+                <tr>
+                    <td><code>Esc</code></td>
+                    <td>Close dialog/modal</td>
+                </tr>
+            </table>
+            
+            <h2>🆘 Common Issues & Fixes</h2>
+            
+            <h3>Access Denied</h3>
+            <div class="quick-box">
+                Your role doesn't have permission → Ask admin to update your role
+            </div>
+            
+            <h3>No Data Showing</h3>
+            <div class="quick-box">
+                • Check filters (may be hiding data)<br>
+                • Wait few seconds (page loading)<br>
+                • Refresh page (F5)<br>
+                • Clear browser cache (Ctrl+Shift+Delete)
+            </div>
+            
+            <h3>Can't Log In</h3>
+            <div class="quick-box">
+                • Check email spelling<br>
+                • Verify caps lock is off<br>
+                • Reset password if forgotten<br>
+                • Contact admin
+            </div>
+            
+            <h3>Page Keeps Loading</h3>
+            <div class="quick-box">
+                • Check internet connection<br>
+                • Clear browser cache<br>
+                • Try different browser<br>
+                • Contact support
+            </div>
+            
+            <h2>📋 Data Entry Best Practices</h2>
+            
+            <ul>
+                <li>✅ Fill all required fields (marked with *)</li>
+                <li>✅ Double-check quantities before submitting</li>
+                <li>✅ Use clear descriptions in notes</li>
+                <li>✅ Include batch numbers for medicines</li>
+                <li>✅ Verify dates are correct</li>
+                <li>✅ Save regularly to avoid losing data</li>
+            </ul>
+            
+            <h2>🔒 Security Tips</h2>
+            
+            <ul>
+                <li>🔐 Never share your password</li>
+                <li>🔐 Change password every 3 months</li>
+                <li>🔐 Logout when done</li>
+                <li>🔐 Use strong passwords (mix uppercase, lowercase, numbers, symbols)</li>
+                <li>🔐 Don't leave computer unattended while logged in</li>
+                <li>🔐 Report suspicious activity immediately</li>
+            </ul>
+            
+            <h2>📞 Support Contact</h2>
+            
+            <div class="quick-box">
+                <strong>Email:</strong> support@inventory.local<br>
+                <strong>Phone:</strong> [Your support number]<br>
+                <strong>In-app Help:</strong> Help Center in menu<br>
+                <strong>System URL:</strong> http://27.34.245.92
+            </div>
+            
+            <h2>📊 Permission Reference Matrix</h2>
+            
+            <table>
+                <tr>
+                    <th>Feature</th>
+                    <th>Viewer</th>
+                    <th>Operator</th>
+                    <th>Manager</th>
+                    <th>Admin</th>
+                </tr>
+                <tr>
+                    <td>Dashboard</td>
+                    <td>✅</td>
+                    <td>✅</td>
+                    <td>✅</td>
+                    <td>✅</td>
+                </tr>
+                <tr>
+                    <td>Medicine Stock (View)</td>
+                    <td>✅</td>
+                    <td>✅</td>
+                    <td>✅</td>
+                    <td>✅</td>
+                </tr>
+                <tr>
+                    <td>Medicine Stock (Edit)</td>
+                    <td>❌</td>
+                    <td>❌</td>
+                    <td>✅</td>
+                    <td>✅</td>
+                </tr>
+                <tr>
+                    <td>Distribution (Create)</td>
+                    <td>❌</td>
+                    <td>✅</td>
+                    <td>✅</td>
+                    <td>✅</td>
+                </tr>
+                <tr>
+                    <td>Costing Reports</td>
+                    <td>❌</td>
+                    <td>❌</td>
+                    <td>✅</td>
+                    <td>✅</td>
+                </tr>
+                <tr>
+                    <td>Settings</td>
+                    <td>❌</td>
+                    <td>❌</td>
+                    <td>❌</td>
+                    <td>✅</td>
+                </tr>
+                <tr>
+                    <td>User Management</td>
+                    <td>❌</td>
+                    <td>❌</td>
+                    <td>❌</td>
+                    <td>✅</td>
+                </tr>
+            </table>
+            
+            <h2>📋 Monthly Checklist</h2>
+            
+            <div class="quick-box">
+                ☐ Dashboard reviewed<br>
+                ☐ Critical stock checked<br>
+                ☐ Stock levels updated<br>
+                ☐ Low batches identified and reordered<br>
+                ☐ Distributions processed<br>
+                ☐ Reports generated<br>
+                ☐ Expense analysis done<br>
+                ☐ Data archived<br>
+                ☐ System running smoothly
+            </div>
+            
+            <h2>🎯 Quick Links</h2>
+            
+            <table>
+                <tr>
+                    <th>Need</th>
+                    <th>Go To</th>
+                </tr>
+                <tr>
+                    <td>Login</td>
+                    <td>http://27.34.245.92</td>
+                </tr>
+                <tr>
+                    <td>Dashboard</td>
+                    <td>http://27.34.245.92/ (after login)</td>
+                </tr>
+                <tr>
+                    <td>Help</td>
+                    <td>Help Center in app menu</td>
+                </tr>
+                <tr>
+                    <td>FAQ</td>
+                    <td>FAQ in app menu</td>
+                </tr>
+                <tr>
+                    <td>Support</td>
+                    <td>support@inventory.local</td>
+                </tr>
+            </table>
+            
+            <p style="margin-top: 30px; text-align: center; color: #999;">
+                <strong>💡 Tip:</strong> Print this page and keep it at your desk for quick reference!
+            </p>
+        </div>
+        
+        <div class="footer">
+            <p><strong>Inventory Management System - Quick Reference Guide</strong></p>
+            <p>Version 2.0 | Generated: November 26, 2025 | Print-Friendly Edition</p>
+            <p><a href="index.html">← Back to Documentation Index</a></p>
+        </div>
+    </div>
+</body>
+</html>
