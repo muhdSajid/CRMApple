@@ -18,7 +18,7 @@ import ViewStock from "./ViewStock";
 import { AddMedicineModal } from "./AddMedicineModal";
 import { EditMedicineModal } from "./EditMedicineModal";
 import PrivilegeGuard from "../common/PrivilegeGuard";
-import { get } from "../../service/apiService";
+import { get, getUserLocations } from "../../service/apiService";
 import { apiDomain, PRIVILEGES } from "../../constants/constants";
 import PageWrapper from "../common/PageWrapper";
 
@@ -75,16 +75,15 @@ const MedicineStock = () => {
     const fetchLocations = async () => {
       try {
         setLoading(true);
-        const url = `${apiDomain}/api/v1/locations`;
-        const response = await get(url);
-        setLocations(response.data);
+        const response = await getUserLocations();
+        setLocations(response);
         
         // Check for saved location in sessionStorage first
         const savedLocationId = sessionStorage.getItem('selectedLocationId');
         
         if (savedLocationId) {
           const locationId = parseInt(savedLocationId, 10);
-          const savedLocation = response.data.find(loc => loc.id === locationId && loc.isActive);
+          const savedLocation = response.find(loc => loc.id === locationId && loc.isActive);
           if (savedLocation) {
             setSelectedLocationId(locationId);
             setError(null);
@@ -97,7 +96,7 @@ const MedicineStock = () => {
         }
         
         // Set first active location as default if no valid saved location
-        const activeLocations = response.data.filter(loc => loc.isActive);
+        const activeLocations = response.filter(loc => loc.isActive);
         if (activeLocations.length > 0) {
           setSelectedLocationId(activeLocations[0].id);
         }

@@ -36,7 +36,7 @@ export const testApiHeaders = async () => {
     console.log('Making test API call...');
     
     try {
-      const response = await get(`${apiDomain}/api/v1/locations`);
+      const response = await get(`${apiDomain}/api/v1/locations/user/${userId}`);
       console.log('✅ API call successful');
       console.log('Response data:', response.data);
       console.log(`user_id header will be set to: ${userId}`);

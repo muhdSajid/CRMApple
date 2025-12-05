@@ -1,5 +1,5 @@
 import api from "./api";
-import { getUserToken } from "./authService";
+import { getUserToken, getUserId } from "./authService";
 import { apiDomain } from "../constants/constants";
 
 export const get = (url, props) => _fetch(url, "GET", null, props);
@@ -63,9 +63,28 @@ export const deleteMedicineType = async (id) => {
 };
 
 // Location management API functions
+// Get locations for the current logged-in user
+export const getUserLocations = async () => {
+  try {
+    const userId = getUserId();
+    if (!userId) {
+      throw new Error('User ID not found. Please ensure you are logged in.');
+    }
+    const response = await get(`${apiDomain}/api/v1/locations/user/${userId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching user locations:', error);
+    throw error;
+  }
+};
+
 export const getLocationsFromSettings = async () => {
   try {
-    const response = await get(`${apiDomain}/api/v1/locations`);
+    const userId = getUserId();
+    if (!userId) {
+      throw new Error('User ID not found. Please ensure you are logged in.');
+    }
+    const response = await get(`${apiDomain}/api/v1/locations/user/${userId}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching locations from settings:', error);
@@ -194,7 +213,11 @@ export const getMedicines = async () => {
 
 export const getLocations = async () => {
   try {
-    const response = await get(`${apiDomain}/api/v1/locations`);
+    const userId = getUserId();
+    if (!userId) {
+      throw new Error('User ID not found. Please ensure you are logged in.');
+    }
+    const response = await get(`${apiDomain}/api/v1/locations/user/${userId}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching locations:', error);
