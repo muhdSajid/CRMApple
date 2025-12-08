@@ -75,17 +75,17 @@ export const SelectLocationMultiple = ({ costingData, setCostingData }) => {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <Label htmlFor="location">Location</Label>
+      <Label htmlFor="location" className="text-gray-900 dark:text-gray-100">Location</Label>
 
       <div
-        className="border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full cursor-pointer flex items-center justify-between"
+        className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm rounded-lg p-2.5 w-full cursor-pointer flex items-center justify-between"
         onClick={() => setIsOpen((prev) => !prev)}
       >
-        <span className={`${(costingData.location || []).length === 0 ? 'text-gray-500' : ''} truncate`}>
+        <span className={`${(costingData.location || []).length === 0 ? 'text-gray-500 dark:text-gray-400' : ''} truncate`}>
           {getSelectedLocationNames()}
         </span>
         <svg 
-          className={`w-4 h-4 text-gray-500 transition-transform ${isOpen ? 'rotate-180' : 'rotate-0'}`} 
+          className={`w-4 h-4 text-gray-500 dark:text-gray-400 transition-transform ${isOpen ? 'rotate-180' : 'rotate-0'}`} 
           fill="none" 
           stroke="currentColor" 
           viewBox="0 0 24 24"
@@ -95,22 +95,22 @@ export const SelectLocationMultiple = ({ costingData, setCostingData }) => {
       </div>
 
       {isOpen && (
-        <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+        <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg dark:shadow-gray-900 max-h-48 overflow-y-auto">
           {loading ? (
-            <div className="px-4 py-3 text-center text-gray-500 text-sm">
+            <div className="px-4 py-3 text-center text-gray-500 dark:text-gray-400 text-sm">
               <div className="flex items-center justify-center gap-2">
-                <div className="w-4 h-4 border-2 border-blue-200 border-t-blue-600 animate-spin rounded-full"></div>
+                <div className="w-4 h-4 border-2 border-blue-200 dark:border-blue-700 border-t-blue-600 dark:border-t-blue-400 animate-spin rounded-full"></div>
                 Loading locations...
               </div>
             </div>
           ) : locations.length === 0 ? (
-            <div className="px-4 py-3 text-center text-gray-500 text-sm">
+            <div className="px-4 py-3 text-center text-gray-500 dark:text-gray-400 text-sm">
               No locations available
             </div>
           ) : (
             <>
               {/* Select All / Deselect All */}
-              <div className="px-4 py-2 border-b border-gray-200 bg-gray-50">
+              <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700">
                 <button
                   onClick={(e) => {
                     e.preventDefault();
@@ -124,7 +124,7 @@ export const SelectLocationMultiple = ({ costingData, setCostingData }) => {
                       setCostingData(prev => ({ ...prev, location: locations.map(loc => loc.id) }));
                     }
                   }}
-                  className="text-xs text-blue-600 hover:text-blue-800 font-medium focus:outline-none hover:underline transition-colors"
+                  className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium focus:outline-none hover:underline transition-colors"
                 >
                   {(costingData.location || []).length === locations.length 
                     ? `Deselect All (${locations.length})` 
@@ -136,21 +136,21 @@ export const SelectLocationMultiple = ({ costingData, setCostingData }) => {
               {locations.map((location) => (
                 <label
                   key={location.id}
-                  className="flex items-start px-4 py-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
+                  className="flex items-start px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0"
                 >
                   <input
                     type="checkbox"
                     checked={(costingData.location || []).includes(location.id)}
                     onChange={() => toggleLocation(location.id)}
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mt-0.5 flex-shrink-0"
+                    className="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 mt-0.5 flex-shrink-0"
                   />
                   <div className="ml-3 min-w-0 flex-1">
-                    <span className="text-sm text-gray-900 font-medium block">{location.name}</span>
+                    <span className="text-sm text-gray-900 dark:text-gray-100 font-medium block">{location.name}</span>
                     {location.locationAddress && (
-                      <span className="text-xs text-gray-500 block mt-0.5 truncate">{location.locationAddress}</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400 block mt-0.5 truncate">{location.locationAddress}</span>
                     )}
                     {location.contactInfo && (
-                      <span className="text-xs text-gray-400 block">{location.contactInfo}</span>
+                      <span className="text-xs text-gray-400 dark:text-gray-500 block">{location.contactInfo}</span>
                     )}
                   </div>
                 </label>

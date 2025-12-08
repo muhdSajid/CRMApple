@@ -25,7 +25,7 @@ const PageWrapper = ({ children, isLoading = false, minLoadTime = 200 }) => {
       <div className="page-container flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <Spinner size="lg" />
-          <p className="mt-2 text-gray-600">Loading...</p>
+          <p className="mt-2 text-gray-600 dark:text-gray-400">Loading...</p>
         </div>
       </div>
     );

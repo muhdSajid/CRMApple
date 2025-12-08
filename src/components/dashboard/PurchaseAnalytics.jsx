@@ -104,6 +104,11 @@ const PurchaseAnalytics = ({ selectedLocationId, selectedLocation }) => {
 
     const renderChart = (width) => {
       svg.selectAll("*").remove();
+      
+      // Detect dark mode
+      const isDarkMode = document.documentElement.classList.contains('dark');
+      const textColor = isDarkMode ? '#e5e7eb' : '#374151'; // gray-200 for dark, gray-700 for light
+      const bgBarColor = isDarkMode ? '#374151' : '#F3F4F6'; // gray-700 for dark, gray-100 for light
 
       const x = d3
         .scaleBand()
@@ -131,7 +136,7 @@ const PurchaseAnalytics = ({ selectedLocationId, selectedLocation }) => {
         .attr("y", margin.top)
         .attr("height", height - margin.top - margin.bottom)
         .attr("width", x.bandwidth())
-        .attr("fill", "#F3F4F6")
+        .attr("fill", bgBarColor)
         .attr("rx", 6)
         .attr("ry", 6);
 
@@ -170,6 +175,7 @@ const PurchaseAnalytics = ({ selectedLocationId, selectedLocation }) => {
         .attr("y", height - 10)
         .attr("text-anchor", "middle")
         .attr("font-size", 10)
+        .attr("fill", textColor)
         .text((d) => d.month);
 
       // Y-axis labels
@@ -183,6 +189,7 @@ const PurchaseAnalytics = ({ selectedLocationId, selectedLocation }) => {
         .attr("text-anchor", "end")
         .attr("alignment-baseline", "middle")
         .attr("font-size", 9)
+        .attr("fill", textColor)
         .text((d) => {
           if (d >= 100000) {
             return `₹${(d / 100000).toFixed(1)}L`; // Show in Lakhs
@@ -214,7 +221,7 @@ const PurchaseAnalytics = ({ selectedLocationId, selectedLocation }) => {
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="text-gray-600">Loading purchase analytics...</div>
+        <div className="text-gray-600 dark:text-gray-400">Loading purchase analytics...</div>
       </div>
     );
   }
@@ -223,7 +230,7 @@ const PurchaseAnalytics = ({ selectedLocationId, selectedLocation }) => {
   if (error) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="text-red-600">Error: {error}</div>
+        <div className="text-red-600 dark:text-red-400">Error: {error}</div>
       </div>
     );
   }
@@ -231,29 +238,29 @@ const PurchaseAnalytics = ({ selectedLocationId, selectedLocation }) => {
   return (
     <div ref={wrapperRef} className="relative p-1 w-full">
       {!selectedLocationId && (
-        <div className="mb-2 p-2 bg-yellow-50 border border-yellow-200 rounded-md">
-          <p className="text-sm text-yellow-700">
+        <div className="mb-2 p-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-md">
+          <p className="text-sm text-yellow-700 dark:text-yellow-300">
             📍 Select a location from above to view specific purchase analytics, or viewing default data
           </p>
         </div>
       )}
       {selectedLocationId && selectedLocation && (
-        <div className="mb-2 p-2 bg-blue-50 border border-blue-200 rounded-md">
-          <p className="text-sm text-blue-700">
+        <div className="mb-2 p-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-md">
+          <p className="text-sm text-blue-700 dark:text-blue-300">
             📍 Showing purchase analytics for <span className="font-semibold">{selectedLocation.locationName}</span>
           </p>
         </div>
       )}
       <div className="flex justify-between items-start mb-2">
         <div className="flex items-baseline gap-2">
-          <h2 className="text-3xl font-bold">₹{total.toLocaleString()}</h2>
-          <p className="text-sm text-gray-500">spent this year</p>
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">₹{total.toLocaleString()}</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">spent this year</p>
         </div>
         <div className="flex items-center justify-end gap-2">
           {/* <FilterPopover /> */}
           <div className="relative">
-            <select 
-              className="appearance-none bg-white border border-gray-300 hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-lg px-4 py-2.5 pr-10 text-sm font-medium text-gray-700 transition-all duration-200 ease-in-out shadow-sm hover:shadow-md cursor-pointer"
+            <select
+              className="appearance-none bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 rounded-lg px-4 py-2.5 pr-10 text-sm font-medium text-gray-700 dark:text-gray-200 transition-all duration-200 ease-in-out shadow-sm hover:shadow-md cursor-pointer"
               value={selectedYear}
               onChange={(e) => setSelectedYear(Number(e.target.value))}
             >
@@ -274,15 +281,15 @@ const PurchaseAnalytics = ({ selectedLocationId, selectedLocation }) => {
 
       {tooltipData && (
         <div
-          className="absolute bg-white border p-2 rounded-md shadow text-sm z-50 pointer-events-none"
+          className="absolute bg-white dark:bg-gray-800 border dark:border-gray-600 p-2 rounded-md shadow dark:shadow-gray-900 text-sm z-50 pointer-events-none"
           style={{
             top: tooltipData.y + 10,
             left: tooltipData.x + 10,
           }}
         >
-          <strong>₹{tooltipData.value.toLocaleString()}</strong>
+          <strong className="text-gray-900 dark:text-gray-100">₹{tooltipData.value.toLocaleString()}</strong>
           {tooltipData.change && (
-            <div className="text-green-600 text-xs mt-1">
+            <div className="text-green-600 dark:text-green-400 text-xs mt-1">
               📈 {tooltipData.change}
             </div>
           )}

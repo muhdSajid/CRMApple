@@ -92,10 +92,10 @@ const ChangePassword = () => {
   return (
     <PageWrapper>
       <div className="page-container p-6 mx-auto max-w-2xl">
-        <div className="bg-white rounded-xl p-8 shadow-lg">
-          <div className="border-b-2 border-gray-200 pb-4 mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">Change Password</h2>
-            <p className="text-sm text-gray-600 mt-1">
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-8 shadow-lg">
+          <div className="border-b-2 border-gray-200 dark:border-gray-700 pb-4 mb-6">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Change Password</h2>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
               Update your password to keep your account secure
             </p>
           </div>
@@ -103,7 +103,7 @@ const ChangePassword = () => {
           <form className="space-y-6" onSubmit={handleSubmit}>
             {/* Current Password */}
             <div>
-              <Label htmlFor="currentPassword">Current Password</Label>
+              <Label htmlFor="currentPassword" className="text-gray-900 dark:text-gray-100">Current Password</Label>
               <div className="relative mt-1">
                 <input
                   id="currentPassword"
@@ -113,12 +113,12 @@ const ChangePassword = () => {
                   placeholder="Enter your current password"
                   required
                   disabled={isLoading}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed pr-10"
+                  className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 dark:disabled:bg-gray-600 disabled:cursor-not-allowed pr-10"
                 />
                 <button
                   type="button"
                   onClick={() => togglePasswordVisibility('current')}
-                  className="absolute inset-y-0 right-3 flex items-center text-gray-500"
+                  className="absolute inset-y-0 right-3 flex items-center text-gray-500 dark:text-gray-400"
                   tabIndex={-1}
                   disabled={isLoading}
                 >
@@ -129,7 +129,7 @@ const ChangePassword = () => {
 
             {/* New Password */}
             <div>
-              <Label htmlFor="newPassword">New Password</Label>
+              <Label htmlFor="newPassword" className="text-gray-900 dark:text-gray-100">New Password</Label>
               <div className="relative mt-1">
                 <input
                   id="newPassword"
@@ -139,12 +139,12 @@ const ChangePassword = () => {
                   placeholder="Enter your new password"
                   required
                   disabled={isLoading}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed pr-10"
+                  className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 dark:disabled:bg-gray-600 disabled:cursor-not-allowed pr-10"
                 />
                 <button
                   type="button"
                   onClick={() => togglePasswordVisibility('new')}
-                  className="absolute inset-y-0 right-3 flex items-center text-gray-500"
+                  className="absolute inset-y-0 right-3 flex items-center text-gray-500 dark:text-gray-400"
                   tabIndex={-1}
                   disabled={isLoading}
                 >
@@ -154,70 +154,70 @@ const ChangePassword = () => {
 
               {/* Password Strength Indicators */}
               {passwordData.newPassword && (
-                <div className="mt-3 p-3 bg-gray-50 rounded-md">
-                  <p className="text-sm font-medium text-gray-700 mb-2">
+                <div className="mt-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-md">
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Password Requirements:
                   </p>
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       {passwordChecks.length ? (
-                        <FaCheck className="text-green-600" />
+                        <FaCheck className="text-green-600 dark:text-green-400" />
                       ) : (
-                        <FaRegCircle className="text-gray-400" />
+                        <FaRegCircle className="text-gray-400 dark:text-gray-500" />
                       )}
-                      <p className={passwordChecks.length ? "text-green-600" : ""}>
+                      <p className={passwordChecks.length ? "text-green-600 dark:text-green-400" : "text-gray-600 dark:text-gray-400"}>
                         At least 8 characters
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
                       {passwordChecks.uppercase ? (
-                        <FaCheck className="text-green-600" />
+                        <FaCheck className="text-green-600 dark:text-green-400" />
                       ) : (
-                        <FaRegCircle className="text-gray-400" />
+                        <FaRegCircle className="text-gray-400 dark:text-gray-500" />
                       )}
-                      <p className={passwordChecks.uppercase ? "text-green-600" : ""}>
+                      <p className={passwordChecks.uppercase ? "text-green-600 dark:text-green-400" : "text-gray-600 dark:text-gray-400"}>
                         Contains uppercase letter
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
                       {passwordChecks.lowercase ? (
-                        <FaCheck className="text-green-600" />
+                        <FaCheck className="text-green-600 dark:text-green-400" />
                       ) : (
-                        <FaRegCircle className="text-gray-400" />
+                        <FaRegCircle className="text-gray-400 dark:text-gray-500" />
                       )}
-                      <p className={passwordChecks.lowercase ? "text-green-600" : ""}>
+                      <p className={passwordChecks.lowercase ? "text-green-600 dark:text-green-400" : "text-gray-600 dark:text-gray-400"}>
                         Contains lowercase letter
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
                       {passwordChecks.number ? (
-                        <FaCheck className="text-green-600" />
+                        <FaCheck className="text-green-600 dark:text-green-400" />
                       ) : (
-                        <FaRegCircle className="text-gray-400" />
+                        <FaRegCircle className="text-gray-400 dark:text-gray-500" />
                       )}
-                      <p className={passwordChecks.number ? "text-green-600" : ""}>
+                      <p className={passwordChecks.number ? "text-green-600 dark:text-green-400" : "text-gray-600 dark:text-gray-400"}>
                         Contains number
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
                       {passwordChecks.special ? (
-                        <FaCheck className="text-green-600" />
+                        <FaCheck className="text-green-600 dark:text-green-400" />
                       ) : (
-                        <FaRegCircle className="text-gray-400" />
+                        <FaRegCircle className="text-gray-400 dark:text-gray-500" />
                       )}
-                      <p className={passwordChecks.special ? "text-green-600" : ""}>
+                      <p className={passwordChecks.special ? "text-green-600 dark:text-green-400" : "text-gray-600 dark:text-gray-400"}>
                         Contains special character
                       </p>
                     </div>
                   </div>
                   <div className="mt-2">
-                    <div className="flex justify-between text-xs text-gray-600">
+                    <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400">
                       <span>Password Strength</span>
                       <span>
                         {isPasswordStrong ? 'Strong' : 'Weak'}
                       </span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
+                    <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 mt-1">
                       <div 
                         className={`h-2 rounded-full transition-all duration-300 ${
                           isPasswordStrong 
@@ -233,7 +233,7 @@ const ChangePassword = () => {
 
             {/* Confirm Password */}
             <div>
-              <Label htmlFor="confirmPassword">Confirm New Password</Label>
+              <Label htmlFor="confirmPassword" className="text-gray-900 dark:text-gray-100">Confirm New Password</Label>
               <div className="relative mt-1">
                 <input
                   id="confirmPassword"
@@ -243,16 +243,16 @@ const ChangePassword = () => {
                   placeholder="Re-enter your new password"
                   required
                   disabled={isLoading}
-                  className={`w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 disabled:bg-gray-100 disabled:cursor-not-allowed pr-10 ${
+                  className={`w-full border rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 disabled:bg-gray-100 dark:disabled:bg-gray-600 disabled:cursor-not-allowed pr-10 ${
                     passwordData.confirmPassword && !passwordsMatch
                       ? "border-red-500 focus:ring-red-500"
-                      : "border-gray-300 focus:ring-blue-500"
+                      : "border-gray-300 dark:border-gray-600 focus:ring-blue-500"
                   }`}
                 />
                 <button
                   type="button"
                   onClick={() => togglePasswordVisibility('confirm')}
-                  className="absolute inset-y-0 right-3 flex items-center text-gray-500"
+                  className="absolute inset-y-0 right-3 flex items-center text-gray-500 dark:text-gray-400"
                   tabIndex={-1}
                   disabled={isLoading}
                 >
@@ -300,11 +300,11 @@ const ChangePassword = () => {
           </form>
 
           {/* Security Tips */}
-          <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <h4 className="text-sm font-semibold text-blue-900 mb-2">
+          <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+            <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-2">
               Password Security Tips:
             </h4>
-            <ul className="text-xs text-blue-800 space-y-1">
+            <ul className="text-xs text-blue-800 dark:text-blue-300 space-y-1">
               <li>• Use a unique password that you don't use elsewhere</li>
               <li>• Consider using a password manager to generate and store passwords</li>
               <li>• Change your password regularly for better security</li>

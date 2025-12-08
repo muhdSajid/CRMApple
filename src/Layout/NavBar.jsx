@@ -39,7 +39,7 @@ const Navbar = () => {
           <div className="relative ml-auto">
             <button
               onClick={() => setShowMenu(!showMenu)}
-              className="flex items-center space-x-3 bg-white hover:bg-gray-100 px-3 py-2 rounded-md focus:outline-none"
+              className="flex items-center space-x-3 bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 px-3 py-2 rounded-md focus:outline-none"
             >
               <img
                 src={profilePic}
@@ -47,10 +47,10 @@ const Navbar = () => {
                 className="w-8 h-8 rounded-full object-cover"
               />
               <div className="text-left">
-                <div className="text-sm font-medium text-gray-900">
+                <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
                   {getUserFullName()}
                 </div>
-                <div className="text-xs text-gray-500">
+                <div className="text-xs text-gray-500 dark:text-gray-400">
                   {user?.email || "@user"}
                 </div>
               </div>
@@ -58,17 +58,17 @@ const Navbar = () => {
 
             {/* Dropdown Menu */}
             {showMenu && (
-              <div className="absolute right-1 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-50">
-                <ul className="py-1 text-sm text-gray-700">
+              <div className="absolute right-1 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md shadow-lg dark:shadow-gray-900 z-50">
+                <ul className="py-1 text-sm text-gray-700 dark:text-gray-300">
                   <li>
-                    <a href="/" className="block px-4 py-2 hover:bg-gray-100">
+                    <a href="/" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700">
                       Dashboard
                     </a>
                   </li>
                   <li>
                     <button 
                       onClick={handleChangePassword}
-                      className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                      className="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
                     >
                       Change Password
                     </button>
@@ -76,7 +76,7 @@ const Navbar = () => {
                   <li>
                     <button 
                       onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                      className="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
                     >
                       Sign out
                     </button>

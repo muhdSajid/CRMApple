@@ -70,7 +70,7 @@ const GenerateReportRadio = ({ costingData, setCostingData }) => {
   return (
     <>
       <div className="flex flex-wrap gap-4">
-        <p className="flex items-center font-medium text-gray-700">
+        <p className="flex items-center font-medium text-gray-700 dark:text-gray-300">
           Generate Report for
         </p>
 
@@ -80,11 +80,11 @@ const GenerateReportRadio = ({ costingData, setCostingData }) => {
               type="radio"
               id={item.id}
               name="report-period"
-              className="w-4 h-4 text-primary border-gray-300 focus:ring-primary"
+              className="w-4 h-4 text-primary border-gray-300 dark:border-gray-600 focus:ring-primary"
               checked={costingData.reportFor == item.id}
               onChange={handleChange}
             />
-            <Label className="ml-2 text-sm text-gray-700">{item.label}</Label>
+            <Label className="ml-2 text-sm text-gray-700 dark:text-gray-300">{item.label}</Label>
           </div>
         ))}
       </div>

@@ -69,7 +69,7 @@ const LocationCard = ({ onLocationSelect, selectedLocationId }) => {
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="text-gray-600">Loading location statistics...</div>
+        <div className="text-gray-600 dark:text-gray-400">Loading location statistics...</div>
       </div>
     );
   }
@@ -78,7 +78,7 @@ const LocationCard = ({ onLocationSelect, selectedLocationId }) => {
   if (error) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="text-red-600">Error: {error}</div>
+        <div className="text-red-600 dark:text-red-400">Error: {error}</div>
       </div>
     );
   }
@@ -87,7 +87,7 @@ const LocationCard = ({ onLocationSelect, selectedLocationId }) => {
   if (!data || data.length === 0) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="text-gray-600">No location data available</div>
+        <div className="text-gray-600 dark:text-gray-400">No location data available</div>
       </div>
     );
   }

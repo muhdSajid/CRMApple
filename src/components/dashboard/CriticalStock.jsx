@@ -58,48 +58,48 @@ const FlowbiteUrgencyTable = ({ selectedLocationId, selectedLocation }) => {
     switch (normalizedActionType) {
       case 'Expired':
         return {
-          indicatorColor: "bg-red-700",
+          indicatorColor: "bg-red-700 dark:bg-red-600",
           reasonColor: "text-white",
-          reasonBgColor: "bg-red-600",
+          reasonBgColor: "bg-red-600 dark:bg-red-700",
           reason: "Expired",
-          textColor: "text-gray-800",
-          borderColor: "border-red-600"
+          textColor: "text-gray-800 dark:text-gray-200",
+          borderColor: "border-red-600 dark:border-red-500"
         };
       case 'Out of Stock':
         return {
-          indicatorColor: "bg-blue-700",
+          indicatorColor: "bg-blue-700 dark:bg-blue-600",
           reasonColor: "text-white",
-          reasonBgColor: "bg-blue-600",
+          reasonBgColor: "bg-blue-600 dark:bg-blue-700",
           reason: "Out of Stock",
-          textColor: "text-gray-800",
-          borderColor: "border-blue-600"
+          textColor: "text-gray-800 dark:text-gray-200",
+          borderColor: "border-blue-600 dark:border-blue-500"
         };
       case 'Critically Low':
         return {
-          indicatorColor: "bg-orange-500",
+          indicatorColor: "bg-orange-500 dark:bg-orange-600",
           reasonColor: "text-white",
-          reasonBgColor: "bg-orange-500",
+          reasonBgColor: "bg-orange-500 dark:bg-orange-600",
           reason: "Critically Low",
-          textColor: "text-gray-800",
-          borderColor: "border-orange-500"
+          textColor: "text-gray-800 dark:text-gray-200",
+          borderColor: "border-orange-500 dark:border-orange-600"
         };
       case 'Near Expiry':
         return {
-          indicatorColor: "bg-yellow-500",
+          indicatorColor: "bg-yellow-500 dark:bg-yellow-600",
           reasonColor: "text-white",
-          reasonBgColor: "bg-yellow-500",
+          reasonBgColor: "bg-yellow-500 dark:bg-yellow-600",
           reason: "Near Expiry",
-          textColor: "text-gray-800",
-          borderColor: "border-yellow-500"
+          textColor: "text-gray-800 dark:text-gray-200",
+          borderColor: "border-yellow-500 dark:border-yellow-600"
         };
       default:
         return {
-          indicatorColor: "bg-gray-500",
+          indicatorColor: "bg-gray-500 dark:bg-gray-600",
           reasonColor: "text-white",
-          reasonBgColor: "bg-gray-500",
+          reasonBgColor: "bg-gray-500 dark:bg-gray-600",
           reason: actionType || 'Unknown',
-          textColor: "text-gray-800",
-          borderColor: "border-gray-500"
+          textColor: "text-gray-800 dark:text-gray-200",
+          borderColor: "border-gray-500 dark:border-gray-600"
         };
     }
   };
@@ -175,8 +175,8 @@ const FlowbiteUrgencyTable = ({ selectedLocationId, selectedLocation }) => {
     <div className="overflow-x-auto py-4">
       {/* Location requirement message */}
       {!selectedLocationId && (
-        <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-          <p className="text-sm text-yellow-700">
+        <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-md">
+          <p className="text-sm text-yellow-700 dark:text-yellow-300">
             📍 Please select a location from above to view critical stock and shortages data.
           </p>
         </div>
@@ -184,8 +184,8 @@ const FlowbiteUrgencyTable = ({ selectedLocationId, selectedLocation }) => {
 
       {/* Selected location indicator */}
       {selectedLocationId && selectedLocation && (
-        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-          <p className="text-sm text-blue-700">
+        <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-md">
+          <p className="text-sm text-blue-700 dark:text-blue-300">
             📍 Showing critical stock data for <span className="font-semibold">{selectedLocation.locationName}</span>
           </p>
         </div>
@@ -193,8 +193,8 @@ const FlowbiteUrgencyTable = ({ selectedLocationId, selectedLocation }) => {
 
       {/* Loading state */}
       {loading && (
-        <div className="mb-4 p-3 bg-gray-50 border border-gray-200 rounded-md">
-          <p className="text-sm text-gray-600">
+        <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
             🔄 Loading critical stock data...
           </p>
         </div>
@@ -202,8 +202,8 @@ const FlowbiteUrgencyTable = ({ selectedLocationId, selectedLocation }) => {
 
       {/* Error state */}
       {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-          <p className="text-sm text-red-700">
+        <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-md">
+          <p className="text-sm text-red-700 dark:text-red-300">
             ⚠️ Error loading critical stock data: {error}
           </p>
         </div>
@@ -218,20 +218,20 @@ const FlowbiteUrgencyTable = ({ selectedLocationId, selectedLocation }) => {
               placeholder="Search medicines..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="border px-3 py-2 border-gray-300 rounded-md w-64 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="border px-3 py-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md w-64 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
             {filteredActionItems.length > 0 && (
               <div className="flex items-center gap-4">
-                <span className="text-sm text-gray-600">
+                <span className="text-sm text-gray-600 dark:text-gray-400">
                   Showing {startIndex + 1}-{Math.min(endIndex, totalItems)} of {totalItems} items
                 </span>
                 <div className="flex items-center gap-2">
-                  <label className="text-sm text-gray-600">Rows per page:</label>
+                  <label className="text-sm text-gray-600 dark:text-gray-400">Rows per page:</label>
                   <div className="relative">
                     <select
                       value={itemsPerPage}
                       onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-                      className="appearance-none bg-white border border-gray-300 hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-lg px-3 py-2 pr-8 text-sm font-medium text-gray-700 transition-all duration-200 ease-in-out shadow-sm hover:shadow-md cursor-pointer"
+                      className="appearance-none bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 rounded-lg px-3 py-2 pr-8 text-sm font-medium text-gray-700 dark:text-gray-200 transition-all duration-200 ease-in-out shadow-sm hover:shadow-md cursor-pointer"
                     >
                       <option value={5}>5</option>
                       <option value={10}>10</option>
@@ -239,7 +239,7 @@ const FlowbiteUrgencyTable = ({ selectedLocationId, selectedLocation }) => {
                       <option value={50}>50</option>
                     </select>
                     <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                      <svg className="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3 h-3 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                       </svg>
                     </div>

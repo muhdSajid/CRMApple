@@ -129,8 +129,8 @@ const MedicineTypes = () => {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Medicine Types</h1>
-          <p className="text-gray-600">Manage different types of medicines</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Medicine Types</h1>
+          <p className="text-gray-600 dark:text-gray-400">Manage different types of medicines</p>
         </div>
         <button
           onClick={openAddModal}
@@ -142,25 +142,25 @@ const MedicineTypes = () => {
       </div>
 
       {/* Medicine Types Table */}
-      <div className="bg-white shadow-md rounded-lg overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+      <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">
+        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <thead className="bg-gray-50 dark:bg-gray-700">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Medicine Type
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                Type Name
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                 Description
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
             {medicineTypes.length === 0 ? (
               <tr>
-                <td colSpan="3" className="px-6 py-8 text-center text-gray-500">
+                <td colSpan="3" className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
                   No medicine types found. Click "Add Medicine Type" to get started.
                 </td>
               </tr>
@@ -170,11 +170,11 @@ const MedicineTypes = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <FaMedkit className="text-blue-600 mr-3" />
-                      <div className="text-sm font-medium text-gray-900">{type.typeName}</div>
+                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{type.typeName}</div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{type.description}</div>
+                    <div className="text-sm text-gray-900 dark:text-gray-100">{type.description}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <button
@@ -202,8 +202,8 @@ const MedicineTypes = () => {
       {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
-          <div className="relative p-8 bg-white w-full max-w-md m-auto rounded-lg shadow-lg">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          <div className="relative p-8 bg-white dark:bg-gray-800 w-full max-w-md m-auto rounded-lg shadow-lg">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
               {editingType ? 'Edit Medicine Type' : 'Add Medicine Type'}
             </h3>
             
@@ -242,7 +242,7 @@ const MedicineTypes = () => {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300"
+                  className="px-4 py-2 text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600"
                   disabled={saving}
                 >
                   Cancel
@@ -276,10 +276,10 @@ const MedicineTypes = () => {
               </div>
               
               <div className="text-center">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
                   Delete Medicine Type
                 </h3>
-                <p className="text-gray-600 mb-4">
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
                   Are you sure you want to delete this medicine type? This action cannot be undone.
                 </p>
                 
@@ -287,8 +287,8 @@ const MedicineTypes = () => {
                   <div className="flex items-center">
                     <FaMedkit className="text-blue-600 mr-3" />
                     <div>
-                      <div className="font-medium text-gray-900">{typeToDelete.typeName}</div>
-                      <div className="text-sm text-gray-600">{typeToDelete.description}</div>
+                      <div className="font-medium text-gray-900 dark:text-gray-100">{typeToDelete.typeName}</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">{typeToDelete.description}</div>
                     </div>
                   </div>
                 </div>
@@ -297,7 +297,7 @@ const MedicineTypes = () => {
               <div className="flex gap-3 justify-end">
                 <button
                   onClick={cancelDelete}
-                  className="bg-white text-gray-700 hover:bg-gray-50 border border-gray-300 font-medium rounded-lg text-sm px-5 py-2.5"
+                  className="bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600 font-medium rounded-lg text-sm px-5 py-2.5"
                 >
                   Cancel
                 </button>

@@ -513,9 +513,9 @@ const UserManagement = () => {
     <PrivilegeGuard privileges={[PRIVILEGES.USER_READ, PRIVILEGES.USER_ALL, PRIVILEGES.ALL]}>
       <PageWrapper isLoading={!initialLoadComplete && isLoading}>
         <div className="page-container p-6 mx-auto">
-          <div className="bg-white rounded-xl p-16 shadow ">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-16 shadow dark:shadow-gray-900 ">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold">User Management</h2>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">User Management</h2>
               <PrivilegeGuard privileges={[PRIVILEGES.USER_CREATE, PRIVILEGES.USER_ALL, PRIVILEGES.ALL]}>
                 <Button
                   size="sm"
@@ -535,7 +535,7 @@ const UserManagement = () => {
         <div className="mb-4">
           <div className="relative max-w-md">
             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m21 21-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </div>
@@ -544,11 +544,11 @@ const UserManagement = () => {
               placeholder="Search by name, email, or role..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              className="pl-10 pr-4 py-2 w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
           {searchTerm && (
-            <p className="text-sm text-gray-600 mt-2">
+            <p className="text-sm text-gray-600 dark:text-gray-300 mt-2">
               Showing {getFilteredAndSortedUsers.length} of {users.length} users
             </p>
           )}
@@ -620,7 +620,7 @@ const UserManagement = () => {
               </TableRow>
             ) : getFilteredAndSortedUsers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan="6" className="text-center py-8 text-gray-500">
+                <TableCell colSpan="6" className="text-center py-8 text-gray-500 dark:text-gray-400">
                   {searchTerm ? `No users found matching "${searchTerm}"` : 'No users found'}
                 </TableCell>
               </TableRow>
@@ -697,7 +697,7 @@ const UserManagement = () => {
           <ModalBody>
             <form className="space-y-5" onSubmit={handleSubmit}>
               <div>
-                <Label htmlFor="firstName">First Name</Label>
+                <Label htmlFor="firstName" className="text-gray-900 dark:text-gray-100">First Name</Label>
                 <input
                   id="firstName"
                   type="text"
@@ -705,11 +705,11 @@ const UserManagement = () => {
                   value={formData.firstName}
                   onChange={handleInputChange}
                   disabled={isLoading}
-                  className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100"
+                  className="mt-1 w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 dark:disabled:bg-gray-600"
                 />
               </div>
               <div>
-                <Label htmlFor="lastName">Last Name</Label>
+                <Label htmlFor="lastName" className="text-gray-900 dark:text-gray-100">Last Name</Label>
                 <input
                   id="lastName"
                   type="text"
@@ -717,11 +717,11 @@ const UserManagement = () => {
                   value={formData.lastName}
                   onChange={handleInputChange}
                   disabled={isLoading}
-                  className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100"
+                  className="mt-1 w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 dark:disabled:bg-gray-600"
                 />
               </div>
               <div>
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="text-gray-900 dark:text-gray-100">Email</Label>
                 <input
                   id="email"
                   type="email"
@@ -730,18 +730,18 @@ const UserManagement = () => {
                   value={formData.email}
                   onChange={handleInputChange}
                   disabled={isLoading}
-                  className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100"
+                  className="mt-1 w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 dark:disabled:bg-gray-600"
                 />
               </div>
               <div>
-                <Label htmlFor="role">Role</Label>
+                <Label htmlFor="role" className="text-gray-900 dark:text-gray-100">Role</Label>
                 <select
                   id="role"
                   required
                   value={formData.role}
                   onChange={handleInputChange}
                   disabled={isLoading}
-                  className="border bg-white border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-1 focus:ring-blue-500 focus:outline-none block w-full p-2.5 disabled:bg-gray-100"
+                  className="border bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 text-sm rounded-lg focus:ring-1 focus:ring-blue-500 focus:outline-none block w-full p-2.5 disabled:bg-gray-100 dark:disabled:bg-gray-600"
                 >
                   <option value="">Select Role</option>
                   {roles.map(role => (
@@ -797,58 +797,58 @@ const UserManagement = () => {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>First Name</Label>
+                  <Label className="text-gray-900 dark:text-gray-100">First Name</Label>
                   <input
                     type="text"
                     value={selectedUser.firstName || 'N/A'}
                     readOnly
-                    className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-gray-50 cursor-not-allowed"
+                    className="mt-1 w-full border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md px-3 py-2 text-sm cursor-not-allowed"
                   />
                 </div>
                 <div>
-                  <Label>Last Name</Label>
+                  <Label className="text-gray-900 dark:text-gray-100">Last Name</Label>
                   <input
                     type="text"
                     value={selectedUser.lastName || 'N/A'}
                     readOnly
-                    className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-gray-50 cursor-not-allowed"
+                    className="mt-1 w-full border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md px-3 py-2 text-sm cursor-not-allowed"
                   />
                 </div>
               </div>
               <div>
-                <Label>Email</Label>
+                <Label className="text-gray-900 dark:text-gray-100">Email</Label>
                 <input
                   type="text"
                   value={selectedUser.email || 'N/A'}
                   readOnly
-                  className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-gray-50 cursor-not-allowed"
+                  className="mt-1 w-full border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md px-3 py-2 text-sm cursor-not-allowed"
                 />
               </div>
               <div>
-                <Label>Role</Label>
+                <Label className="text-gray-900 dark:text-gray-100">Role</Label>
                 <input
                   type="text"
                   value={getRoleDisplayName(selectedUser.roles)}
                   readOnly
-                  className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-gray-50 cursor-not-allowed"
+                  className="mt-1 w-full border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md px-3 py-2 text-sm cursor-not-allowed"
                 />
               </div>
               <div>
-                <Label>Date Created</Label>
+                <Label className="text-gray-900 dark:text-gray-100">Date Created</Label>
                 <input
                   type="text"
                   value={formatDate(selectedUser.createdAt || selectedUser.dateCreated)}
                   readOnly
-                  className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-gray-50 cursor-not-allowed"
+                  className="mt-1 w-full border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md px-3 py-2 text-sm cursor-not-allowed"
                 />
               </div>
               <div>
-                <Label>Status</Label>
+                <Label className="text-gray-900 dark:text-gray-100">Status</Label>
                 <input
                   type="text"
                   value={selectedUser.isActive === true ? 'Active' : selectedUser.isActive === false ? 'Inactive' : 'Unknown'}
                   readOnly
-                  className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-gray-50 cursor-not-allowed"
+                  className="mt-1 w-full border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md px-3 py-2 text-sm cursor-not-allowed"
                 />
               </div>
             </div>
@@ -872,23 +872,23 @@ const UserManagement = () => {
           <ModalBody>
             <form className="space-y-5" onSubmit={handleEditSubmit}>
               <div>
-                <Label>User</Label>
+                <Label className="text-gray-900 dark:text-gray-100">User</Label>
                 <input
                   type="text"
                   value={`${selectedUser.firstName || ''} ${selectedUser.lastName || ''} (${selectedUser.email})`}
                   readOnly
-                  className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-gray-50 cursor-not-allowed"
+                  className="mt-1 w-full border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md px-3 py-2 text-sm cursor-not-allowed"
                 />
               </div>
               <div>
-                <Label htmlFor="role">Role</Label>
+                <Label htmlFor="role" className="text-gray-900 dark:text-gray-100">Role</Label>
                 <select
                   id="role"
                   required
                   value={editFormData.role}
                   onChange={handleEditInputChange}
                   disabled={isLoading}
-                  className="border bg-white border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-1 focus:ring-blue-500 focus:outline-none block w-full p-2.5 disabled:bg-gray-100"
+                  className="border bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 text-sm rounded-lg focus:ring-1 focus:ring-blue-500 focus:outline-none block w-full p-2.5 disabled:bg-gray-100 dark:disabled:bg-gray-600"
                 >
                   <option value="">Select Role</option>
                   {roles.map(role => (
@@ -908,7 +908,7 @@ const UserManagement = () => {
                       onClick={() => handleStatusToggle(!editFormData.isActive)}
                       disabled={isLoading}
                       className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 ${
-                        editFormData.isActive ? 'bg-blue-600' : 'bg-gray-200'
+                        editFormData.isActive ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-600'
                       }`}
                     >
                       <span
@@ -917,11 +917,11 @@ const UserManagement = () => {
                         }`}
                       />
                     </button>
-                    <span className={`text-sm font-medium ${editFormData.isActive ? 'text-blue-600' : 'text-gray-500'}`}>
+                    <span className={`text-sm font-medium ${editFormData.isActive ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'}`}>
                       {editFormData.isActive ? "Active" : "Inactive"}
                     </span>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                     {editFormData.isActive 
                       ? "User can access the system" 
                       : "User access is disabled"
@@ -982,18 +982,18 @@ const UserManagement = () => {
                     </svg>
                   </div>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">User Added Successfully!</h3>
-                <p className="text-gray-600 mb-4">A temporary password has been generated for this user:</p>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">User Added Successfully!</h3>
+                <p className="text-gray-600 dark:text-gray-300 mb-4">A temporary password has been generated for this user:</p>
               </div>
               
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                <Label className="block text-sm font-medium text-gray-700 mb-2">Temporary Password</Label>
+              <div className="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-4">
+                <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Temporary Password</Label>
                 <div className="flex items-center gap-2">
                   <input
                     type="text"
                     value={temporaryPassword}
                     readOnly
-                    className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm font-mono select-all focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="flex-1 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 rounded-md text-sm font-mono select-all focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <Button
                     type="button"
@@ -1055,18 +1055,18 @@ const UserManagement = () => {
                     </svg>
                   </div>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Password Reset Successfully!</h3>
-                <p className="text-gray-600 mb-4">A new password has been generated for this user:</p>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Password Reset Successfully!</h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">A new password has been generated for this user:</p>
               </div>
               
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                <Label className="block text-sm font-medium text-gray-700 mb-2">New Password</Label>
+              <div className="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-4">
+                <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">New Password</Label>
                 <div className="flex items-center gap-2">
                   <input
                     type="text"
                     value={resetPassword}
                     readOnly
-                    className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm font-mono select-all focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="flex-1 px-3 py-2 bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-md text-sm text-gray-900 dark:text-gray-100 font-mono select-all focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <Button
                     type="button"
@@ -1084,15 +1084,15 @@ const UserManagement = () => {
                 </div>
               </div>
 
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
                 <div className="flex">
                   <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="h-5 w-5 text-yellow-400 dark:text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                     </svg>
                   </div>
                   <div className="ml-3">
-                    <p className="text-sm text-yellow-800">
+                    <p className="text-sm text-yellow-800 dark:text-yellow-200">
                       <strong>Important:</strong> Please share this new password with the user securely. 
                       They should change it upon next login.
                     </p>

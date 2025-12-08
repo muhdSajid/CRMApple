@@ -147,10 +147,10 @@ const RoleManagement = () => {
     <div className="p-6">
       <div className="flex items-center mb-6">
         <FaUserShield className="text-blue-600 text-2xl mr-3" />
-        <h1 className="text-2xl font-bold text-gray-900">Role & Privilege Management</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Role & Privilege Management</h1>
       </div>
       
-      <p className="text-gray-600 mb-6">
+      <p className="text-gray-600 dark:text-gray-400 mb-6">
         Manage user roles and assign privileges to control access to different parts of the system.
       </p>
 
@@ -158,14 +158,14 @@ const RoleManagement = () => {
       <div className="space-y-4">
         {Array.isArray(roles) && roles.length > 0 ? (
           roles.map((role) => (
-            <div key={role.id} className="bg-white border border-gray-200 rounded-lg shadow-sm">
+            <div key={role.id} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-sm">
               {/* Role Header */}
-              <div className="p-4 border-b border-gray-200">
-                <div className="flex items-center justify-between">
+              <div className="p-4 border-b border-gray-200 dark:border-gray-600">
+                <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <h4 className="text-lg font-medium text-gray-900">{role.displayName}</h4>
-                    <p className="text-sm text-gray-500 mb-2">{role.name}</p>
-                    <div className="flex items-center text-sm text-gray-600">
+                    <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100">{role.displayName}</h4>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">{role.name}</p>
+                    <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                       <span className="mr-2">Privileges:</span>
                       <span className="font-medium">
                         {role.privileges && Array.isArray(role.privileges) ? role.privileges.length : 0}
@@ -210,16 +210,16 @@ const RoleManagement = () => {
               {editingRole?.id === role.id && (
                 <div className="p-4">
                   <div>
-                    <h5 className="text-sm font-medium text-gray-700 mb-4">
+                    <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">
                       Select Privileges for {role.displayName}:
                     </h5>
                     <div className="max-h-96 overflow-y-auto">
                       {Array.isArray(allPrivileges) && groupPrivilegesByPrefix(allPrivileges).map(([groupName, groupPrivileges]) => (
                         <div key={groupName} className="mb-6">
-                          <h6 className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-3 flex items-center">
-                            <span className="h-px bg-gray-300 flex-1 mr-3"></span>
+                          <h6 className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center">
+                            <span className="h-px bg-gray-300 dark:bg-gray-600 flex-1 mr-3"></span>
                             {groupName}
-                            <span className="h-px bg-gray-300 flex-1 ml-3"></span>
+                            <span className="h-px bg-gray-300 dark:bg-gray-600 flex-1 ml-3"></span>
                           </h6>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             {groupPrivileges.map((privilege) => (
@@ -227,26 +227,26 @@ const RoleManagement = () => {
                                 key={privilege.id}
                                 className={`flex items-start p-3 border rounded-lg cursor-pointer transition-colors ${
                                   selectedPrivileges.includes(privilege.id)
-                                    ? 'border-blue-500 bg-blue-50'
-                                    : 'border-gray-200 hover:bg-gray-50'
+                                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 dark:border-blue-400'
+                                    : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800'
                                 }`}
                               >
                                 <input
                                   type="checkbox"
                                   checked={selectedPrivileges.includes(privilege.id)}
                                   onChange={() => handlePrivilegeToggle(privilege.id)}
-                                  className="mt-1 mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                  className="mt-1 mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded"
                                 />
                                 <div className="flex-1">
-                                  <div className="text-sm font-medium text-gray-900">
+                                  <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
                                     {privilege.privilegeName || privilege.name}
                                   </div>
-                                  <div className="text-xs text-gray-500 mt-1">
+                                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                                     {privilege.description}
                                   </div>
                                 </div>
                                 {selectedPrivileges.includes(privilege.id) && (
-                                  <FaCheck className="text-blue-600 mt-1" />
+                                  <FaCheck className="text-blue-600 dark:text-blue-400 mt-1" />
                                 )}
                               </label>
                             ))}
@@ -260,11 +260,11 @@ const RoleManagement = () => {
             </div>
           ))
         ) : (
-          <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
+          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm">
             <div className="text-center py-12">
-              <FaUserShield className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No roles found</h3>
-              <p className="text-gray-500 mb-4">
+              <FaUserShield className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No roles found</h3>
+              <p className="text-gray-500 dark:text-gray-400 mb-4">
                 {!Array.isArray(roles) 
                   ? 'Unable to load roles data. Please check your connection and try again.'
                   : 'No roles are available in the system.'

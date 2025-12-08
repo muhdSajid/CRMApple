@@ -276,18 +276,21 @@ const Distribution = () => {
     try {
       setAddingCenter(true);
       
-      // Map distribution modes to type IDs
-      const typeMap = {
-        'hospitals': 1,
-        'medical-camps': 2,
-        'home-care': 3
-      };
+      // Get the type ID from the distribution type (dynamically from API data)
+      const selectedType = deliveryCenterTypes.find(type => 
+        getDeliveryCenterTypeConfig(type.typeName).value === selectedMode
+      );
+
+      if (!selectedType) {
+        alert("Invalid distribution type selected");
+        return;
+      }
 
       const centerData = {
         name: newCenterName.trim(),
         contactPhone: newCenterContact.trim(),
         locationId: selectedLocation,
-        typeId: typeMap[selectedMode] || selectedMode
+        typeId: selectedType.id
       };
 
       const newCenter = await createDeliveryCenter(centerData);
@@ -939,18 +942,18 @@ const Distribution = () => {
 
   return (
     <PrivilegeGuard privileges={[PRIVILEGES.MEDICINE_DISTRIBUTION_VIEW, PRIVILEGES.MEDICINE_DISTRIBUTION_ALL, PRIVILEGES.ALL]}>
-      <div className="m-6 p-4 bg-white rounded-lg shadow-md space-y-4">
+      <div className="m-6 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md space-y-4">
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-semibold">Medicine Distribution</h1>
+          <h1 className="text-3xl font-semibold text-gray-900 dark:text-gray-100">Medicine Distribution</h1>
         </div>
         <HR />
 
         {/* Compact Selection Section */}
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 shadow-sm">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 p-4">
           {/* Location Selection - Compact */}
           <div className="relative">
-            <label className="block text-xs font-medium text-gray-700 mb-1">
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
               <span className="flex items-center gap-1">
                 <div className={`w-4 h-4 rounded-full flex items-center justify-center text-xs ${
                   selectedLocation ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'
@@ -963,7 +966,7 @@ const Distribution = () => {
             <div className="relative">
               <button
                 onClick={toggleLocationAccordion}
-                className="w-full p-2 text-left border border-gray-300 rounded-lg bg-white hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                className="w-full p-2 text-left border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm text-gray-900 dark:text-gray-100"
               >
                 <span className="block truncate">
                   {selectedLocation 
@@ -983,20 +986,20 @@ const Distribution = () => {
               </button>
               
               {locationAccordionOpen && (
-                <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                   {loading ? (
-                    <div className="p-3 text-center text-gray-500 text-sm">Loading...</div>
+                    <div className="p-3 text-center text-gray-500 dark:text-gray-400 text-sm">Loading...</div>
                   ) : (
                     locations.map((location) => (
                       <div
                         key={location.id}
                         onClick={() => handleLocationChange(location.id.toString())}
-                        className={`px-3 py-2 cursor-pointer hover:bg-gray-100 border-b border-gray-100 last:border-b-0 ${
-                          selectedLocation === location.id.toString() ? 'bg-blue-50 text-blue-700' : ''
+                        className={`px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-700 last:border-b-0 ${
+                          selectedLocation === location.id.toString() ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' : 'text-gray-900 dark:text-gray-100'
                         }`}
                       >
                         <div className="text-sm font-medium">{location.name}</div>
-                        <div className="text-xs text-gray-500 truncate">{location.locationAddress}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{location.locationAddress}</div>
                       </div>
                     ))
                   )}
@@ -1007,7 +1010,7 @@ const Distribution = () => {
 
           {/* Distribution Type Selection - Compact */}
           <div className="relative">
-            <label className="block text-xs font-medium text-gray-700 mb-1">
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
               <span className="flex items-center gap-1">
                 <div className={`w-4 h-4 rounded-full flex items-center justify-center text-xs ${
                   selectedMode ? 'bg-green-500 text-white' : 
@@ -1024,8 +1027,8 @@ const Distribution = () => {
                 disabled={!selectedLocation}
                 className={`w-full p-2 text-left border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm ${
                   selectedLocation 
-                    ? 'border-gray-300 bg-white hover:bg-gray-50 focus:border-blue-500' 
-                    : 'border-gray-200 bg-gray-100 cursor-not-allowed text-gray-500'
+                    ? 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:border-blue-500 text-gray-900 dark:text-gray-100' 
+                    : 'border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 cursor-not-allowed text-gray-500 dark:text-gray-500'
                 }`}
               >
                 <span className="block truncate">
@@ -1046,15 +1049,15 @@ const Distribution = () => {
               </button>
               
               {typeAccordionOpen && selectedLocation && (
-                <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg">
+                <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg">
                   {deliveryCenterTypes.map((type) => {
                     const config = getDeliveryCenterTypeConfig(type.typeName);
                     return (
                       <div
                         key={type.id}
                         onClick={() => handleRadioClick(config.value)}
-                        className={`px-3 py-2 cursor-pointer hover:bg-gray-100 border-b border-gray-100 last:border-b-0 ${
-                          selectedMode === config.value ? 'bg-blue-50 text-blue-700' : ''
+                        className={`px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-700 last:border-b-0 ${
+                          selectedMode === config.value ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' : 'text-gray-900 dark:text-gray-100'
                         }`}
                       >
                         <div className="text-sm font-medium">{type.typeName}</div>
@@ -1068,7 +1071,7 @@ const Distribution = () => {
 
           {/* Distribution Center - Compact */}
           <div className="relative">
-            <label className="block text-xs font-medium text-gray-700 mb-1">
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
               <span className="flex items-center gap-1">
                 <div className={`w-4 h-4 rounded-full flex items-center justify-center text-xs ${
                   selectedDeliveryCenter ? 'bg-green-500 text-white' : 
@@ -1085,8 +1088,8 @@ const Distribution = () => {
                 disabled={!selectedLocation || !selectedMode}
                 className={`w-full p-2 text-left border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm ${
                   (selectedLocation && selectedMode)
-                    ? 'border-gray-300 bg-white hover:bg-gray-50 focus:border-blue-500' 
-                    : 'border-gray-200 bg-gray-100 cursor-not-allowed text-gray-500'
+                    ? 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:border-blue-500 text-gray-900 dark:text-gray-100' 
+                    : 'border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 cursor-not-allowed text-gray-500 dark:text-gray-500'
                 }`}
               >
                 <span className="block truncate">
@@ -1107,19 +1110,19 @@ const Distribution = () => {
               </button>
               
               {deliveryCenterAccordionOpen && selectedLocation && selectedMode && (
-                <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                   {loadingCenters ? (
-                    <div className="p-3 text-center text-gray-500 text-sm">Loading...</div>
+                    <div className="p-3 text-center text-gray-500 dark:text-gray-400 text-sm">Loading...</div>
                   ) : (
                     <>
-                      <div className="p-2 border-b border-gray-100">
+                      <div className="p-2 border-b border-gray-100 dark:border-gray-700">
                         <div className="flex gap-1">
                           <input
                             type="text"
                             value={searchTerm}
                             onChange={handleSearchChange}
                             placeholder="Search centers..."
-                            className="flex-1 border border-gray-300 text-gray-900 text-xs rounded px-2 py-1 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                            className="flex-1 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 dark:bg-gray-700 text-xs rounded px-2 py-1 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                           />
                           <button
                             onClick={() => setShowAddCenterModal(true)}
@@ -1135,16 +1138,16 @@ const Distribution = () => {
                         <div
                           key={center.id}
                           onClick={() => handleCenterSelect(String(center.id))}
-                          className={`px-3 py-2 cursor-pointer hover:bg-gray-100 border-b border-gray-100 last:border-b-0 ${
-                            selectedDeliveryCenter === String(center.id) ? 'bg-blue-50 text-blue-700' : ''
+                          className={`px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-700 last:border-b-0 ${
+                            selectedDeliveryCenter === String(center.id) ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' : 'text-gray-900 dark:text-gray-100'
                           }`}
                         >
                           <div className="text-sm font-medium">{center.name}</div>
-                          <div className="text-xs text-gray-500">{center.contactPhone || 'No contact'}</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">{center.contactPhone || 'No contact'}</div>
                         </div>
                       ))}
                       {filteredCenters.length === 0 && (
-                        <div className="p-3 text-center text-gray-500 text-sm">
+                        <div className="p-3 text-center text-gray-500 dark:text-gray-400 text-sm">
                           No centers found
                         </div>
                       )}
@@ -1157,7 +1160,7 @@ const Distribution = () => {
 
           {/* Date Selection - Compact */}
           <div className="relative">
-            <label className="block text-xs font-medium text-gray-700 mb-1">
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
               <span className="flex items-center gap-1">
                 <div className={`w-4 h-4 rounded-full flex items-center justify-center text-xs ${
                   selectedDistributionDate ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'
@@ -1179,33 +1182,33 @@ const Distribution = () => {
 
       {/* Compact Welcome Message */}
       {(!selectedLocation || !selectedMode || !selectedDeliveryCenter) && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
           <div className="text-center">
-            <h3 className="text-lg font-semibold text-blue-900 mb-2">Complete Setup to Start Distribution</h3>
+            <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-2">Complete Setup to Start Distribution</h3>
             <div className="flex justify-center items-center gap-4 text-sm">
               <div className="flex items-center gap-1">
                 <div className={`w-4 h-4 rounded-full flex items-center justify-center text-xs ${
-                  selectedLocation ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'
+                  selectedLocation ? 'bg-green-500 text-white' : 'bg-gray-300 dark:bg-gray-600 text-gray-600 dark:text-gray-400'
                 }`}>
                   {selectedLocation ? '✓' : '1'}
                 </div>
-                <span className={selectedLocation ? 'text-green-700' : 'text-gray-600'}>Location</span>
+                <span className={selectedLocation ? 'text-green-700 dark:text-green-400' : 'text-gray-600 dark:text-gray-400'}>Location</span>
               </div>
               <div className="flex items-center gap-1">
                 <div className={`w-4 h-4 rounded-full flex items-center justify-center text-xs ${
-                  selectedMode ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'
+                  selectedMode ? 'bg-green-500 text-white' : 'bg-gray-300 dark:bg-gray-600 text-gray-600 dark:text-gray-400'
                 }`}>
                   {selectedMode ? '✓' : '2'}
                 </div>
-                <span className={selectedMode ? 'text-green-700' : 'text-gray-600'}>Type</span>
+                <span className={selectedMode ? 'text-green-700 dark:text-green-400' : 'text-gray-600 dark:text-gray-400'}>Type</span>
               </div>
               <div className="flex items-center gap-1">
                 <div className={`w-4 h-4 rounded-full flex items-center justify-center text-xs ${
-                  selectedDeliveryCenter ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'
+                  selectedDeliveryCenter ? 'bg-green-500 text-white' : 'bg-gray-300 dark:bg-gray-600 text-gray-600 dark:text-gray-400'
                 }`}>
                   {selectedDeliveryCenter ? '✓' : '3'}
                 </div>
-                <span className={selectedDeliveryCenter ? 'text-green-700' : 'text-gray-600'}>Center</span>
+                <span className={selectedDeliveryCenter ? 'text-green-700 dark:text-green-400' : 'text-gray-600 dark:text-gray-400'}>Center</span>
               </div>
             </div>
           </div>
@@ -1215,14 +1218,14 @@ const Distribution = () => {
       {/* Tab Navigation - Show when center and date are selected */}
       {selectedLocation && selectedMode && selectedDeliveryCenter && (
         <div className="mt-6">
-          <div className="border-b border-gray-200">
+          <div className="border-b border-gray-200 dark:border-gray-700">
             <nav className="-mb-px flex space-x-8" aria-label="Tabs">
               <button
                 onClick={() => setActiveTab("new-distribution")}
                 className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
                   activeTab === "new-distribution"
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    ? "border-blue-500 text-blue-600 dark:text-blue-400"
+                    : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600"
                 }`}
               >
                 <div className="flex items-center gap-2">
@@ -1236,8 +1239,8 @@ const Distribution = () => {
                 onClick={() => setActiveTab("daily-list")}
                 className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
                   activeTab === "daily-list"
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    ? "border-blue-500 text-blue-600 dark:text-blue-400"
+                    : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600"
                 }`}
               >
                 <div className="flex items-center gap-2">
@@ -1257,12 +1260,12 @@ const Distribution = () => {
               <div>
                 {/* Header with Help Icon */}
                 <div className="flex items-center gap-2 mb-4">
-                  <h4 className="text-lg font-semibold text-gray-900">Daily Distributions</h4>
+                  <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Daily Distributions</h4>
                   <div className="relative">
                     <button
                       onMouseEnter={() => setShowDailyDistributionHelp(true)}
                       onMouseLeave={() => setShowDailyDistributionHelp(false)}
-                      className="text-gray-400 hover:text-gray-600 transition-colors"
+                      className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                       title="Help"
                     >
                       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -1300,12 +1303,12 @@ const Distribution = () => {
               <div className="space-y-4">
                 {/* Header with Help Icon */}
                 <div className="flex items-center gap-2 mb-4">
-                  <h4 className="text-lg font-semibold text-gray-900">New Distribution</h4>
+                  <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100">New Distribution</h4>
                   <div className="relative">
                     <button
                       onMouseEnter={() => setShowNewDistributionHelp(true)}
                       onMouseLeave={() => setShowNewDistributionHelp(false)}
-                      className="text-gray-400 hover:text-gray-600 transition-colors"
+                      className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                       title="Help"
                     >
                       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -1362,14 +1365,14 @@ const Distribution = () => {
                 {completedPatients.map((patient) => (
                   <div 
                     key={patient.id} 
-                    className={`bg-white border border-green-200 rounded-md p-3 transition-all duration-300 ${
+                    className={`bg-white dark:bg-gray-700 border border-green-200 dark:border-green-700 rounded-md p-3 transition-all duration-300 ${
                       fadingCompletedPatients.includes(patient.id) ? 'opacity-0 transform scale-95' : 'opacity-100'
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-gray-900">{patient.name}</p>
-                        <p className="text-xs text-gray-500">{patient.medicineCount} medicine{patient.medicineCount !== 1 ? 's' : ''}</p>
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{patient.name}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{patient.medicineCount} medicine{patient.medicineCount !== 1 ? 's' : ''}</p>
                       </div>
                       <div className="text-xs text-green-600">
                         ✓ Saved
@@ -1380,7 +1383,7 @@ const Distribution = () => {
               </div>
               
               {/* Auto-fade notice */}
-              <div className="mt-3 text-xs text-green-700 opacity-75 flex items-center gap-1">
+              <div className="mt-3 text-xs text-green-700 dark:text-green-400 opacity-75 flex items-center gap-1">
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -1391,14 +1394,14 @@ const Distribution = () => {
 
           {/* Error Display */}
           {distributionError && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg p-3 mb-4">
               <div className="flex items-start">
-                <svg className="w-5 h-5 text-red-400 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-5 h-5 text-red-400 dark:text-red-500 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                 </svg>
                 <div>
-                  <h4 className="text-red-800 font-medium text-sm">Distribution Error</h4>
-                  <p className="text-red-700 text-sm mt-1">{distributionError}</p>
+                  <h4 className="text-red-800 dark:text-red-300 font-medium text-sm">Distribution Error</h4>
+                  <p className="text-red-700 dark:text-red-400 text-sm mt-1">{distributionError}</p>
                 </div>
               </div>
             </div>
@@ -1407,7 +1410,7 @@ const Distribution = () => {
           {/* Medicine Distribution Table */}
 
           <div className="overflow-x-auto mb-4 pb-8">
-            <Table className="border border-gray-300">
+            <Table className="border border-gray-300 dark:border-gray-600">
               <TableHead className="[&>tr>th]:bg-[#E8EFF2] [&>tr>th]:text-black">
                 <TableRow>
                   <TableHeadCell>Patient Name</TableHeadCell>
@@ -1433,30 +1436,30 @@ const Distribution = () => {
                 ).map(([patientId, group]) => (
                   <React.Fragment key={patientId}>
                     {/* Patient header row */}
-                    <TableRow className="bg-blue-50">
-                      <TableCell className="py-2 font-semibold text-blue-900" colSpan={4}>
+                    <TableRow className="bg-blue-50 dark:bg-blue-900/20">
+                      <TableCell className="py-2 font-semibold text-blue-900 dark:text-blue-100" colSpan={4}>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <span>Patient: {group.patient.name}</span>
                             {group.patient.isNewPatient && (
-                              <span className="px-2 py-1 text-xs bg-blue-200 text-blue-800 rounded-full">
+                              <span className="px-2 py-1 text-xs bg-blue-200 dark:bg-blue-700 text-blue-800 dark:text-blue-200 rounded-full">
                                 New Patient
                               </span>
                             )}
-                            <span className="text-sm text-blue-700">({group.medicines.length} medicine{group.medicines.length !== 1 ? 's' : ''})</span>
+                            <span className="text-sm text-blue-700 dark:text-blue-300">({group.medicines.length} medicine{group.medicines.length !== 1 ? 's' : ''})</span>
                           </div>
                         </div>
                       </TableCell>
                     </TableRow>
                     {/* Medicine rows for this patient */}
                     {group.medicines.map((item) => (
-                      <TableRow key={item.id} className="bg-white hover:bg-gray-50">
+                      <TableRow key={item.id} className="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">
                         <TableCell className="py-3 pl-8">
-                          <span className="text-gray-600">↳ Medicine</span>
+                          <span className="text-gray-600 dark:text-gray-400">↳ Medicine</span>
                         </TableCell>
                         <TableCell className="py-3">
                           <div className="flex flex-col">
-                            <span className="text-gray-900 font-medium">{item.medicineName}</span>
+                            <span className="text-gray-900 dark:text-gray-100 font-medium">{item.medicineName}</span>
                             {item.availableStock !== null && (
                               <span className={`text-xs ${
                                 item.availableStock > item.quantity ? 'text-green-600' : 'text-amber-600'
@@ -1516,13 +1519,13 @@ const Distribution = () => {
                           ) : (
                             <div className="flex items-center gap-3">
                               <div className="text-center">
-                                <div className="text-lg font-semibold text-gray-900">{item.quantity}</div>
-                                <div className="text-xs text-gray-500">units</div>
+                                <div className="text-lg font-semibold text-gray-900 dark:text-gray-100">{item.quantity}</div>
+                                <div className="text-xs text-gray-500 dark:text-gray-400">units</div>
                               </div>
                               {item.totalPrice && (
                                 <div className="text-center">
-                                  <div className="text-lg font-semibold text-green-600">₹{item.totalPrice.toFixed(2)}</div>
-                                  <div className="text-xs text-gray-500">total</div>
+                                  <div className="text-lg font-semibold text-green-600 dark:text-green-400">₹{item.totalPrice.toFixed(2)}</div>
+                                  <div className="text-xs text-gray-500 dark:text-gray-400">total</div>
                                 </div>
                               )}
                             </div>
@@ -1546,7 +1549,7 @@ const Distribution = () => {
                 
                 {/* Input row for adding new entries - only show when no items or user clicks "Add More" */}
                 {(distributionList.length === 0 || showAddRow) && (
-                  <TableRow className="bg-gray-50 hover:bg-gray-100">
+                  <TableRow className="bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800">
                     <TableCell className="py-3">
                       <div className="relative patient-search-dropdown-container">
                         <div className="flex gap-2">
@@ -1577,15 +1580,15 @@ const Distribution = () => {
                                   </div>
                                 )}
                                 {showPatientDropdown && patients.length > 0 && (
-                                  <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                                  <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-48 overflow-y-auto">
                                     {patients.map((patient) => (
                                       <div
                                         key={patient.id}
                                         onClick={() => handlePatientSelect(patient)}
-                                        className="px-3 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
+                                        className="px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0"
                                       >
-                                        <div className="text-sm font-medium text-gray-900">{patient.name}</div>
-                                        <div className="text-xs text-gray-500">
+                                        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{patient.name}</div>
+                                        <div className="text-xs text-gray-500 dark:text-gray-400">
                                           {patient.patientId} • {patient.phone || 'No phone'}
                                         </div>
                                       </div>
@@ -1593,7 +1596,7 @@ const Distribution = () => {
                                   </div>
                                 )}
                                 {showPatientDropdown && patientSearchTerm && patients.length === 0 && !searchingPatients && (
-                                  <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-3 text-center text-gray-500 text-sm">
+                                  <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg p-3 text-center text-gray-500 dark:text-gray-400 text-sm">
                                     No patients found
                                   </div>
                                 )}
@@ -1623,7 +1626,7 @@ const Distribution = () => {
                           onChange={handleMedicineSearchChange}
                           onFocus={() => setShowMedicineDropdown(true)}
                           placeholder="Search medicine name..."
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                          className="w-full border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 dark:bg-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-blue-500 focus:outline-none"
                         />
                         {searchingMedicines && (
                           <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
@@ -1631,16 +1634,16 @@ const Distribution = () => {
                           </div>
                         )}
                         {showMedicineDropdown && medicines.length > 0 && (
-                          <div className="absolute z-[9999] w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                          <div className="absolute z-[9999] w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-48 overflow-y-auto">
                             {console.log('Rendering medicines dropdown with:', medicines)}
                             {medicines.map((medicine) => (
                               <div
                                 key={medicine.medicineId}
                                 onClick={() => handleMedicineSelect(medicine)}
-                                className="px-3 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
+                                className="px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0"
                               >
-                                <div className="text-sm font-medium text-gray-900">{medicine.medicineName}</div>
-                                <div className="text-xs text-gray-500 flex justify-between">
+                                <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{medicine.medicineName}</div>
+                                <div className="text-xs text-gray-500 dark:text-gray-400 flex justify-between">
                                   <span>Batches: {medicine.numberOfBatches}</span>
                                   <span className={`font-medium ${
                                     medicine.totalNumberOfMedicines > 0 ? 'text-green-600' : 'text-red-600'
@@ -1653,7 +1656,7 @@ const Distribution = () => {
                           </div>
                         )}
                         {showMedicineDropdown && medicineSearchTerm && medicines.length === 0 && !searchingMedicines && (
-                          <div className="absolute z-[9999] w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-3 text-center text-gray-500 text-sm">
+                          <div className="absolute z-[9999] w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg p-3 text-center text-gray-500 dark:text-gray-400 text-sm">
                             No medicines found
                           </div>
                         )}
@@ -1661,7 +1664,7 @@ const Distribution = () => {
                     </TableCell>
                     <TableCell className="py-3">
                       <div className="text-center">
-                        <span className="text-gray-500 text-sm">
+                        <span className="text-gray-500 dark:text-gray-400 text-sm">
                           Quantity will be set from batch selection
                         </span>
                       </div>
@@ -1713,7 +1716,7 @@ const Distribution = () => {
                 
                 {/* Add More button row and Complete Patient - show when there are items and add row is not shown */}
                 {distributionList.length > 0 && !showAddRow && (
-                  <TableRow className="bg-blue-50 hover:bg-blue-100">
+                  <TableRow className="bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30">
                     <TableCell colSpan={4} className="py-4">
                       <div className="flex items-center justify-between">
                         <button
@@ -1767,9 +1770,9 @@ const Distribution = () => {
                 {/* Empty state when no items */}
                 {distributionList.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={4} className="py-8 text-center text-gray-500">
+                    <TableCell colSpan={4} className="py-8 text-center text-gray-500 dark:text-gray-400">
                       <div className="flex flex-col items-center gap-2">
-                        <svg className="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-12 h-12 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                         </svg>
                         <p>No medicines added yet</p>

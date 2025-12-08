@@ -27,29 +27,29 @@ const FilterPopover = () => {
       </button>
 
       {showFilter && (
-        <div className="absolute z-10 right-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg p-4">
-          <h4 className="text-sm font-semibold text-gray-700 mb-2">
+        <div className="absolute z-10 right-0 mt-2 w-64 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg dark:shadow-gray-900 p-4">
+          <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
             Filter Options
           </h4>
 
           <div className="space-y-2">
             <div>
-              <label className="block text-xs font-medium text-gray-600">
+              <label className="block text-xs font-medium text-gray-600 dark:text-gray-400">
                 Start Date
               </label>
               <input
                 type="date"
-                className="w-full border rounded px-2 py-1 text-sm"
+                className="w-full border dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded px-2 py-1 text-sm"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-gray-600">
+              <label className="block text-xs font-medium text-gray-600 dark:text-gray-400">
                 End Date
               </label>
               <input
                 type="date"
-                className="w-full border rounded px-2 py-1 text-sm"
+                className="w-full border dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded px-2 py-1 text-sm"
               />
             </div>
           </div>
@@ -57,7 +57,7 @@ const FilterPopover = () => {
           <div className="flex justify-end gap-2 mt-4">
             <button
               onClick={() => setShowFilter(false)}
-              className="text-sm px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded"
+              className="text-sm px-3 py-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 rounded"
             >
               Cancel
             </button>

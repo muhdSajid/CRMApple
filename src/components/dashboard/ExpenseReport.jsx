@@ -169,7 +169,7 @@ const ExpensesReport = ({ selectedLocationId, selectedYear }) => {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <div className="ml-2 text-gray-600">Loading expense report...</div>
+        <div className="ml-2 text-gray-600 dark:text-gray-400">Loading expense report...</div>
       </div>
     );
   }
@@ -178,17 +178,17 @@ const ExpensesReport = ({ selectedLocationId, selectedYear }) => {
   if (!hasRealData) {
     return (
       <div className="max-w-md mx-auto text-center pt-6">
-        <div className="flex flex-col items-center justify-center py-8 bg-gray-50 rounded-lg">
-          <div className="text-4xl text-gray-300 mb-2">📊</div>
-          <h3 className="text-lg font-medium text-gray-600 mb-1">No Expense Data Available</h3>
-          <p className="text-sm text-gray-500 text-center">
+        <div className="flex flex-col items-center justify-center py-8 bg-gray-50 dark:bg-gray-900 rounded-lg">
+          <div className="text-4xl text-gray-300 dark:text-gray-600 mb-2">📊</div>
+          <h3 className="text-lg font-medium text-gray-600 dark:text-gray-300 mb-1">No Expense Data Available</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
             There are no expense reports to display for this period.
           </p>
         </div>
         
         <div className="mt-4 text-center">
-          <p className="text-sm text-gray-500">Total Expenses</p>
-          <p className="text-xl font-bold">₹0</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Total Expenses</p>
+          <p className="text-xl font-bold text-gray-900 dark:text-gray-100">₹0</p>
         </div>
       </div>
     );
@@ -198,24 +198,24 @@ const ExpensesReport = ({ selectedLocationId, selectedYear }) => {
     <div className="max-w-md mx-auto text-center pt-6">
       <svg ref={svgRef} className="mx-auto"></svg>
       <div className="-mt-12 text-center">
-        <p className="text-sm text-gray-500">Total Expenses</p>
-        <p className="text-xl font-bold">₹{total.toLocaleString()}</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">Total Expenses</p>
+        <p className="text-xl font-bold text-gray-900 dark:text-gray-100">₹{total.toLocaleString()}</p>
       </div>
 
       <div className="grid grid-cols-2 gap-3 mt-12 pt-6">
         {data.map((item, index) => (
           <div
             key={index}
-            className="bg-gray-100 p-3 rounded-lg text-left flex flex-col"
+            className="bg-gray-100 dark:bg-gray-700 p-3 rounded-lg text-left flex flex-col"
           >
             <div className="flex items-center gap-2 mb-1">
               <span
                 className="w-3 h-3 rounded-full"
                 style={{ backgroundColor: item.color }}
               ></span>
-              <span className="text-sm text-gray-700">{item.name}</span>
+              <span className="text-sm text-gray-700 dark:text-gray-300">{item.name}</span>
             </div>
-            <p className="font-semibold text-black text-sm">
+            <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
               ₹{item.value.toLocaleString()}
             </p>
           </div>

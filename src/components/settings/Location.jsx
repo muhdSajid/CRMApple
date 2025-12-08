@@ -184,8 +184,8 @@ const Location = () => {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Locations</h1>
-          <p className="text-gray-600">Manage warehouse and storage locations</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Locations</h1>
+          <p className="text-gray-600 dark:text-gray-400">Manage warehouse and storage locations</p>
         </div>
         <button
           onClick={openAddModal}
@@ -197,28 +197,28 @@ const Location = () => {
       </div>
 
       {/* Locations Table */}
-      <div className="bg-white shadow-md rounded-lg overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+      <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">
+        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <thead className="bg-gray-50 dark:bg-gray-700">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                 Location Name
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                 Address
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                 Status
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
             {locations.length === 0 ? (
               <tr>
-                <td colSpan="4" className="px-6 py-8 text-center text-gray-500">
+                <td colSpan="4" className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
                   No locations found. Click "Add Location" to get started.
                 </td>
               </tr>
@@ -229,12 +229,12 @@ const Location = () => {
                     <div className="flex items-center">
                       <FaMapMarkerAlt className="text-blue-600 mr-3" />
                       <div>
-                        <div className="text-sm font-medium text-gray-900">{location.name}</div>
+                        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{location.name}</div>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="text-sm text-gray-900 max-w-xs truncate" title={location.locationAddress}>
+                    <div className="text-sm text-gray-900 dark:text-gray-100 max-w-xs truncate" title={location.locationAddress}>
                       {location.locationAddress}
                     </div>
                   </td>
@@ -277,8 +277,8 @@ const Location = () => {
       {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
-          <div className="relative p-8 bg-white w-full max-w-lg m-auto rounded-lg shadow-lg">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          <div className="relative p-8 bg-white dark:bg-gray-800 w-full max-w-lg m-auto rounded-lg shadow-lg">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
               {editingLocation ? 'Edit Location' : 'Add Location'}
             </h3>
             
@@ -295,8 +295,8 @@ const Location = () => {
                     clearFieldError('name');
                   }}
                   className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.name ? 'border-red-300 focus:border-red-500' : 'border-gray-300'
-                  }`}
+                    errors.name ? 'border-red-300 focus:border-red-500' : 'border-gray-300 dark:border-gray-600'
+                  } bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100`}
                   disabled={saving}
                   placeholder="Enter location name"
                 />
@@ -306,7 +306,7 @@ const Location = () => {
               </div>
               
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Address <span className="text-red-500">*</span>
                 </label>
                 <textarea
@@ -316,8 +316,8 @@ const Location = () => {
                     clearFieldError('locationAddress');
                   }}
                   className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.locationAddress ? 'border-red-300 focus:border-red-500' : 'border-gray-300'
-                  }`}
+                    errors.locationAddress ? 'border-red-300 focus:border-red-500' : 'border-gray-300 dark:border-gray-600'
+                  } bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100`}
                   rows="3"
                   disabled={saving}
                   placeholder="Enter full address"
@@ -347,7 +347,7 @@ const Location = () => {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300"
+                  className="px-4 py-2 text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600"
                   disabled={saving}
                 >
                   Cancel
@@ -381,10 +381,10 @@ const Location = () => {
               </div>
               
               <div className="text-center">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
                   Delete Location
                 </h3>
-                <p className="text-gray-600 mb-4">
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
                   Are you sure you want to delete this location? This action will soft-delete the location and it may affect existing records.
                 </p>
                 
@@ -392,9 +392,9 @@ const Location = () => {
                   <div className="flex items-start">
                     <FaMapMarkerAlt className="text-blue-600 mr-3 mt-1" />
                     <div>
-                      <div className="font-medium text-gray-900">{locationToDelete.name}</div>
-                      <div className="text-sm text-gray-600 mt-1">{locationToDelete.locationAddress}</div>
-                      <div className="text-xs text-gray-500 mt-1">
+                      <div className="font-medium text-gray-900 dark:text-gray-100">{locationToDelete.name}</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">{locationToDelete.locationAddress}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">
                         Status: {locationToDelete.isActive ? 'Active' : 'Inactive'}
                       </div>
                     </div>
@@ -409,7 +409,7 @@ const Location = () => {
               <div className="flex gap-3 justify-end">
                 <button
                   onClick={cancelDelete}
-                  className="bg-white text-gray-700 hover:bg-gray-50 border border-gray-300 font-medium rounded-lg text-sm px-5 py-2.5"
+                  className="bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600 font-medium rounded-lg text-sm px-5 py-2.5"
                 >
                   Cancel
                 </button>

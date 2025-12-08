@@ -89,7 +89,7 @@ const DonationReport = () => {
       <div className="p-1">
         <div className="flex justify-center items-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <span className="ml-2 text-gray-600">Loading donation report...</span>
+          <span className="ml-2 text-gray-600 dark:text-gray-400">Loading donation report...</span>
         </div>
       </div>
     );
@@ -101,13 +101,13 @@ const DonationReport = () => {
       <div className="p-1">
         <div className="flex justify-between items-start mb-4">
           <div className="flex items-baseline gap-2">
-            <h2 className="text-3xl font-bold">₹0</h2>
-            <p className="text-sm text-gray-500">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">₹0</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               received in {monthOptions.find(opt => opt.value === selectedMonthYear)?.displayName || 'selected period'}
             </p>
           </div>
           <select 
-            className="border border-gray-300 rounded-md px-3 py-1.5 text-sm"
+            className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md px-3 py-1.5 text-sm"
             value={selectedMonthYear}
             onChange={handleMonthYearChange}
           >
@@ -119,10 +119,10 @@ const DonationReport = () => {
           </select>
         </div>
         
-        <div className="flex flex-col items-center justify-center py-8 bg-gray-50 rounded-lg">
-          <div className="text-4xl text-gray-300 mb-2">📊</div>
-          <h3 className="text-lg font-medium text-gray-600 mb-1">No Donation Data Available</h3>
-          <p className="text-sm text-gray-500 text-center">
+        <div className="flex flex-col items-center justify-center py-8 bg-gray-50 dark:bg-gray-900 rounded-lg">
+          <div className="text-4xl text-gray-300 dark:text-gray-600 mb-2">📊</div>
+          <h3 className="text-lg font-medium text-gray-600 dark:text-gray-300 mb-1">No Donation Data Available</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
             There are no donation reports to display for this period.
           </p>
         </div>
@@ -134,14 +134,14 @@ const DonationReport = () => {
     <div className="p-1">
       <div className="flex justify-between items-start">
         <div className="flex items-baseline gap-2">
-          <h2 className="text-3xl font-bold">₹{displayTotal.toLocaleString()}</h2>
-          <p className="text-sm text-gray-500">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">₹{displayTotal.toLocaleString()}</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             received in {monthOptions.find(opt => opt.value === selectedMonthYear)?.displayName || 'selected period'}
           </p>
         </div>
         <div className="relative">
           <select 
-            className="appearance-none bg-white border border-gray-300 hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-lg px-4 py-2.5 pr-10 text-sm font-medium text-gray-700 transition-all duration-200 ease-in-out shadow-sm hover:shadow-md cursor-pointer"
+            className="appearance-none bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 rounded-lg px-4 py-2.5 pr-10 text-sm font-medium text-gray-700 dark:text-gray-200 transition-all duration-200 ease-in-out shadow-sm hover:shadow-md cursor-pointer"
             value={selectedMonthYear}
             onChange={handleMonthYearChange}
           >
@@ -178,13 +178,13 @@ const DonationReport = () => {
         {dataWithColors.map((city, idx) => (
           <div
             key={idx}
-            className="bg-gray-100 px-3 py-2 rounded flex flex-col items-start"
+            className="bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded flex flex-col items-start"
           >
-            <div className="flex items-center gap-2 text-sm text-gray-700">
+            <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
               <span className={`w-3 h-3 rounded-full ${city.color}`}></span>
               {city.name || 'Unknown Location'}
             </div>
-            <div className="font-bold text-md mt-1">
+            <div className="font-bold text-md mt-1 text-gray-900 dark:text-gray-100">
               ₹{(city.amount || 0).toLocaleString()}
             </div>
           </div>

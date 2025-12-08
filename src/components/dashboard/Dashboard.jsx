@@ -56,15 +56,15 @@ const Dashboard = () => {
   return (
     <PageWrapper isLoading={!initialLoadComplete}>
       <PrivilegeGuard privileges={[PRIVILEGES.DASHBOARD_VIEW, PRIVILEGES.DASHBOARD_ALL, PRIVILEGES.ALL]}>
-        <div className="page-container p-4 space-y-6 bg-[#f9f9f9] fade-in">
-          <div className="bg-white rounded-2xl shadow p-6">
-            <div className="flex items-center justify-between border-b-2 border-gray-300 pb-2 mb-4">
-              <h3 className="text-xl font-semibold">
+        <div className="page-container p-4 space-y-6 bg-[#f9f9f9] dark:bg-gray-900 fade-in">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow dark:shadow-gray-900 p-6">
+            <div className="flex items-center justify-between border-b-2 border-gray-300 dark:border-gray-600 pb-2 mb-4">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
                 Location Specific-Medicine Status
               </h3>
               {selectedLocation && (
-                <div className="text-sm text-gray-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
-                  Selected: <span className="font-semibold text-blue-700">{selectedLocation.locationName}</span>
+                <div className="text-sm text-gray-600 dark:text-gray-300 bg-blue-50 dark:bg-blue-900/30 px-3 py-1 rounded-full border border-blue-200 dark:border-blue-700">
+                  Selected: <span className="font-semibold text-blue-700 dark:text-blue-400">{selectedLocation.locationName}</span>
                   <button 
                     onClick={() => {
                       setSelectedLocation(null);
@@ -72,7 +72,7 @@ const Dashboard = () => {
                       sessionStorage.removeItem('selectedLocationId');
                       sessionStorage.removeItem('selectedLocationData');
                     }}
-                    className="ml-2 text-blue-700 hover:text-blue-900"
+                    className="ml-2 text-blue-700 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
                   >
                     ✕
                   </button>
@@ -90,9 +90,9 @@ const Dashboard = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className="lg:col-span-2 flex flex-col gap-4">
-            <div className="bg-white rounded-2xl shadow p-4">
-              <div className="border-b-2 border-gray-200 pb-2 mb-2">
-                <h3 className="text-xl font-semibold">Purchase Analytics</h3>
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow dark:shadow-gray-900 p-4">
+              <div className="border-b-2 border-gray-200 dark:border-gray-600 pb-2 mb-2">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Purchase Analytics</h3>
               </div>
               <PurchaseAnalytics 
                 selectedLocationId={selectedLocationId} 
@@ -100,29 +100,29 @@ const Dashboard = () => {
               />
             </div>
 
-            <div className="bg-white rounded-2xl shadow p-4">
-              <div className="border-b-2 border-gray-200 pb-2 mb-2">
-                <h3 className="text-xl font-semibold">Donation Report</h3>
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow dark:shadow-gray-900 p-4">
+              <div className="border-b-2 border-gray-200 dark:border-gray-600 pb-2 mb-2">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Donation Report</h3>
               </div>
               <DonationReport />
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow p-4">
-            <div className="border-b-2 border-gray-200 pb-2 mb-4">
-              <h3 className="text-xl font-semibold">Expense Report</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow dark:shadow-gray-900 p-4">
+            <div className="border-b-2 border-gray-200 dark:border-gray-600 pb-2 mb-4">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Expense Report</h3>
             </div>
 
             {!selectedLocationId && (
-              <div className="mb-4 p-2 bg-yellow-50 border border-yellow-200 rounded-md">
-                <p className="text-sm text-yellow-700">
+              <div className="mb-4 p-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-md">
+                <p className="text-sm text-yellow-700 dark:text-yellow-300">
                   📍 Select a location from above to view specific expense report, or viewing default data
                 </p>
               </div>
             )}
             {selectedLocationId && selectedLocation && (
-              <div className="mb-4 p-2 bg-blue-50 border border-blue-200 rounded-md">
-                <p className="text-sm text-blue-700">
+              <div className="mb-4 p-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-md">
+                <p className="text-sm text-blue-700 dark:text-blue-300">
                   📍 Showing expense report for <span className="font-semibold">{selectedLocation.locationName}</span>
                 </p>
               </div>
@@ -132,7 +132,7 @@ const Dashboard = () => {
               {/* <FilterPopover /> */}
               <div className="relative">
                 <select 
-                  className="appearance-none bg-white border border-gray-300 hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-lg px-4 py-2.5 pr-10 text-sm font-medium text-gray-700 transition-all duration-200 ease-in-out shadow-sm hover:shadow-md cursor-pointer"
+                  className="appearance-none bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 rounded-lg px-4 py-2.5 pr-10 text-sm font-medium text-gray-700 dark:text-gray-200 transition-all duration-200 ease-in-out shadow-sm hover:shadow-md cursor-pointer"
                   value={selectedYear}
                   onChange={(e) => setSelectedYear(parseInt(e.target.value))}
                 >
@@ -156,9 +156,9 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow p-4">
-          <div className="border-b-2 border-gray-200 pb-2 mb-2">
-            <h2 className="text-xl font-semibold">Critical Stock & Shortages</h2>
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow dark:shadow-gray-900 p-4">
+          <div className="border-b-2 border-gray-200 dark:border-gray-600 pb-2 mb-2">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Critical Stock & Shortages</h2>
           </div>
 
           <CriticalStock 

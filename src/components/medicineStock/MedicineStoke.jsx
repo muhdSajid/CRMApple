@@ -305,13 +305,13 @@ const MedicineStock = () => {
   }, [stockStatusFilter, medicineTypeFilter, searchTerm]);
   return (
     <PageWrapper isLoading={!initialLoadComplete}>
-      <div className="page-container p-6 bg-gray-50 min-h-screen fade-in">
-        <div className="bg-white rounded-xl p-6 shadow">
+      <div className="page-container p-6 bg-gray-50 dark:bg-gray-900 min-h-screen fade-in">
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow dark:shadow-gray-900">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold">Medicine Stock List</h2>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Medicine Stock List</h2>
             {selectedLocationId && locations.length > 0 && !loading && (
-              <div className="text-sm text-gray-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
-                Selected: <span className="font-semibold text-blue-700">
+              <div className="text-sm text-gray-600 dark:text-gray-300 bg-blue-50 dark:bg-blue-900/30 px-3 py-1 rounded-full border border-blue-200 dark:border-blue-700">
+                Selected: <span className="font-semibold text-blue-700 dark:text-blue-400">
                   {locations.find(loc => loc.id === selectedLocationId)?.name || 'Unknown Location'}
                 </span>
               </div>
@@ -319,14 +319,14 @@ const MedicineStock = () => {
           </div>
 
         {/* Custom Tab Implementation for better styling */}
-        <div className="border-b border-gray-200 mb-4">
+        <div className="border-b border-gray-200 dark:border-gray-600 mb-4">
           <nav className="-mb-px flex space-x-8">
             {loading ? (
-              <span className="border-transparent text-gray-500 py-2 px-1 border-b-2 font-medium text-sm">
+              <span className="border-transparent text-gray-500 dark:text-gray-400 py-2 px-1 border-b-2 font-medium text-sm">
                 Loading...
               </span>
             ) : error ? (
-              <span className="border-transparent text-red-500 py-2 px-1 border-b-2 font-medium text-sm">
+              <span className="border-transparent text-red-500 dark:text-red-400 py-2 px-1 border-b-2 font-medium text-sm">
                 Error loading locations
               </span>
             ) : locations.length > 0 ? (
@@ -338,15 +338,15 @@ const MedicineStock = () => {
                     onClick={() => handleTabClick(location.id)}
                     className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors duration-200 ${
                       selectedLocationId === location.id
-                        ? 'border-blue-500 text-blue-600 bg-blue-50 rounded-t-md px-3'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                        ? 'border-blue-500 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 rounded-t-md px-3'
+                        : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
                     }`}
                   >
                     {location.name}
                   </button>
                 ))
             ) : (
-              <span className="border-transparent text-gray-500 py-2 px-1 border-b-2 font-medium text-sm">
+              <span className="border-transparent text-gray-500 dark:text-gray-400 py-2 px-1 border-b-2 font-medium text-sm">
                 No locations available
               </span>
             )}
@@ -354,32 +354,32 @@ const MedicineStock = () => {
         </div>
 
         {error && (
-          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
-            <p className="text-sm text-red-700">
+          <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-md">
+            <p className="text-sm text-red-700 dark:text-red-300">
               ⚠️ Error loading locations: {error}
             </p>
           </div>
         )}
 
         {loading && (
-          <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-md">
-            <p className="text-sm text-gray-600">
+          <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md">
+            <p className="text-sm text-gray-600 dark:text-gray-300">
               🔄 Loading locations...
             </p>
           </div>
         )}
 
         {medicineLoading && (
-          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-            <p className="text-sm text-blue-600">
+          <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-md">
+            <p className="text-sm text-blue-600 dark:text-blue-300">
               🔄 Loading medicine data...
             </p>
           </div>
         )}
 
         {medicineError && (
-          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
-            <p className="text-sm text-red-700">
+          <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-md">
+            <p className="text-sm text-red-700 dark:text-red-300">
               ⚠️ Error loading medicine data: {medicineError}
             </p>
           </div>
@@ -422,19 +422,19 @@ const MedicineStock = () => {
               placeholder="Search medicines..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="border px-3 py-2 border-gray-300 rounded-md w-64 text-sm focus:outline-none focus:ring-0 focus:border-gray-300"
+              className="border px-3 py-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md w-64 text-sm focus:outline-none focus:ring-0 focus:border-gray-300 dark:focus:border-gray-500"
             />
             {!medicineLoading && !medicineError && (
               <div className="flex items-center gap-4">
-                <span className="text-sm text-gray-600">
+                <span className="text-sm text-gray-600 dark:text-gray-300">
                   Showing {startIndex + 1}-{Math.min(endIndex, totalItems)} of {totalItems} medicines
                 </span>
                 <div className="flex items-center gap-2">
-                  <label className="text-sm text-gray-600">Rows per page:</label>
+                  <label className="text-sm text-gray-600 dark:text-gray-300">Rows per page:</label>
                   <select
                     value={itemsPerPage}
                     onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-                    className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value={5}>5</option>
                     <option value={10}>10</option>
@@ -462,7 +462,7 @@ const MedicineStock = () => {
               <button
                 ref={filterButtonRef}
                 onClick={() => setShowFilterPopover(!showFilterPopover)}
-                className="flex items-center gap-2 px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                className="flex items-center gap-2 px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               >
                 <MdFilterList className="text-base" />
                 Filters
@@ -477,13 +477,13 @@ const MedicineStock = () => {
               {showFilterPopover && (
                 <div 
                   ref={filterPopoverRef}
-                  className="absolute right-0 top-full mt-2 w-80 bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-lg shadow-xl z-50 p-4 backdrop-blur-sm"
+                  className="absolute right-0 top-full mt-2 w-80 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-600 rounded-lg shadow-xl dark:shadow-gray-900 z-50 p-4 backdrop-blur-sm"
                 >
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-sm font-semibold text-gray-800">Filter Options</h3>
+                    <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200">Filter Options</h3>
                     <button
                       onClick={() => setShowFilterPopover(false)}
-                      className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
+                      className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -493,11 +493,11 @@ const MedicineStock = () => {
                   
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-2">
+                      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Stock Status
                       </label>
                       <select 
-                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                        className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
                         value={tempStockStatusFilter}
                         onChange={(e) => setTempStockStatusFilter(e.target.value)}
                       >
@@ -509,11 +509,11 @@ const MedicineStock = () => {
                     </div>
                     
                     <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-2">
+                      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Medicine Type
                       </label>
                       <select 
-                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                        className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
                         value={tempMedicineTypeFilter}
                         onChange={(e) => setTempMedicineTypeFilter(e.target.value)}
                       >
@@ -527,10 +527,10 @@ const MedicineStock = () => {
                     </div>
 
                     {/* Filter Actions */}
-                    <div className="flex items-center justify-between pt-3 border-t border-gray-200">
+                    <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-600">
                       <button
                         onClick={handleClearFilters}
-                        className="text-xs text-gray-500 hover:text-gray-700 underline transition-colors"
+                        className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 underline transition-colors"
                       >
                         Clear all filters
                       </button>
@@ -571,7 +571,7 @@ const MedicineStock = () => {
                 <TableRow>
                   <TableCell colSpan={9} className="text-center py-8">
                     <div className="flex items-center justify-center">
-                      <span className="text-gray-500">Loading medicine data...</span>
+                      <span className="text-gray-500 dark:text-gray-400">Loading medicine data...</span>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -579,7 +579,7 @@ const MedicineStock = () => {
                 <TableRow>
                   <TableCell colSpan={9} className="text-center py-8">
                     <div className="flex items-center justify-center">
-                      <span className="text-red-500">Error loading medicine data</span>
+                      <span className="text-red-500 dark:text-red-400">Error loading medicine data</span>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -587,7 +587,7 @@ const MedicineStock = () => {
                 <TableRow>
                   <TableCell colSpan={9} className="text-center py-8">
                     <div className="flex items-center justify-center">
-                      <span className="text-gray-500">No medicines found matching "{searchTerm}"</span>
+                      <span className="text-gray-500 dark:text-gray-400">No medicines found matching "{searchTerm}"</span>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -595,7 +595,7 @@ const MedicineStock = () => {
                 <TableRow>
                   <TableCell colSpan={9} className="text-center py-8">
                     <div className="flex items-center justify-center">
-                      <span className="text-gray-500">No medicine data available for this location</span>
+                      <span className="text-gray-500 dark:text-gray-400">No medicine data available for this location</span>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -603,7 +603,7 @@ const MedicineStock = () => {
                 <TableRow>
                   <TableCell colSpan={9} className="text-center py-8">
                     <div className="flex items-center justify-center">
-                      <span className="text-gray-500">No data available for this page</span>
+                      <span className="text-gray-500 dark:text-gray-400">No data available for this page</span>
                     </div>
                   </TableCell>
                 </TableRow>

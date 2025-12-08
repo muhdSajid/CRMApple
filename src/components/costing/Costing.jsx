@@ -160,8 +160,8 @@ export const Costing = () => {
   return (
     <PrivilegeGuard privileges={[PRIVILEGES.REPORT_COSTING, PRIVILEGES.REPORT_ALL, PRIVILEGES.ALL]}>
       <div className="mt-10">
-        <div className="p-6 bg-white rounded-lg shadow-md max-w-4xl mx-auto">
-          <h2 className="text-xl font-bold mb-4 border-b pb-2">
+        <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md dark:shadow-gray-900 max-w-4xl mx-auto">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4 border-b dark:border-gray-600 pb-2">
             Cost Report Generator
           </h2>
 
@@ -233,11 +233,11 @@ export const Costing = () => {
         {showResults && (
           <div className="mt-8">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                 Medicine Cost Summary ({reportResults.length} records)
               </h3>
               <div className="flex items-center gap-4">
-                <div className="text-sm text-gray-600">
+                <div className="text-sm text-gray-600 dark:text-gray-300">
                   Total Cost: ₹{reportResults.reduce((sum, item) => sum + (item.totalPrice || 0), 0).toLocaleString()}
                 </div>
                 {reportResults.length > 0 && (
@@ -266,8 +266,8 @@ export const Costing = () => {
             </div>
 
             <div className="overflow-x-auto">
-              <Table className="border border-gray-300">
-                <TableHead className="[&>tr>th]:bg-[#E8EFF2] [&>tr>th]:text-black">
+              <Table className="border border-gray-300 dark:border-gray-600">
+                <TableHead className="[&>tr>th]:bg-[#E8EFF2] dark:[&>tr>th]:bg-gray-700 [&>tr>th]:text-black dark:[&>tr>th]:text-gray-100">
                   <TableRow>
                     <TableHeadCell>Location</TableHeadCell>
                     <TableHeadCell>Delivery Center</TableHeadCell>
@@ -280,7 +280,7 @@ export const Costing = () => {
                 <TableBody className="divide-y">
                   {reportResults.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8 text-gray-500">
+                      <TableCell colSpan={6} className="text-center py-8 text-gray-500 dark:text-gray-400">
                         No records found for the selected criteria
                       </TableCell>
                     </TableRow>
@@ -289,36 +289,36 @@ export const Costing = () => {
                       const groupedData = groupDataByLocationDeliveryDate(reportResults);
                       return groupedData.map((group, groupIndex) => (
                         group.medicines.map((medicine, medicineIndex) => (
-                          <TableRow key={`${groupIndex}-${medicineIndex}`} className="hover:bg-gray-50">
+                          <TableRow key={`${groupIndex}-${medicineIndex}`} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                             {medicineIndex === 0 && (
                               <>
                                 <TableCell 
                                   rowSpan={group.medicines.length} 
-                                  className="font-medium text-gray-900 border-r border-gray-200 bg-gray-50"
+                                  className="font-medium text-gray-900 dark:text-gray-100 border-r border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800"
                                 >
                                   {group.locationName}
                                 </TableCell>
                                 <TableCell 
                                   rowSpan={group.medicines.length} 
-                                  className="text-gray-700 border-r border-gray-200 bg-gray-50"
+                                  className="text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800"
                                 >
                                   {group.deliveryCenterName}
                                 </TableCell>
                                 <TableCell 
                                   rowSpan={group.medicines.length} 
-                                  className="text-gray-700 border-r border-gray-200 bg-gray-50"
+                                  className="text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800"
                                 >
                                   {new Date(group.distDate).toLocaleDateString('en-IN')}
                                 </TableCell>
                               </>
                             )}
-                            <TableCell className="text-gray-900">
+                            <TableCell className="text-gray-900 dark:text-gray-100">
                               {medicine.medicineName}
                             </TableCell>
-                            <TableCell className="text-gray-700">
+                            <TableCell className="text-gray-700 dark:text-gray-300">
                               {medicine.numberOfUnit}
                             </TableCell>
-                            <TableCell className="font-medium text-green-600">
+                            <TableCell className="font-medium text-green-600 dark:text-green-400">
                               ₹{medicine.totalPrice.toLocaleString()}
                             </TableCell>
                           </TableRow>
